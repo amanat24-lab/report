@@ -127,6 +127,12 @@
   .okr-summary-item:last-child{border-bottom:none;}
   .okr-summary-qty{font-family:var(--mono);font-size:12px;color:var(--accent-dark);font-weight:700;white-space:nowrap;}
 
+  .dyn-charts{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);}
+  .dyn-charts-title{font-size:12.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-bottom:12px;}
+  .dyn-chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+  .dyn-chart-box{border:1px solid var(--line);border-radius:10px;padding:12px 10px 6px;background:var(--bg);}
+  .dyn-chart-label{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px;padding-left:4px;}
+
   .empty-state{text-align:center;padding:60px 20px;color:var(--ink-faint);}
   .empty-state .big{font-size:15px;color:var(--ink-soft);margin-bottom:6px;}
 
@@ -173,7 +179,8 @@
     <h3>1. Загрузка отчётов</h3>
     <div class="hint">Заберите отчёты из папки на Google Диске одной кнопкой, либо перетащите файлы вручную. Можно добавлять отчёты по одному — старые не пропадают.</div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
-      <button class="btn primary" id="btnPullDrive">☁ Забрать из Google Диска</button>
+      <button class="btn primary" id="btnPullAll">📥 Загрузить все отчёты</button>
+      <button class="btn" id="btnPullRecent">🆕 Загрузить новые отчёты</button>
       <span id="driveStatus" style="font-family:var(--mono);font-size:11.5px;"></span>
     </div>
     <div class="dropzone" id="dropzone">
@@ -297,20 +304,40 @@ function handleFiles(fileListRaw){
 --------------------------------------------------------------- */
 const DRIVE_LIST_URL = 'https://script.google.com/macros/s/AKfycbz0HqfR-g5BMViqqsHAPsR2gGe5IV-eaGaAHNsi4TBwwJr7ErI2mokNPwSjzTE8zb0k/exec';
 
-async function pullFromDrive(){
-  const btn = document.getElementById('btnPullDrive');
+const RECENT_DAYS = 4;
+
+function isWithinLastDays(dateStr, days){
+  if(!dateStr) return false;
+  const d = new Date(dateStr+'T00:00:00');
+  if(isNaN(d)) return false;
+  const cutoff = new Date();
+  cutoff.setHours(0,0,0,0);
+  cutoff.setDate(cutoff.getDate() - days);
+  return d >= cutoff;
+}
+
+async function pullFromDrive(onlyRecent){
+  const btnAll = document.getElementById('btnPullAll');
+  const btnRecent = document.getElementById('btnPullRecent');
+  const activeBtn = onlyRecent ? btnRecent : btnAll;
+  const otherBtn = onlyRecent ? btnAll : btnRecent;
   const statusEl = document.getElementById('driveStatus');
-  const originalLabel = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Забираю с Google Диска…';
+  const originalLabel = activeBtn.textContent;
+  btnAll.disabled = true;
+  btnRecent.disabled = true;
+  activeBtn.textContent = 'Забираю с Google Диска…';
   statusEl.textContent = '';
   statusEl.style.color = '';
 
+  function reset(){
+    btnAll.disabled = false;
+    btnRecent.disabled = false;
+    activeBtn.textContent = originalLabel;
+  }
   function fail(msg){
     statusEl.textContent = msg;
     statusEl.style.color = 'var(--red)';
-    btn.disabled = false;
-    btn.textContent = originalLabel;
+    reset();
   }
 
   let res;
@@ -353,17 +380,35 @@ async function pullFromDrive(){
     return;
   }
 
-  const reports = json.reports || [];
-  reports.forEach(r => addFileEntry(ingestReportText(r.name, r.content)));
+  const allReports = json.reports || [];
+  let added = 0, skippedOld = 0, skippedBad = 0;
+  allReports.forEach(r => {
+    const entry = ingestReportText(r.name, r.content);
+    if(!entry.ok){ skippedBad++; return; }
+    if(onlyRecent && !isWithinLastDays(entry.report.meta.filledDate, RECENT_DAYS)){
+      skippedOld++;
+      return;
+    }
+    addFileEntry(entry);
+    added++;
+  });
   renderFileList();
   renderFilterPanel();
 
-  statusEl.textContent = reports.length ? `Загружено файлов: ${reports.length}` : 'В папке пока нет отчётов';
-  statusEl.style.color = reports.length ? 'var(--green)' : 'var(--amber)';
-  btn.disabled = false;
-  btn.textContent = originalLabel;
+  if(onlyRecent){
+    statusEl.textContent = added
+      ? `Загружено новых отчётов: ${added} (за последние ${RECENT_DAYS} дн.)` + (skippedOld ? `, пропущено более старых: ${skippedOld}` : '')
+      : `Новых отчётов за последние ${RECENT_DAYS} дн. не найдено` + (skippedOld ? ` (пропущено старых: ${skippedOld})` : '');
+    statusEl.style.color = added ? 'var(--green)' : 'var(--amber)';
+  } else {
+    statusEl.textContent = added ? `Загружено файлов: ${added}` : 'В папке пока нет отчётов';
+    statusEl.style.color = added ? 'var(--green)' : 'var(--amber)';
+  }
+
+  reset();
 }
-document.getElementById('btnPullDrive').addEventListener('click', pullFromDrive);
+document.getElementById('btnPullAll').addEventListener('click', ()=>pullFromDrive(false));
+document.getElementById('btnPullRecent').addEventListener('click', ()=>pullFromDrive(true));
 
 function findEntryForReport(report){
   return files.find(f=>f.report===report);
@@ -617,8 +662,19 @@ function renderBySection(reports, managers){
     card.appendChild(head);
     const body = document.createElement('div'); body.className='card-body';
 
-    if(reg.type==='fields'){
+    // Один и тот же id раздела мог в старых отчётах иметь другую структуру
+    // (например, "Обработанные лиды" раньше было одним полем, теперь — таблица).
+    // Если в загруженных файлах перемешаны разные форматы одного раздела,
+    // используем безопасный построчный рендер вместо типовой таблицы, чтобы
+    // не потерять данные из старых отчётов.
+    const typesSeen = new Set(reports.map(r=>{ const s=sectionOf(r,reg.id); return s && s.type; }).filter(Boolean));
+
+    if(typesSeen.size > 1){
+      body.appendChild(renderMixedShapeSectionSummary(reg, reports));
+    } else if(reg.type==='fields'){
       body.appendChild(renderFieldsSectionSummary(reg, reports));
+      const dyn = renderDynamicsBlock(reg, reports);
+      if(dyn) body.appendChild(dyn);
     } else if(reg.type==='table'){
       body.appendChild(renderTableSectionSummary(reg, reports));
     } else if(reg.type==='fixedlist'){
@@ -632,8 +688,123 @@ function renderBySection(reports, managers){
   return container;
 }
 
+function renderMixedShapeSectionSummary(reg, reports){
+  const wrap = document.createElement('div');
+  const note = document.createElement('div');
+  note.className = 'muted';
+  note.style.cssText = 'font-size:12px;margin-bottom:12px;';
+  note.textContent = 'В загруженных отчётах этот раздел встречается в разных форматах (менялась структура опросника) — показываю каждый отчёт как есть.';
+  wrap.appendChild(note);
+
+  const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
+  rowsSorted.forEach(r=>{
+    const sec = sectionOf(r, reg.id);
+    if(!sec) return;
+    const block = document.createElement('div');
+    block.style.cssText = 'margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--line);';
+    const who = document.createElement('div');
+    who.className = 'mgr-name';
+    who.style.marginBottom = '6px';
+    who.textContent = r.meta.manager + ' · ' + fmtDate(r.meta.filledDate);
+    block.appendChild(who);
+    block.appendChild(renderSingleSectionContent(sec));
+    wrap.appendChild(block);
+  });
+  const last = wrap.lastElementChild;
+  if(last) last.style.borderBottom = 'none';
+  return wrap;
+}
+
 function sectionOf(report, secId){
   return report.sections.find(s=>s.id===secId);
+}
+
+/* ---------------------------------------------------------------
+   ДИНАМИКА ПО НЕДЕЛЯМ — для числовых разделов (Премия и АВ / Выполненные мероприятия)
+--------------------------------------------------------------- */
+const DYNAMICS_SECTION_IDS = ['activities_done', 'weekly_numbers'];
+
+function isoWeekInfo(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr+'T00:00:00');
+  if(isNaN(d)) return null;
+  const dayIdx = (d.getDay()+6)%7; // Пн=0 ... Вс=6
+  const monday = new Date(d); monday.setDate(d.getDate()-dayIdx);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+  const thursday = new Date(monday); thursday.setDate(monday.getDate()+3);
+  const firstThursday = new Date(thursday.getFullYear(), 0, 4);
+  const firstThursdayDay = (firstThursday.getDay()+6)%7;
+  firstThursday.setDate(firstThursday.getDate()-firstThursdayDay+3);
+  const week = 1 + Math.round((thursday - firstThursday) / (7*86400000));
+  const key = thursday.getFullYear() + '-W' + String(week).padStart(2,'0');
+  const two = n => String(n).padStart(2,'0');
+  const label = `${two(monday.getDate())}.${two(monday.getMonth()+1)}–${two(sunday.getDate())}.${two(sunday.getMonth()+1)}`;
+  return {key, label, monday};
+}
+
+function buildWeeklyDynamics(reports, secId, fieldIds){
+  const buckets = {};
+  reports.forEach(r=>{
+    const sec = sectionOf(r, secId);
+    if(!sec || sec.type !== 'fields') return;
+    const info = isoWeekInfo(r.meta.filledDate);
+    if(!info) return;
+    if(!buckets[info.key]) buckets[info.key] = {label:info.label, monday:info.monday, sums:{}};
+    fieldIds.forEach(fid=>{
+      const f = sec.fields.find(x=>x.id===fid);
+      const v = f ? Number(f.value)||0 : 0;
+      buckets[info.key].sums[fid] = (buckets[info.key].sums[fid]||0) + v;
+    });
+  });
+  return Object.values(buckets).sort((a,b)=>a.monday-b.monday);
+}
+
+function buildBarChartSvg(points){
+  const width = 320, height = 140;
+  const padding = {top:22, right:8, bottom:26, left:8};
+  const chartW = width - padding.left - padding.right;
+  const chartH = height - padding.top - padding.bottom;
+  const maxVal = Math.max(1, ...points.map(p=>p.value));
+  const gap = 10;
+  const barW = Math.max(16, (chartW - gap*(points.length-1)) / points.length);
+  let bars = '';
+  points.forEach((p,i)=>{
+    const h = (p.value/maxVal) * chartH;
+    const x = padding.left + i*(barW+gap);
+    const y = padding.top + (chartH - h);
+    bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,1).toFixed(1)}" rx="4" fill="var(--accent)"/>`;
+    bars += `<text x="${(x+barW/2).toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="middle" font-size="11" font-family="var(--mono)" font-weight="700" fill="var(--ink)">${esc(p.value)}</text>`;
+    bars += `<text x="${(x+barW/2).toFixed(1)}" y="${height-10}" text-anchor="middle" font-size="9.5" fill="var(--ink-faint)">${esc(p.label)}</text>`;
+  });
+  return `<svg width="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">${bars}</svg>`;
+}
+
+function renderDynamicsBlock(reg, reports){
+  if(!DYNAMICS_SECTION_IDS.includes(reg.id)) return null;
+  const fieldIds = reg.fieldOrder.filter(fid => reg.columns[fid].type === 'number');
+  if(!fieldIds.length) return null;
+
+  const weekly = buildWeeklyDynamics(reports, reg.id, fieldIds);
+  if(weekly.length < 2) return null; // нечего сравнивать динамику по одной неделе
+
+  const wrap = document.createElement('div');
+  wrap.className = 'dyn-charts';
+  const title = document.createElement('div');
+  title.className = 'dyn-charts-title';
+  title.textContent = `Динамика по неделям — сумма по команде (${weekly.length} нед.)`;
+  wrap.appendChild(title);
+
+  const grid = document.createElement('div');
+  grid.className = 'dyn-chart-grid';
+  fieldIds.forEach(fid=>{
+    const points = weekly.map(w=>({label:w.label, value:w.sums[fid]||0}));
+    const box = document.createElement('div');
+    box.className = 'dyn-chart-box';
+    box.innerHTML = `<div class="dyn-chart-label">${esc(reg.columns[fid].label)}</div>` + buildBarChartSvg(points);
+    grid.appendChild(box);
+  });
+  wrap.appendChild(grid);
+  return wrap;
 }
 
 function renderFieldsSectionSummary(reg, reports){
@@ -771,7 +942,7 @@ function renderTableSectionSummary(reg, reports){
       body += `<tr><td class="mgr-name">${esc(r.meta.manager)}</td>` + cols.map(cid=>{
         const val = row[cid];
         const colType = reg.columns[cid].type;
-        if(colType==='select' && val){
+        if(val==='Низкий'||val==='Средний'||val==='Высокий'){
           const cls = val==='Низкий'?'low':(val==='Высокий'?'high':'mid');
           return `<td><span class="prio-tag ${cls}">${esc(val)}</span></td>`;
         }
@@ -927,7 +1098,7 @@ function renderSingleSectionContent(sec){
       let thead = '<tr>'+sec.columns.map(c=>`<th>${esc(c.label)}</th>`).join('')+'</tr>';
       let body = sec.rows.map(row=>'<tr>'+sec.columns.map(c=>{
         const val = row[c.id];
-        if(c.type==='select' && val){
+        if(val==='Низкий'||val==='Средний'||val==='Высокий'){
           const cls = val==='Низкий'?'low':(val==='Высокий'?'high':'mid');
           return `<td><span class="prio-tag ${cls}">${esc(val)}</span></td>`;
         }
