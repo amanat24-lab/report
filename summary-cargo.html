@@ -160,6 +160,16 @@
   .acc-body{border-top:1px solid var(--line);background:var(--bg);}
   iframe.report-frame{width:100%;border:none;display:block;min-height:120px;background:#fff;}
 
+  .acc-extra-note{font-size:11.5px;color:var(--ink-faint);padding:0 16px 10px;font-style:italic;}
+
+  .dedup-notice{background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;padding:14px 16px;margin-bottom:18px;}
+  .dedup-notice-head{font-size:13px;color:#8a5a10;font-weight:600;line-height:1.5;}
+  .dedup-details{margin-top:10px;}
+  .dedup-details summary{cursor:pointer;font-size:12.5px;color:#8a5a10;font-weight:600;}
+  .dedup-list{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
+  .dedup-group-head{font-size:13px;padding:6px 0 2px;border-top:1px solid rgba(184,119,30,.25);}
+  .dedup-group-head:first-child{border-top:none;padding-top:0;}
+
   @media print{
     .panel, .toolbar, header .toolbar, .no-print{display:none !important;}
     body{padding-bottom:0;}
@@ -488,8 +498,109 @@ function getFilteredReports(){
   });
 }
 
+/* ---------------------------------------------------------------
+   ДЕДУБЛИКАЦИЯ — если менеджер заполнил отчёт за одну и ту же
+   календарную неделю больше одного раза (ошибся, дозаполнил,
+   дважды нажал "Завершить"), учитываем только последнюю по времени
+   отправки версию. Более ранние версии не участвуют в подсчётах,
+   но не пропадают — их можно посмотреть в примечании под фильтрами.
+--------------------------------------------------------------- */
+function reportSubmittedTime(report){
+  const t = report.meta && report.meta.submittedAt;
+  if(t){
+    const d = new Date(t);
+    if(!isNaN(d)) return d.getTime();
+  }
+  const fd = report.meta && report.meta.filledDate;
+  if(fd){
+    const d = new Date(fd+'T00:00:00');
+    if(!isNaN(d)) return d.getTime();
+  }
+  return 0;
+}
+
+function dedupeReportsByWeek(reports){
+  const groups = {};
+  reports.forEach(r=>{
+    const mgr = r.meta.manager || 'Без имени';
+    const info = isoWeekInfo(r.meta.filledDate);
+    const weekKey = info ? info.key : ('nodate:' + (r.meta.filledDate || '?'));
+    const weekLabel = info ? info.label : (r.meta.filledDate || 'без даты заполнения');
+    const key = mgr + '||' + weekKey;
+    if(!groups[key]) groups[key] = {manager: mgr, weekLabel, reports: []};
+    groups[key].reports.push(r);
+  });
+
+  const winners = [];
+  const hiddenGroups = [];
+  Object.values(groups).forEach(g=>{
+    if(g.reports.length === 1){
+      winners.push(g.reports[0]);
+      return;
+    }
+    const sorted = g.reports.slice().sort((a,b)=> reportSubmittedTime(b) - reportSubmittedTime(a));
+    const winner = sorted[0];
+    const hidden = sorted.slice(1);
+    winners.push(winner);
+    hiddenGroups.push({manager: g.manager, weekLabel: g.weekLabel, winner, hidden});
+  });
+
+  return {winners, hiddenGroups};
+}
+
+function renderDedupNotice(hiddenGroups){
+  if(!hiddenGroups.length) return null;
+  const totalHidden = hiddenGroups.reduce((s,g)=>s+g.hidden.length,0);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'dedup-notice';
+
+  const headLine = document.createElement('div');
+  headLine.className = 'dedup-notice-head';
+  headLine.textContent = `⚠ Учтена только последняя версия отчёта — найдено ${hiddenGroups.length} `
+    + (hiddenGroups.length===1 ? 'случай' : (hiddenGroups.length<5 ? 'случая' : 'случаев'))
+    + `, когда за одну неделю было больше одной отправки (скрыто версий: ${totalHidden}).`;
+  wrap.appendChild(headLine);
+
+  const details = document.createElement('details'); details.className = 'dedup-details';
+  const summary = document.createElement('summary'); summary.textContent = 'Показать более ранние версии';
+  details.appendChild(summary);
+
+  const list = document.createElement('div'); list.className = 'dedup-list';
+  hiddenGroups
+    .slice()
+    .sort((a,b)=> a.manager.localeCompare(b.manager,'ru'))
+    .forEach(g=>{
+      const groupHead = document.createElement('div');
+      groupHead.className = 'dedup-group-head';
+      groupHead.innerHTML = `<span class="mgr-name">${esc(g.manager)}</span> <span class="acc-date">неделя ${esc(g.weekLabel)}</span>`;
+      list.appendChild(groupHead);
+
+      const winnerNote = `Учтена в сводке — отправлена ${fmtDateTime(g.winner.meta.submittedAt)}`;
+      list.appendChild(buildReportAccordionItem(g.winner, winnerNote));
+
+      g.hidden.forEach(h=>{
+        const note = `Заменена более новой версией — эта отправлена ${fmtDateTime(h.meta.submittedAt)}, не учитывается в подсчётах`;
+        list.appendChild(buildReportAccordionItem(h, note));
+      });
+    });
+  details.appendChild(list);
+  wrap.appendChild(details);
+
+  return wrap;
+}
+
+function fmtDateTime(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  const two = n => String(n).padStart(2,'0');
+  return `${two(d.getDate())}.${two(d.getMonth()+1)}.${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`;
+}
+
 function buildSummary(){
-  const reports = getFilteredReports();
+  const filtered = getFilteredReports();
+  const { winners: reports, hiddenGroups } = dedupeReportsByWeek(filtered);
   const summaryRoot = document.getElementById('summaryRoot');
   const statRow = document.getElementById('statRow');
   summaryRoot.innerHTML = '';
@@ -508,6 +619,9 @@ function buildSummary(){
   statRow.style.display = 'flex';
   statRow.innerHTML = statCard(reports.length,'отчётов') + statCard(managers.length,'менеджеров') + statCard(dateRangeLabel(reports),'период',true)
     + (teamAvg!=null ? statCard(idxBadge(teamAvg),'средний индекс',true) : '');
+
+  const notice = renderDedupNotice(hiddenGroups);
+  if(notice) summaryRoot.appendChild(notice);
 
   const lb = renderLeaderboard(reports);
   if(lb) summaryRoot.appendChild(lb);
@@ -994,50 +1108,59 @@ function renderFixedlistSectionSummary(reg, reports){
 /* ---------------------------------------------------------------
    ПОЛНЫЕ ОТЧЁТЫ — свёрнутые вкладки (аккордеон) по каждому отчёту
 --------------------------------------------------------------- */
+function buildReportAccordionItem(r, extraNote){
+  const entry = findEntryForReport(r);
+  const details = document.createElement('details'); details.className = 'acc-item';
+
+  const summary = document.createElement('summary');
+  summary.innerHTML = `<span class="acc-chevron">▸</span><span class="mgr-name">${esc(r.meta.manager)}</span>
+    <span class="acc-date">${fmtDate(r.meta.filledDate)}</span>`;
+  const withIndex = findIndexSection(r);
+  if(withIndex){
+    const badge = document.createElement('span');
+    badge.style.marginLeft = 'auto';
+    badge.innerHTML = idxBadge(withIndex.index.percent);
+    summary.appendChild(badge);
+  }
+  details.appendChild(summary);
+
+  if(extraNote){
+    const note = document.createElement('div');
+    note.className = 'acc-extra-note';
+    note.textContent = extraNote;
+    details.appendChild(note);
+  }
+
+  const body = document.createElement('div'); body.className = 'acc-body';
+  if(entry && entry.rawHtml){
+    const iframe = document.createElement('iframe');
+    iframe.className = 'report-frame';
+    iframe.srcdoc = entry.rawHtml;
+    const fitHeight = ()=>{ try{ iframe.style.height = (iframe.contentWindow.document.body.scrollHeight + 24) + 'px'; }catch(e){} };
+    iframe.addEventListener('load', fitHeight);
+    details.addEventListener('toggle', ()=>{ if(details.open) fitHeight(); });
+    body.appendChild(iframe);
+  } else {
+    // старый .json-файл без встроенной html-версии — собираем из структуры
+    r.sections.forEach(sec=>{
+      const t = document.createElement('div');
+      t.style.cssText = 'font-weight:700;font-size:13.5px;margin:14px 0 6px;';
+      t.textContent = sec.title;
+      body.appendChild(t);
+      body.appendChild(renderSingleSectionContent(sec));
+    });
+  }
+  details.appendChild(body);
+  return details;
+}
+
 function renderFullReportsAccordion(reports){
   const wrap = document.createElement('div'); wrap.className = 'accordion-list';
   const sorted = reports.slice().sort((a,b)=>
     (a.meta.manager||'').localeCompare(b.meta.manager||'','ru') ||
     (a.meta.filledDate||'').localeCompare(b.meta.filledDate||'')
   );
-  sorted.forEach(r=>{
-    const entry = findEntryForReport(r);
-    const details = document.createElement('details'); details.className = 'acc-item';
-
-    const summary = document.createElement('summary');
-    summary.innerHTML = `<span class="acc-chevron">▸</span><span class="mgr-name">${esc(r.meta.manager)}</span>
-      <span class="acc-date">${fmtDate(r.meta.filledDate)}</span>`;
-    const withIndex = findIndexSection(r);
-    if(withIndex){
-      const badge = document.createElement('span');
-      badge.style.marginLeft = 'auto';
-      badge.innerHTML = idxBadge(withIndex.index.percent);
-      summary.appendChild(badge);
-    }
-    details.appendChild(summary);
-
-    const body = document.createElement('div'); body.className = 'acc-body';
-    if(entry && entry.rawHtml){
-      const iframe = document.createElement('iframe');
-      iframe.className = 'report-frame';
-      iframe.srcdoc = entry.rawHtml;
-      const fitHeight = ()=>{ try{ iframe.style.height = (iframe.contentWindow.document.body.scrollHeight + 24) + 'px'; }catch(e){} };
-      iframe.addEventListener('load', fitHeight);
-      details.addEventListener('toggle', ()=>{ if(details.open) fitHeight(); });
-      body.appendChild(iframe);
-    } else {
-      // старый .json-файл без встроенной html-версии — собираем из структуры
-      r.sections.forEach(sec=>{
-        const t = document.createElement('div');
-        t.style.cssText = 'font-weight:700;font-size:13.5px;margin:14px 0 6px;';
-        t.textContent = sec.title;
-        body.appendChild(t);
-        body.appendChild(renderSingleSectionContent(sec));
-      });
-    }
-    details.appendChild(body);
-    wrap.appendChild(details);
-  });
+  sorted.forEach(r=> wrap.appendChild(buildReportAccordionItem(r)));
   return wrap;
 }
 
