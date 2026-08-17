@@ -200,8 +200,8 @@
     box-shadow:0 0 0 3px var(--accent-soft);
   }
   textarea{resize:vertical;min-height:80px;}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end;}
+  .grid4{display:grid;grid-template-columns:repeat(var(--field-cols,4),1fr);gap:14px;align-items:end;}
   @media (max-width:640px){.grid2,.grid4{grid-template-columns:1fr;}}
 
   table.dyn{width:100%;border-collapse:collapse;font-size:14px;}
@@ -366,7 +366,7 @@ const STORAGE_DRAFT  = 'salesSurvey.draft.v1';
 
 // URL веб-приложения Google Apps Script, куда отправляются .html-отчёты.
 // Задаётся здесь в коде — через интерфейс менеджеры его поменять не могут.
-const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxZmopP206_Po-F6AqzAJHA3M3dZw57GEmCtX0yHeARl0C_Y7xEA89A18wFCT0JNPCE/exec';
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz0HqfR-g5BMViqqsHAPsR2gGe5IV-eaGaAHNsi4TBwwJr7ErI2mokNPwSjzTE8zb0k/exec';
 
 function uid(prefix){
   return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
@@ -378,10 +378,12 @@ const DEFAULT_CONFIG = {
   sections: [
     {
       id: "meta", type: "fields", title: "ФИО и дата заполнения",
-      desc: "Кто отчитывается и за какой период.",
+      desc: "Кто отчитывается и за какой период. ФИО указывайте строго по образцу: Кайратов Кайрат Кайратович — фамилия, имя и отчество по отдельности.",
       locked: true,
       fields: [
-        {id:"fio", label:"ФИО менеджера", type:"text", required:true, width:"half"},
+        {id:"last_name", label:"Фамилия", type:"text", required:true, width:"third", placeholder:"Кайратов"},
+        {id:"first_name", label:"Имя", type:"text", required:true, width:"third", placeholder:"Кайрат"},
+        {id:"middle_name", label:"Отчество", type:"text", required:true, width:"third", placeholder:"Кайратович"},
         {id:"fill_date", label:"Дата заполнения", type:"date", required:true, width:"half"},
         {id:"period_start", label:"Период с", type:"date", required:false, width:"half"},
         {id:"period_end", label:"по", type:"date", required:false, width:"half"}
@@ -485,7 +487,8 @@ const DEFAULT_CONFIG = {
       priorityLegend:true,
       columns:[
         {id:"priority", label:"Приоритет", type:"select", options:["Низкий","Средний","Высокий"]},
-        {id:"description", label:"Описание", type:"textarea"}
+        {id:"description", label:"Описание", type:"textarea"},
+        {id:"department", label:"Кто может помочь", type:"select", options:["IT","Юристы","Андеррайтинг","Выплатники","Продажи","Маркетинг","HR"]}
       ]
     },
     {
@@ -716,7 +719,7 @@ function renderFieldsBody(sec){
     wrap.appendChild(g);
   }
   if(groups.third.length){
-    const g = el('div',{class:'grid4', style:'margin-top:14px;'});
+    const g = el('div',{class:'grid4', style:'margin-top:14px;--field-cols:'+groups.third.length+';'});
     groups.third.forEach(f=> g.appendChild(fieldBlock(sec, f)));
     wrap.appendChild(g);
   }
@@ -756,7 +759,7 @@ function fieldBlock(sec, f){
   block.appendChild(inputFor(f.type, draft[sec.id][f.id], f.tall, (val)=>{
     draft[sec.id][f.id] = val; persistDraft();
     if(sec.showIndex) refreshIndexBox(sec);
-  }, f.options));
+  }, f.options, f.placeholder));
   return block;
 }
 
@@ -845,11 +848,12 @@ function openKpiModal(sec){
   };
 }
 
-function inputFor(type, value, tall, onChange, options){
+function inputFor(type, value, tall, onChange, options, placeholder){
   let node;
   if(type === 'textarea'){
     node = el('textarea',{});
     if(tall) node.style.minHeight = '140px';
+    if(placeholder) node.placeholder = placeholder;
     node.value = value||'';
     node.addEventListener('input', ()=>onChange(node.value));
   } else if(type === 'select'){
@@ -875,6 +879,7 @@ function inputFor(type, value, tall, onChange, options){
     }
   } else {
     node = el('input',{type: type==='number'?'number':(type==='date'?'date':'text')});
+    if(placeholder) node.placeholder = placeholder;
     node.value = value||'';
     node.addEventListener('input', ()=>onChange(node.value));
   }
@@ -905,7 +910,7 @@ function renderTableBody(sec){
       const td = el('td',{});
       td.appendChild(inputFor(c.type, row[c.id], false, (val)=>{
         row[c.id]=val; persistDraft();
-      }, c.options));
+      }, c.options, c.placeholder));
       tr.appendChild(td);
     });
     const delTd = el('td',{class:'row-del'});
@@ -1332,8 +1337,12 @@ function showToast(msg){
 --------------------------------------------------------------- */
 function buildReport(){
   const metaSec = config.sections.find(s=>s.id==='meta');
+  const fullName = ['last_name','first_name','middle_name']
+    .map(k=> (draft.meta && draft.meta[k] || '').trim())
+    .filter(Boolean)
+    .join(' ');
   const meta = {
-    manager: (draft.meta && draft.meta.fio) || '',
+    manager: fullName,
     filledDate: (draft.meta && draft.meta.fill_date) || '',
     periodStart: (draft.meta && draft.meta.period_start) || '',
     periodEnd: (draft.meta && draft.meta.period_end) || '',
