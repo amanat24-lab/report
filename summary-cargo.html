@@ -295,7 +295,7 @@ function handleFiles(fileListRaw){
    URL — тот же веб-апп Apps Script, что принимает отчёты от опросника,
    только вызывается методом GET с ?action=list.
 --------------------------------------------------------------- */
-const DRIVE_LIST_URL = 'https://script.google.com/macros/s/AKfycbxZmopP206_Po-F6AqzAJHA3M3dZw57GEmCtX0yHeARl0C_Y7xEA89A18wFCT0JNPCE/exec';
+const DRIVE_LIST_URL = 'https://script.google.com/macros/s/AKfycbz0HqfR-g5BMViqqsHAPsR2gGe5IV-eaGaAHNsi4TBwwJr7ErI2mokNPwSjzTE8zb0k/exec';
 
 async function pullFromDrive(){
   const btn = document.getElementById('btnPullDrive');
@@ -304,24 +304,62 @@ async function pullFromDrive(){
   btn.disabled = true;
   btn.textContent = 'Забираю с Google Диска…';
   statusEl.textContent = '';
+  statusEl.style.color = '';
 
-  try{
-    const res = await fetch(DRIVE_LIST_URL + '?action=list');
-    const json = await res.json();
-    if(!json.ok) throw new Error(json.error || ('HTTP '+res.status));
-
-    const reports = json.reports || [];
-    reports.forEach(r => addFileEntry(ingestReportText(r.name, r.content)));
-    renderFileList();
-    renderFilterPanel();
-
-    statusEl.textContent = `Загружено файлов: ${reports.length}`;
-    statusEl.style.color = 'var(--green)';
-  }catch(err){
-    statusEl.textContent = 'Не удалось получить файлы с Диска: ' + (err.message || err);
+  function fail(msg){
+    statusEl.textContent = msg;
     statusEl.style.color = 'var(--red)';
+    btn.disabled = false;
+    btn.textContent = originalLabel;
   }
 
+  let res;
+  try{
+    // cache:'no-store' — иначе браузер может отдать старый закэшированный
+    // ответ на повторный GET и новые отчёты не появятся.
+    res = await fetch(DRIVE_LIST_URL + '?action=list&t=' + Date.now(), {cache:'no-store'});
+  }catch(err){
+    fail('Не удалось подключиться к скрипту: ' + (err.message||err) +
+      '. Обычно это блокировка CORS или недоступный URL — проверьте, что в развёртывании стоит "Кто имеет доступ: Все".');
+    return;
+  }
+
+  let text;
+  try{
+    text = await res.text();
+  }catch(err){
+    fail('Пустой ответ от скрипта (HTTP '+res.status+').');
+    return;
+  }
+
+  let json;
+  try{
+    json = JSON.parse(text);
+  }catch(err){
+    const looksLikeHtml = /<html|<!doctype/i.test(text);
+    fail(looksLikeHtml
+      ? 'Скрипт вернул страницу входа/ошибки вместо данных (HTTP '+res.status+'). Проверьте, что развёртывание открыто для "Всех" и это последняя версия (после правок нужно новое развёртывание).'
+      : 'Не удалось разобрать ответ скрипта: ' + text.slice(0,140));
+    return;
+  }
+
+  if(!json.ok){
+    fail('Скрипт вернул ошибку: ' + (json.error || 'неизвестная ошибка'));
+    return;
+  }
+
+  if(json.reports === undefined){
+    fail('Скрипт ответил, но без списка отчётов — похоже, развёрнута старая версия скрипта (без обработчика ?action=list). Обновите код в Apps Script и сделайте новое развёртывание.');
+    return;
+  }
+
+  const reports = json.reports || [];
+  reports.forEach(r => addFileEntry(ingestReportText(r.name, r.content)));
+  renderFileList();
+  renderFilterPanel();
+
+  statusEl.textContent = reports.length ? `Загружено файлов: ${reports.length}` : 'В папке пока нет отчётов';
+  statusEl.style.color = reports.length ? 'var(--green)' : 'var(--amber)';
   btn.disabled = false;
   btn.textContent = originalLabel;
 }
