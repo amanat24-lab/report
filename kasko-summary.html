@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сводка по отчётам менеджеров</title>
+<style>
+  :root{
+    --bg:#F3F5F4; --paper:#FFFFFF; --ink:#1B2420; --ink-soft:#5B6A63; --ink-faint:#8B978F;
+    --line:#DCE3DF; --line-strong:#C3CDC6;
+    --accent:#2F6F5E; --accent-dark:#204F42; --accent-soft:#E4EFEA;
+    --amber:#B8791E; --amber-soft:#FBF0DE; --red:#B8433A; --red-soft:#FBE7E4; --green:#3A7D4C; --green-soft:#E7F3EA;
+    --radius:10px;
+    --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.5;padding-bottom:60px;}
+  body::before{
+    content:"";position:fixed;inset:0;
+    background-image:linear-gradient(90deg, rgba(47,111,94,0.035) 1px, transparent 1px),
+      linear-gradient(rgba(47,111,94,0.035) 1px, transparent 1px);
+    background-size:28px 28px;pointer-events:none;z-index:0;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+  header.top{padding:38px 0 26px;border-bottom:2px solid var(--ink);margin-bottom:28px;}
+  .eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-dark);display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  h1{font-size:30px;margin:0 0 6px;letter-spacing:-0.01em;font-weight:700;}
+  .sub{color:var(--ink-soft);font-size:14.5px;max-width:64ch;}
+
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:22px;}
+  .panel h3{margin:0 0 4px;font-size:15px;}
+  .panel .hint{font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;}
+
+  .dropzone{
+    border:2px dashed var(--line-strong);border-radius:10px;padding:28px;text-align:center;
+    cursor:pointer;transition:.15s;color:var(--ink-soft);font-size:13.5px;
+  }
+  .dropzone.drag{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-dark);}
+  .dropzone b{color:var(--ink);}
+
+  .file-list{margin-top:14px;display:flex;flex-direction:column;gap:6px;}
+  .file-row{
+    display:flex;align-items:center;gap:10px;font-size:13px;
+    background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:8px 10px;
+  }
+  .file-row .name{font-weight:600;flex:1;}
+  .file-row .meta{font-family:var(--mono);color:var(--ink-soft);font-size:11.5px;}
+  .file-row .rm{cursor:pointer;color:var(--ink-faint);border:none;background:none;font-size:14px;}
+  .file-row .rm:hover{color:var(--red);}
+  .file-row.bad{border-color:var(--red);}
+  .file-row.bad .meta{color:var(--red);}
+
+  .filters{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;}
+  .f-item label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);font-weight:700;margin-bottom:6px;}
+  .f-item input[type=date]{font-family:inherit;font-size:14px;border:1px solid var(--line-strong);border-radius:7px;padding:8px 10px;background:var(--bg);}
+  .managers-list{display:flex;flex-wrap:wrap;gap:8px;max-width:520px;}
+  .chip{
+    font-size:12.5px;border:1px solid var(--line-strong);border-radius:20px;padding:6px 12px;cursor:pointer;
+    background:var(--paper);user-select:none;
+  }
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+  .btn{font-family:inherit;font-size:13px;font-weight:600;border:1px solid var(--line-strong);background:var(--paper);color:var(--ink);padding:9px 14px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s ease;}
+  .btn:hover{border-color:var(--accent);color:var(--accent-dark);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.primary:hover{background:var(--accent-dark);border-color:var(--accent-dark);color:#fff;}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px;}
+  .group-toggle{display:flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;}
+  .group-toggle button{border:none;background:var(--paper);padding:8px 12px;font-size:12.5px;cursor:pointer;color:var(--ink-soft);}
+  .group-toggle button.active{background:var(--accent);color:#fff;}
+
+  .stat-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px;}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 18px;min-width:130px;}
+  .stat .num{font-size:24px;font-weight:700;font-family:var(--mono);}
+  .stat .lbl{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-top:2px;}
+
+  #summaryRoot section.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  #summaryRoot .card-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+  #summaryRoot .card-head .idx{font-family:var(--mono);font-size:12px;color:var(--ink-faint);}
+  #summaryRoot .card-head h2{font-size:16px;margin:0;font-weight:700;}
+  #summaryRoot .card-body{padding:16px 20px 20px;}
+
+  table.sumtable{width:100%;border-collapse:collapse;font-size:13.5px;}
+  table.sumtable th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);font-weight:700;padding:6px 10px;border-bottom:1px solid var(--line-strong);background:var(--bg);}
+  table.sumtable td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  table.sumtable tr:last-child td{border-bottom:none;}
+  table.sumtable tr.total-row td{font-weight:700;background:var(--accent-soft);}
+  .mgr-name{font-weight:700;}
+  .prio-tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:600;}
+  .prio-tag.low{background:var(--green-soft);color:var(--green);}
+  .prio-tag.mid, .prio-tag.средний{background:var(--amber-soft);color:var(--amber);}
+  .prio-tag.high{background:var(--red-soft);color:var(--red);}
+
+  .qa-block{margin-bottom:18px;}
+  .qa-block:last-child{margin-bottom:0;}
+  .qa-block h4{font-size:13.5px;margin:0 0 8px;color:var(--accent-dark);}
+  .qa-item{display:grid;grid-template-columns:160px 1fr;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13.5px;}
+  .qa-item:last-child{border-bottom:none;}
+  .qa-item .who{font-weight:700;}
+
+  .textlist{display:flex;flex-direction:column;gap:12px;}
+  .textlist .item{border-left:3px solid var(--accent);padding:4px 0 4px 12px;}
+  .textlist .who{font-weight:700;font-size:13px;margin-bottom:3px;}
+  .textlist .txt{font-size:13.5px;white-space:pre-wrap;color:var(--ink-soft);}
+
+  .muted{color:var(--ink-faint);font-style:italic;}
+
+  .okr-dist{display:flex;flex-direction:column;gap:6px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line);}
+  .okr-dist-row{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;
+    background:var(--bg);border-radius:7px;padding:8px 12px;}
+  .okr-dist-label{font-weight:600;}
+  .okr-dist-count{font-family:var(--mono);color:var(--accent-dark);font-weight:700;font-size:12.5px;}
+
+  .okr-summary-list{display:flex;flex-direction:column;gap:12px;}
+  .okr-summary-card{border:1px solid var(--line);border-radius:9px;padding:12px 14px;background:var(--paper);}
+  .okr-summary-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .okr-summary-focus{font-size:12.5px;color:var(--accent-dark);font-weight:700;background:var(--accent-soft);
+    border-radius:6px;padding:2px 9px;white-space:nowrap;}
+  .okr-summary-hint{font-size:12px;color:var(--ink-faint);font-style:italic;margin-top:5px;line-height:1.5;}
+  .okr-summary-items{margin-top:9px;display:flex;flex-direction:column;gap:5px;}
+  .okr-summary-item{display:flex;justify-content:space-between;gap:12px;font-size:13px;
+    padding:6px 0;border-bottom:1px solid var(--line);}
+  .okr-summary-item:last-child{border-bottom:none;}
+  .okr-summary-qty{font-family:var(--mono);font-size:12px;color:var(--accent-dark);font-weight:700;white-space:nowrap;}
+
+
+  .empty-state{text-align:center;padding:60px 20px;color:var(--ink-faint);}
+  .empty-state .big{font-size:15px;color:var(--ink-soft);margin-bottom:6px;}
+
+  .idx-badge{display:inline-block;font-family:var(--mono);font-weight:700;font-size:13px;padding:3px 9px;border-radius:20px;}
+  .idx-badge.good{background:var(--green-soft);color:var(--green);}
+  .idx-badge.warn{background:var(--amber-soft);color:var(--amber);}
+  .idx-badge.bad{background:var(--red-soft);color:var(--red);}
+  .idx-badge.na{background:var(--bg);color:var(--ink-faint);}
+
+  .rank-num{font-family:var(--mono);color:var(--ink-faint);width:26px;display:inline-block;}
+
+  .accordion-list{display:flex;flex-direction:column;gap:8px;}
+  details.acc-item{
+    background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  }
+  details.acc-item[open]{border-color:var(--line-strong);}
+  details.acc-item summary{
+    list-style:none;cursor:pointer;padding:13px 16px;display:flex;align-items:center;gap:10px;
+    font-size:13.5px;user-select:none;
+  }
+  details.acc-item summary::-webkit-details-marker{display:none;}
+  .acc-chevron{display:inline-block;color:var(--ink-faint);transition:transform .15s ease;font-size:11px;}
+  details.acc-item[open] .acc-chevron{transform:rotate(90deg);}
+  .acc-date{color:var(--ink-faint);font-family:var(--mono);font-size:12px;}
+  .acc-body{border-top:1px solid var(--line);background:var(--bg);}
+  iframe.report-frame{width:100%;border:none;display:block;min-height:120px;background:#fff;}
+
+  .acc-extra-note{font-size:11.5px;color:var(--ink-faint);padding:0 16px 10px;font-style:italic;}
+
+  .dedup-notice{background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;padding:14px 16px;margin-bottom:18px;}
+  .dedup-notice-head{font-size:13px;color:#8a5a10;font-weight:600;line-height:1.5;}
+  .dedup-details{margin-top:10px;}
+  .dedup-details summary{cursor:pointer;font-size:12.5px;color:#8a5a10;font-weight:600;}
+  .dedup-list{margin-top:12px;display:flex;flex-direction:column;gap:10px;}
+  .dedup-group-head{font-size:13px;padding:6px 0 2px;border-top:1px solid rgba(184,119,30,.25);}
+  .dedup-group-head:first-child{border-top:none;padding-top:0;}
+
+  @media print{
+    .panel, .toolbar, header .toolbar, .no-print{display:none !important;}
+    body{padding-bottom:0;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow"><span class="dot"></span>Отдел продаж · Сводный отчёт</div>
+    <h1>Сводка по отчётам менеджеров</h1>
+    <div class="sub">Загрузите .html-отчёты, которые менеджеры скачали из опросника (или отправили на Google Диск). Сводка соберёт данные по разделам автоматически — в том числе по разделам, добавленным вручную.</div>
+  </header>
+
+  <div class="panel no-print">
+    <h3>1. Загрузка отчётов</h3>
+    <div class="hint">Заберите отчёты из папки на Google Диске одной кнопкой, либо перетащите файлы вручную. Можно добавлять отчёты по одному — старые не пропадают.</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;">
+      <button class="btn primary" id="btnPullAll">📥 Загрузить все отчёты</button>
+      <button class="btn" id="btnPullRecent">🆕 Загрузить новые отчёты</button>
+      <span id="driveStatus" style="font-family:var(--mono);font-size:11.5px;"></span>
+    </div>
+    <div class="dropzone" id="dropzone">
+      <div><b>Перетащите .html-отчёты</b> сюда, или нажмите, чтобы выбрать (старые .json тоже подойдут)</div>
+    </div>
+    <input type="file" id="fileInput" accept=".html,.htm,.json" multiple style="display:none;">
+    <div class="file-list" id="fileList"></div>
+  </div>
+
+  <div class="panel no-print" id="filterPanel" style="display:none;">
+    <h3>2. Фильтры</h3>
+    <div class="hint">Диапазон дат применяется к дате заполнения отчёта. Менеджеров можно исключить из сводки, сняв отметку.</div>
+    <div class="filters">
+      <div class="f-item">
+        <label>Дата заполнения — с</label>
+        <input type="date" id="dateFrom">
+      </div>
+      <div class="f-item">
+        <label>по</label>
+        <input type="date" id="dateTo">
+      </div>
+      <div class="f-item" style="flex:1;min-width:240px;">
+        <label>Менеджеры</label>
+        <div class="managers-list" id="managersList"></div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="group-toggle" id="groupToggle">
+        <button class="active" data-mode="section">По разделам</button>
+        <button data-mode="manager">По менеджерам</button>
+        <button data-mode="full">Полные отчёты</button>
+      </div>
+      <button class="btn primary" id="btnBuild">Собрать сводку</button>
+      <div style="flex:1"></div>
+      <button class="btn" id="btnDownload" disabled>Скачать сводку (HTML)</button>
+      <button class="btn" id="btnPrint" disabled>Печать / PDF</button>
+    </div>
+  </div>
+
+  <div class="stat-row" id="statRow" style="display:none;"></div>
+
+  <div id="summaryRoot"></div>
+</div>
+
+<script>
+/* ---------------------------------------------------------------
+   СОСТОЯНИЕ
+--------------------------------------------------------------- */
+let files = [];      // [{name, report}]
+let excludedManagers = new Set();
+let groupMode = 'section';
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const fileListEl = document.getElementById('fileList');
+
+dropzone.addEventListener('click', ()=>fileInput.click());
+dropzone.addEventListener('dragover', (e)=>{ e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', ()=> dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', (e)=>{
+  e.preventDefault(); dropzone.classList.remove('drag');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', (e)=>{ handleFiles(e.target.files); e.target.value=''; });
+
+const REPORT_DATA_RE = /<script[^>]*id=["']report-data["'][^>]*>([\s\S]*?)<\/script>/i;
+
+// Разбирает содержимое одного файла (текст) в запись {name, ok, report, error, rawHtml}.
+// Используется и для файлов, выбранных вручную, и для файлов, забранных с Google Диска —
+// логика разбора отчёта одна и та же независимо от источника.
+function ingestReportText(name, text){
+  const lower = name.toLowerCase();
+  const isJson = lower.endsWith('.json');
+  let entry = {name, ok:false, report:null, error:'', rawHtml:null};
+  try{
+    let parsed;
+    if(isJson){
+      parsed = JSON.parse(text);
+    } else {
+      const m = text.match(REPORT_DATA_RE);
+      if(!m) throw new Error('В файле не найдены данные отчёта');
+      parsed = JSON.parse(m[1]);
+      entry.rawHtml = text;
+    }
+    if(!parsed.meta || !parsed.sections) throw new Error('Неверная структура отчёта');
+    entry.ok = true;
+    entry.report = parsed;
+  }catch(err){
+    entry.error = 'Не удалось прочитать файл (не найден отчёт)';
+  }
+  return entry;
+}
+
+// Добавляет запись в список; если файл с таким именем уже был загружен
+// (например, повторное нажатие "Забрать из Google Диска"), обновляет её,
+// а не плодит дубликаты.
+function addFileEntry(entry){
+  const existingIdx = files.findIndex(f=>f.name===entry.name);
+  if(existingIdx>=0) files[existingIdx] = entry;
+  else files.push(entry);
+}
+
+function handleFiles(fileListRaw){
+  Array.from(fileListRaw).forEach(f=>{
+    const lower = f.name.toLowerCase();
+    if(!lower.endsWith('.html') && !lower.endsWith('.htm') && !lower.endsWith('.json')) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      addFileEntry(ingestReportText(f.name, reader.result));
+      renderFileList();
+      renderFilterPanel();
+    };
+    reader.readAsText(f);
+  });
+}
+
+/* ---------------------------------------------------------------
+   ЗАБРАТЬ ОТЧЁТЫ НАПРЯМУЮ С GOOGLE ДИСКА
+   URL — тот же веб-апп Apps Script, что принимает отчёты от опросника,
+   только вызывается методом GET с ?action=list.
+--------------------------------------------------------------- */
+const DRIVE_LIST_URL = 'https://script.google.com/macros/s/AKfycbye9vd0pciymEo15mEuAfhonp_4Ck_CRoRBUyi4GIAfKNWhIVcbT8DjAsfHzKcVGjps/exec';
+
+const RECENT_DAYS = 4;
+
+function isWithinLastDays(dateStr, days){
+  if(!dateStr) return false;
+  const d = new Date(dateStr+'T00:00:00');
+  if(isNaN(d)) return false;
+  const cutoff = new Date();
+  cutoff.setHours(0,0,0,0);
+  cutoff.setDate(cutoff.getDate() - days);
+  return d >= cutoff;
+}
+
+async function pullFromDrive(onlyRecent){
+  const btnAll = document.getElementById('btnPullAll');
+  const btnRecent = document.getElementById('btnPullRecent');
+  const activeBtn = onlyRecent ? btnRecent : btnAll;
+  const otherBtn = onlyRecent ? btnAll : btnRecent;
+  const statusEl = document.getElementById('driveStatus');
+  const originalLabel = activeBtn.textContent;
+  btnAll.disabled = true;
+  btnRecent.disabled = true;
+  activeBtn.textContent = 'Забираю с Google Диска…';
+  statusEl.textContent = '';
+  statusEl.style.color = '';
+
+  function reset(){
+    btnAll.disabled = false;
+    btnRecent.disabled = false;
+    activeBtn.textContent = originalLabel;
+  }
+  function fail(msg){
+    statusEl.textContent = msg;
+    statusEl.style.color = 'var(--red)';
+    reset();
+  }
+
+  let res;
+  try{
+    // cache:'no-store' — иначе браузер может отдать старый закэшированный
+    // ответ на повторный GET и новые отчёты не появятся.
+    res = await fetch(DRIVE_LIST_URL + '?action=list&t=' + Date.now(), {cache:'no-store'});
+  }catch(err){
+    fail('Не удалось подключиться к скрипту: ' + (err.message||err) +
+      '. Обычно это блокировка CORS или недоступный URL — проверьте, что в развёртывании стоит "Кто имеет доступ: Все".');
+    return;
+  }
+
+  let text;
+  try{
+    text = await res.text();
+  }catch(err){
+    fail('Пустой ответ от скрипта (HTTP '+res.status+').');
+    return;
+  }
+
+  let json;
+  try{
+    json = JSON.parse(text);
+  }catch(err){
+    const looksLikeHtml = /<html|<!doctype/i.test(text);
+    fail(looksLikeHtml
+      ? 'Скрипт вернул страницу входа/ошибки вместо данных (HTTP '+res.status+'). Проверьте, что развёртывание открыто для "Всех" и это последняя версия (после правок нужно новое развёртывание).'
+      : 'Не удалось разобрать ответ скрипта: ' + text.slice(0,140));
+    return;
+  }
+
+  if(!json.ok){
+    fail('Скрипт вернул ошибку: ' + (json.error || 'неизвестная ошибка'));
+    return;
+  }
+
+  if(json.reports === undefined){
+    fail('Скрипт ответил, но без списка отчётов — похоже, развёрнута старая версия скрипта (без обработчика ?action=list). Обновите код в Apps Script и сделайте новое развёртывание.');
+    return;
+  }
+
+  const allReports = json.reports || [];
+  let added = 0, skippedOld = 0, skippedBad = 0;
+  allReports.forEach(r => {
+    const entry = ingestReportText(r.name, r.content);
+    if(!entry.ok){ skippedBad++; return; }
+    if(onlyRecent && !isWithinLastDays(entry.report.meta.filledDate, RECENT_DAYS)){
+      skippedOld++;
+      return;
+    }
+    addFileEntry(entry);
+    added++;
+  });
+  renderFileList();
+  renderFilterPanel();
+
+  if(onlyRecent){
+    statusEl.textContent = added
+      ? `Загружено новых отчётов: ${added} (за последние ${RECENT_DAYS} дн.)` + (skippedOld ? `, пропущено более старых: ${skippedOld}` : '')
+      : `Новых отчётов за последние ${RECENT_DAYS} дн. не найдено` + (skippedOld ? ` (пропущено старых: ${skippedOld})` : '');
+    statusEl.style.color = added ? 'var(--green)' : 'var(--amber)';
+  } else {
+    statusEl.textContent = added ? `Загружено файлов: ${added}` : 'В папке пока нет отчётов';
+    statusEl.style.color = added ? 'var(--green)' : 'var(--amber)';
+  }
+
+  reset();
+}
+document.getElementById('btnPullAll').addEventListener('click', ()=>pullFromDrive(false));
+document.getElementById('btnPullRecent').addEventListener('click', ()=>pullFromDrive(true));
+
+function findEntryForReport(report){
+  return files.find(f=>f.report===report);
+}
+
+function renderFileList(){
+  fileListEl.innerHTML = '';
+  files.forEach((entry, i)=>{
+    const row = document.createElement('div');
+    row.className = 'file-row' + (entry.ok ? '' : ' bad');
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = entry.ok ? (entry.report.meta.manager || entry.name) : entry.name;
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    meta.textContent = entry.ok ? (entry.report.meta.filledDate || '') : entry.error;
+    const rm = document.createElement('button');
+    rm.className = 'rm'; rm.textContent = '✕';
+    rm.onclick = ()=>{ files.splice(i,1); renderFileList(); renderFilterPanel(); };
+    row.appendChild(name); row.appendChild(meta); row.appendChild(rm);
+    fileListEl.appendChild(row);
+  });
+}
+
+/* ---------------------------------------------------------------
+   ФИЛЬТРЫ
+--------------------------------------------------------------- */
+function renderFilterPanel(){
+  const okFiles = files.filter(f=>f.ok);
+  document.getElementById('filterPanel').style.display = okFiles.length ? 'block' : 'none';
+  if(!okFiles.length) return;
+
+  const managers = [...new Set(okFiles.map(f=>f.report.meta.manager || 'Без имени'))].sort((a,b)=>a.localeCompare(b,'ru'));
+  const mgrWrap = document.getElementById('managersList');
+  mgrWrap.innerHTML = '';
+  managers.forEach(m=>{
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (excludedManagers.has(m) ? '' : ' on');
+    chip.textContent = m;
+    chip.onclick = ()=>{
+      if(excludedManagers.has(m)) excludedManagers.delete(m); else excludedManagers.add(m);
+      renderFilterPanel();
+    };
+    mgrWrap.appendChild(chip);
+  });
+
+  const dates = okFiles.map(f=>f.report.meta.filledDate).filter(Boolean).sort();
+  if(dates.length && !document.getElementById('dateFrom').value){
+    document.getElementById('dateFrom').value = dates[0];
+    document.getElementById('dateTo').value = dates[dates.length-1];
+  }
+}
+
+document.getElementById('groupToggle').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-mode]');
+  if(!btn) return;
+  groupMode = btn.dataset.mode;
+  document.querySelectorAll('#groupToggle button').forEach(b=>b.classList.toggle('active', b===btn));
+  buildSummary();
+});
+
+document.getElementById('btnBuild').addEventListener('click', buildSummary);
+
+/* ---------------------------------------------------------------
+   СБОРКА СВОДКИ
+--------------------------------------------------------------- */
+function getFilteredReports(){
+  const from = document.getElementById('dateFrom').value;
+  const to = document.getElementById('dateTo').value;
+  return files.filter(f=>f.ok).map(f=>f.report).filter(r=>{
+    const mgr = r.meta.manager || 'Без имени';
+    if(excludedManagers.has(mgr)) return false;
+    const d = r.meta.filledDate;
+    if(from && d && d < from) return false;
+    if(to && d && d > to) return false;
+    return true;
+  });
+}
+
+/* ---------------------------------------------------------------
+   ДЕДУБЛИКАЦИЯ — если менеджер заполнил отчёт за одну и ту же
+   календарную неделю больше одного раза (ошибся, дозаполнил,
+   дважды нажал "Завершить"), учитываем только последнюю по времени
+   отправки версию. Более ранние версии не участвуют в подсчётах,
+   но не пропадают — их можно посмотреть в примечании под фильтрами.
+--------------------------------------------------------------- */
+function reportSubmittedTime(report){
+  const t = report.meta && report.meta.submittedAt;
+  if(t){
+    const d = new Date(t);
+    if(!isNaN(d)) return d.getTime();
+  }
+  const fd = report.meta && report.meta.filledDate;
+  if(fd){
+    const d = new Date(fd+'T00:00:00');
+    if(!isNaN(d)) return d.getTime();
+  }
+  return 0;
+}
+
+// Используется дедупликацией повторных отправок (группировка "тот же
+// отчёт за ту же неделю") — считает календарную неделю пн-вс.
+function isoWeekInfo(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr+'T00:00:00');
+  if(isNaN(d)) return null;
+  const dayIdx = (d.getDay()+6)%7; // Пн=0 ... Вс=6
+  const monday = new Date(d); monday.setDate(d.getDate()-dayIdx);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+  const thursday = new Date(monday); thursday.setDate(monday.getDate()+3);
+  const firstThursday = new Date(thursday.getFullYear(), 0, 4);
+  const firstThursdayDay = (firstThursday.getDay()+6)%7;
+  firstThursday.setDate(firstThursday.getDate()-firstThursdayDay+3);
+  const week = 1 + Math.round((thursday - firstThursday) / (7*86400000));
+  const key = thursday.getFullYear() + '-W' + String(week).padStart(2,'0');
+  const two = n => String(n).padStart(2,'0');
+  const label = `${two(monday.getDate())}.${two(monday.getMonth()+1)}–${two(sunday.getDate())}.${two(sunday.getMonth()+1)}`;
+  return {key, label, monday};
+}
+
+function dedupeReportsByWeek(reports){
+  const groups = {};
+  reports.forEach(r=>{
+    const mgr = r.meta.manager || 'Без имени';
+    const info = isoWeekInfo(r.meta.filledDate);
+    const weekKey = info ? info.key : ('nodate:' + (r.meta.filledDate || '?'));
+    const weekLabel = info ? info.label : (r.meta.filledDate || 'без даты заполнения');
+    const key = mgr + '||' + weekKey;
+    if(!groups[key]) groups[key] = {manager: mgr, weekLabel, reports: []};
+    groups[key].reports.push(r);
+  });
+
+  const winners = [];
+  const hiddenGroups = [];
+  Object.values(groups).forEach(g=>{
+    if(g.reports.length === 1){
+      winners.push(g.reports[0]);
+      return;
+    }
+    const sorted = g.reports.slice().sort((a,b)=> reportSubmittedTime(b) - reportSubmittedTime(a));
+    const winner = sorted[0];
+    const hidden = sorted.slice(1);
+    winners.push(winner);
+    hiddenGroups.push({manager: g.manager, weekLabel: g.weekLabel, winner, hidden});
+  });
+
+  return {winners, hiddenGroups};
+}
+
+function renderDedupNotice(hiddenGroups){
+  if(!hiddenGroups.length) return null;
+  const totalHidden = hiddenGroups.reduce((s,g)=>s+g.hidden.length,0);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'dedup-notice';
+
+  const headLine = document.createElement('div');
+  headLine.className = 'dedup-notice-head';
+  headLine.textContent = `⚠ Учтена только последняя версия отчёта — найдено ${hiddenGroups.length} `
+    + (hiddenGroups.length===1 ? 'случай' : (hiddenGroups.length<5 ? 'случая' : 'случаев'))
+    + `, когда за одну неделю было больше одной отправки (скрыто версий: ${totalHidden}).`;
+  wrap.appendChild(headLine);
+
+  const details = document.createElement('details'); details.className = 'dedup-details';
+  const summary = document.createElement('summary'); summary.textContent = 'Показать более ранние версии';
+  details.appendChild(summary);
+
+  const list = document.createElement('div'); list.className = 'dedup-list';
+  hiddenGroups
+    .slice()
+    .sort((a,b)=> a.manager.localeCompare(b.manager,'ru'))
+    .forEach(g=>{
+      const groupHead = document.createElement('div');
+      groupHead.className = 'dedup-group-head';
+      groupHead.innerHTML = `<span class="mgr-name">${esc(g.manager)}</span> <span class="acc-date">неделя ${esc(g.weekLabel)}</span>`;
+      list.appendChild(groupHead);
+
+      const winnerNote = `Учтена в сводке — отправлена ${fmtDateTime(g.winner.meta.submittedAt)}`;
+      list.appendChild(buildReportAccordionItem(g.winner, winnerNote));
+
+      g.hidden.forEach(h=>{
+        const note = `Заменена более новой версией — эта отправлена ${fmtDateTime(h.meta.submittedAt)}, не учитывается в подсчётах`;
+        list.appendChild(buildReportAccordionItem(h, note));
+      });
+    });
+  details.appendChild(list);
+  wrap.appendChild(details);
+
+  return wrap;
+}
+
+function fmtDateTime(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  const two = n => String(n).padStart(2,'0');
+  return `${two(d.getDate())}.${two(d.getMonth()+1)}.${d.getFullYear()} ${two(d.getHours())}:${two(d.getMinutes())}`;
+}
+
+function buildSummary(){
+  const filtered = getFilteredReports();
+  const { winners: reports, hiddenGroups } = dedupeReportsByWeek(filtered);
+  const summaryRoot = document.getElementById('summaryRoot');
+  const statRow = document.getElementById('statRow');
+  summaryRoot.innerHTML = '';
+
+  if(!reports.length){
+    statRow.style.display = 'none';
+    summaryRoot.innerHTML = `<div class="empty-state"><div class="big">Нет отчётов, подходящих под фильтр</div>Загрузите файлы или измените диапазон дат / выбранных менеджеров.</div>`;
+    document.getElementById('btnDownload').disabled = true;
+    document.getElementById('btnPrint').disabled = true;
+    return;
+  }
+
+  const managers = [...new Set(reports.map(r=>r.meta.manager||'Без имени'))].sort((a,b)=>a.localeCompare(b,'ru'));
+  const leaderboardData = buildLeaderboard(reports);
+  const teamAvg = leaderboardData.length ? Math.round(leaderboardData.reduce((s,d)=>s+d.avg,0)/leaderboardData.length) : null;
+  statRow.style.display = 'flex';
+  statRow.innerHTML = statCard(reports.length,'отчётов') + statCard(managers.length,'менеджеров') + statCard(dateRangeLabel(reports),'период',true)
+    + (teamAvg!=null ? statCard(idxBadge(teamAvg),'средний индекс',true) : '');
+
+  const notice = renderDedupNotice(hiddenGroups);
+  if(notice) summaryRoot.appendChild(notice);
+
+  const lb = renderLeaderboard(reports);
+  if(lb) summaryRoot.appendChild(lb);
+
+  summaryRoot.appendChild(
+    groupMode==='manager' ? renderByManager(reports, managers) :
+    groupMode==='full' ? renderFullReportsAccordion(reports) :
+    renderBySection(reports, managers)
+  );
+
+  document.getElementById('btnDownload').disabled = false;
+  document.getElementById('btnPrint').disabled = false;
+}
+
+function statCard(value, label, isText){
+  return `<div class="stat"><div class="num" style="${isText?'font-size:14px;':''}">${value}</div><div class="lbl">${label}</div></div>`;
+}
+function dateRangeLabel(reports){
+  const dates = reports.map(r=>r.meta.filledDate).filter(Boolean).sort();
+  if(!dates.length) return '—';
+  return dates[0]===dates[dates.length-1] ? fmtDate(dates[0]) : fmtDate(dates[0])+' – '+fmtDate(dates[dates.length-1]);
+}
+function fmtDate(d){
+  if(!d) return '';
+  const parts = d.split('-');
+  return parts.length===3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : d;
+}
+function esc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function nl2br(s){ return esc(s).replace(/\n/g,'<br>'); }
+
+/* ---------------------------------------------------------------
+   ИНДЕКС РЕЗУЛЬТАТИВНОСТИ
+   Берём готовый расчёт из отчёта (report.sections[].index), если он есть —
+   так сводка не зависит от версии опросника. Если в старом файле индекса
+   нет, считаем сами по стандартным KPI/весам как запасной вариант.
+--------------------------------------------------------------- */
+const FALLBACK_INDEX_DEFS = {
+  contacts_search: {kpi:10, weight:1},
+  calls: {kpi:10, weight:2},
+  meetings: {kpi:5, weight:3}
+};
+function idxColorClass(percent){
+  if(percent>=85) return 'good';
+  if(percent>=60) return 'warn';
+  return 'bad';
+}
+function findIndexSection(report){
+  return report.sections.find(s=>s.type==='fields' && s.index);
+}
+function computeFallbackIndex(sec){
+  let totalWeight=0, weighted=0, any=false;
+  sec.fields.forEach(f=>{
+    const def = FALLBACK_INDEX_DEFS[f.id];
+    if(def){
+      any = true;
+      const ratio = Math.min((Number(f.value)||0)/def.kpi, 1);
+      weighted += ratio*def.weight; totalWeight += def.weight;
+    }
+  });
+  return any && totalWeight ? Math.round(weighted/totalWeight*100) : null;
+}
+function getReportIndex(report){
+  const withIndex = findIndexSection(report);
+  if(withIndex) return withIndex.index.percent;
+  const secAct = report.sections.find(s=>s.id==='activities_done' && s.type==='fields');
+  if(secAct) return computeFallbackIndex(secAct);
+  return null;
+}
+function idxBadge(percent){
+  if(percent==null) return `<span class="idx-badge na">—</span>`;
+  return `<span class="idx-badge ${idxColorClass(percent)}">${percent}%</span>`;
+}
+
+function buildLeaderboard(reports){
+  const byMgr = {};
+  reports.forEach(r=>{
+    const idx = getReportIndex(r);
+    if(idx==null) return;
+    const mgr = r.meta.manager || 'Без имени';
+    (byMgr[mgr] = byMgr[mgr] || []).push(idx);
+  });
+  return Object.entries(byMgr)
+    .map(([manager, arr])=>({manager, avg: Math.round(arr.reduce((a,b)=>a+b,0)/arr.length), count: arr.length}))
+    .sort((a,b)=>b.avg-a.avg);
+}
+
+function renderLeaderboard(reports){
+  const data = buildLeaderboard(reports);
+  if(!data.length) return null;
+  const card = document.createElement('section'); card.className='card';
+  const head = document.createElement('div'); head.className='card-head';
+  head.innerHTML = `<h2>Индекс результативности недели — по менеджерам</h2>`;
+  card.appendChild(head);
+  const body = document.createElement('div'); body.className='card-body';
+  const table = document.createElement('table'); table.className='sumtable';
+  let rows = data.map((d,i)=>`<tr><td><span class="rank-num">${i+1}</span></td><td class="mgr-name">${esc(d.manager)}</td><td>${idxBadge(d.avg)}</td><td style="color:var(--ink-faint);">${d.count} ${d.count===1?'отчёт':'отчёта(ов)'}</td></tr>`).join('');
+  table.innerHTML = `<tr><th></th><th>Менеджер</th><th>Индекс (среднее за период)</th><th>Отчётов учтено</th></tr>${rows}`;
+  body.appendChild(table);
+  body.appendChild(el2('div',{style:'font-size:12px;color:var(--ink-faint);margin-top:10px;'}, 'Индекс считается по показателям раздела «Выполненные мероприятия» относительно KPI, с весом по приоритету: встречи важнее звонков, звонки важнее поиска контактов. Если отчётов за период несколько — берётся среднее.'));
+  card.appendChild(body);
+  return card;
+}
+function el2(tag, attrs, txt){
+  const e = document.createElement(tag);
+  Object.keys(attrs||{}).forEach(k=>e.setAttribute(k, attrs[k]));
+  if(txt) e.textContent = txt;
+  return e;
+}
+
+/* ---- collect a registry of all section/field ids seen across reports ---- */
+function collectSectionRegistry(reports){
+  const registry = {}; // id -> {title, type, columns:{id:label}, fieldsOrder:[]}
+  reports.forEach(r=>{
+    r.sections.forEach(sec=>{
+      if(!registry[sec.id]){
+        registry[sec.id] = {id:sec.id, title:sec.title, type:sec.type, columns:{}, colOrder:[], fieldOrder:[]};
+      }
+      const reg = registry[sec.id];
+      reg.title = sec.title; // latest label wins for display
+      if(sec.type==='fields'){
+        sec.fields.forEach(f=>{
+          if(!reg.fieldOrder.includes(f.id)) reg.fieldOrder.push(f.id);
+          reg.columns[f.id] = {label:f.label, type:f.type};
+        });
+      }
+      if(sec.type==='table' || sec.type==='fixedlist'){
+        (sec.columns||[]).forEach(c=>{
+          if(!reg.colOrder.includes(c.id)) reg.colOrder.push(c.id);
+          reg.columns[c.id] = {label:c.label, type:c.type};
+        });
+      }
+    });
+  });
+  return registry;
+}
+
+/* ---------------------------------------------------------------
+   ГРУППИРОВКА ПО РАЗДЕЛАМ (сводные таблицы по каждому разделу)
+--------------------------------------------------------------- */
+function renderBySection(reports, managers){
+  const registry = collectSectionRegistry(reports);
+  const container = document.createElement('div');
+  let idx = 0;
+  Object.values(registry).forEach(reg=>{
+    idx++;
+    const card = document.createElement('section');
+    card.className = 'card';
+    const head = document.createElement('div'); head.className='card-head';
+    head.innerHTML = `<span class="idx">${String(idx).padStart(2,'0')}</span><h2>${esc(reg.title)}</h2>`;
+    card.appendChild(head);
+    const body = document.createElement('div'); body.className='card-body';
+
+    // Один и тот же id раздела мог в старых отчётах иметь другую структуру
+    // (например, "Обработанные лиды" раньше было одним полем, теперь — таблица).
+    // Если в загруженных файлах перемешаны разные форматы одного раздела,
+    // используем безопасный построчный рендер вместо типовой таблицы, чтобы
+    // не потерять данные из старых отчётов.
+    const typesSeen = new Set(reports.map(r=>{ const s=sectionOf(r,reg.id); return s && s.type; }).filter(Boolean));
+
+    if(typesSeen.size > 1){
+      body.appendChild(renderMixedShapeSectionSummary(reg, reports));
+    } else if(reg.type==='fields'){
+      body.appendChild(renderFieldsSectionSummary(reg, reports));
+    } else if(reg.type==='table'){
+      body.appendChild(renderTableSectionSummary(reg, reports));
+    } else if(reg.type==='fixedlist'){
+      body.appendChild(renderFixedlistSectionSummary(reg, reports));
+    } else if(reg.type==='okr'){
+      body.appendChild(renderOkrSectionSummary(reg, reports));
+    }
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+  return container;
+}
+
+function renderMixedShapeSectionSummary(reg, reports){
+  const wrap = document.createElement('div');
+  const note = document.createElement('div');
+  note.className = 'muted';
+  note.style.cssText = 'font-size:12px;margin-bottom:12px;';
+  note.textContent = 'В загруженных отчётах этот раздел встречается в разных форматах (менялась структура опросника) — показываю каждый отчёт как есть.';
+  wrap.appendChild(note);
+
+  const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
+  rowsSorted.forEach(r=>{
+    const sec = sectionOf(r, reg.id);
+    if(!sec) return;
+    const block = document.createElement('div');
+    block.style.cssText = 'margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--line);';
+    const who = document.createElement('div');
+    who.className = 'mgr-name';
+    who.style.marginBottom = '6px';
+    who.textContent = r.meta.manager + ' · ' + fmtDate(r.meta.filledDate);
+    block.appendChild(who);
+    block.appendChild(renderSingleSectionContent(sec));
+    wrap.appendChild(block);
+  });
+  const last = wrap.lastElementChild;
+  if(last) last.style.borderBottom = 'none';
+  return wrap;
+}
+
+function sectionOf(report, secId){
+  return report.sections.find(s=>s.id===secId);
+}
+
+function renderFieldsSectionSummary(reg, reports){
+  const fieldIds = reg.fieldOrder;
+  const allNumeric = fieldIds.length && fieldIds.every(fid => reg.columns[fid].type==='number');
+  const allRating = fieldIds.length && fieldIds.every(fid => reg.columns[fid].type==='rating');
+
+  if(allRating){
+    const table = document.createElement('table'); table.className='sumtable';
+    let thead = '<tr><th>Менеджер</th>' + fieldIds.map(fid=>`<th>${esc(reg.columns[fid].label)}</th>`).join('') + '<th>Среднее</th></tr>';
+    const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
+    let body = '';
+    const colSums = {}, colCounts = {};
+    fieldIds.forEach(fid=>{ colSums[fid]=0; colCounts[fid]=0; });
+    rowsSorted.forEach(r=>{
+      const sec = sectionOf(r, reg.id);
+      body += `<tr><td class="mgr-name">${esc(r.meta.manager)}</td>`;
+      let rowSum=0, rowCount=0;
+      fieldIds.forEach(fid=>{
+        const f = sec && sec.fields.find(x=>x.id===fid);
+        const v = f ? Number(f.value)||0 : 0;
+        if(v>0){ colSums[fid]+=v; colCounts[fid]++; rowSum+=v; rowCount++; }
+        body += `<td>${v ? v : '<span class="muted">—</span>'}</td>`;
+      });
+      body += `<td><b>${rowCount ? (rowSum/rowCount).toFixed(1) : '—'}</b></td></tr>`;
+    });
+    let avgRow = `<tr class="total-row"><td>Среднее по команде</td>` + fieldIds.map(fid=>
+      `<td>${colCounts[fid] ? (colSums[fid]/colCounts[fid]).toFixed(1) : '—'}</td>`
+    ).join('') + `<td></td></tr>`;
+    table.innerHTML = thead + body + avgRow;
+    return table;
+  }
+
+  if(allNumeric){
+    const table = document.createElement('table'); table.className='sumtable';
+    const hasIndex = reg.id === 'activities_done' || reports.some(r=>{ const s=sectionOf(r,reg.id); return s && s.index; });
+    let thead = '<tr><th>Менеджер</th>' + fieldIds.map(fid=>`<th>${esc(reg.columns[fid].label)}</th>`).join('') + (hasIndex?'<th>Индекс</th>':'') + '</tr>';
+    const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
+    let body = '';
+    const totals = {}; fieldIds.forEach(fid=>totals[fid]=0);
+    rowsSorted.forEach(r=>{
+      const sec = sectionOf(r, reg.id);
+      body += `<tr><td class="mgr-name">${esc(r.meta.manager)}</td>`;
+      fieldIds.forEach(fid=>{
+        const f = sec && sec.fields.find(x=>x.id===fid);
+        const v = f ? Number(f.value)||0 : 0;
+        totals[fid]+=v;
+        body += `<td>${f? esc(f.value||0):'—'}</td>`;
+      });
+      if(hasIndex){
+        body += `<td>${idxBadge(sec ? getReportIndex(r) : null)}</td>`;
+      }
+      body += '</tr>';
+    });
+    let totalRow = `<tr class="total-row"><td>Итого</td>` + fieldIds.map(fid=>`<td>${totals[fid]}</td>`).join('') + (hasIndex?'<td></td>':'') + `</tr>`;
+    table.innerHTML = thead + body + totalRow;
+    return table;
+  }
+
+  // mixed / textual fields -> per-manager list
+  const wrap = document.createElement('div'); wrap.className='textlist';
+  const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
+  rowsSorted.forEach(r=>{
+    const sec = sectionOf(r, reg.id);
+    if(!sec) return;
+    const lines = sec.fields.map(f=>{
+      const val = f.type==='rating' && f.value ? f.value+'/5' : (f.value||'—');
+      return `<b>${esc(f.label)}:</b> ${nl2br(val)}`;
+    }).join('<br>');
+    const item = document.createElement('div'); item.className='item';
+    item.innerHTML = `<div class="who">${esc(r.meta.manager)} <span style="font-weight:400;color:var(--ink-faint);">· ${fmtDate(r.meta.filledDate)}</span></div><div class="txt">${lines}</div>`;
+    wrap.appendChild(item);
+  });
+  return wrap;
+}
+
+/* ---------------------------------------------------------------
+   OKR — распределение выбранных Objective + список по менеджерам
+--------------------------------------------------------------- */
+function renderOkrSectionSummary(reg, reports){
+  const wrap = document.createElement('div');
+  const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
+
+  const counts = {};
+  const withSelection = [];
+  rowsSorted.forEach(r=>{
+    const sec = sectionOf(r, reg.id);
+    if(!sec || !sec.selected) return;
+    const key = sec.selected.title;
+    counts[key] = (counts[key]||0) + 1;
+    withSelection.push({manager: r.meta.manager, sec});
+  });
+
+  if(!withSelection.length){
+    wrap.innerHTML = '<div class="empty-state" style="padding:20px;"><div class="big">Никто ещё не выбрал Objective</div></div>';
+    return wrap;
+  }
+
+  const countEntries = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  const dist = document.createElement('div'); dist.className = 'okr-dist';
+  dist.innerHTML = countEntries.map(([title,n])=>
+    `<div class="okr-dist-row"><span class="okr-dist-label">${esc(title)}</span><span class="okr-dist-count">${n} ${n===1?'менеджер':'менеджера(ов)'}</span></div>`
+  ).join('');
+  wrap.appendChild(dist);
+
+  const list = document.createElement('div'); list.className = 'okr-summary-list';
+  withSelection.forEach(({manager, sec})=>{
+    const items = (sec.items||[]).filter(it=>it.text && it.text.trim());
+    const itemsHtml = items.map(it=>
+      `<div class="okr-summary-item"><span>${esc(it.text)}</span>${it.qty ? `<span class="okr-summary-qty">Кол-во: ${esc(it.qty)}</span>` : ''}</div>`
+    ).join('');
+    const card = document.createElement('div'); card.className = 'okr-summary-card';
+    card.innerHTML = `<div class="okr-summary-head"><span class="mgr-name">${esc(manager)}</span><span class="okr-summary-focus">${esc(sec.selected.title)}</span></div>`
+      + (sec.selected.hint ? `<div class="okr-summary-hint">${esc(sec.selected.hint)}</div>` : '')
+      + (itemsHtml ? `<div class="okr-summary-items">${itemsHtml}</div>` : '<div class="muted" style="font-size:12.5px;">Мероприятия не заполнены</div>');
+    list.appendChild(card);
+  });
+  wrap.appendChild(list);
+
+  return wrap;
+}
+
+function renderTableSectionSummary(reg, reports){
+  const cols = reg.colOrder;
+  const table = document.createElement('table'); table.className='sumtable';
+  let thead = '<tr><th>Менеджер</th>' + cols.map(cid=>`<th>${esc(reg.columns[cid].label)}</th>`).join('') + '</tr>';
+  let body = '';
+  const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
+  let any = false;
+  rowsSorted.forEach(r=>{
+    const sec = sectionOf(r, reg.id);
+    if(!sec || !sec.rows || !sec.rows.length) return;
+    sec.rows.forEach(row=>{
+      any = true;
+      body += `<tr><td class="mgr-name">${esc(r.meta.manager)}</td>` + cols.map(cid=>{
+        const val = row[cid];
+        const colType = reg.columns[cid].type;
+        if(val==='Низкий'||val==='Средний'||val==='Высокий'){
+          const cls = val==='Низкий'?'low':(val==='Высокий'?'high':'mid');
+          return `<td><span class="prio-tag ${cls}">${esc(val)}</span></td>`;
+        }
+        if(colType==='date' && val){
+          return `<td>${esc(fmtDate(val))}</td>`;
+        }
+        return `<td>${nl2br(val||'—')}</td>`;
+      }).join('') + '</tr>';
+    });
+  });
+  if(!any){
+    const empty = document.createElement('div'); empty.className='empty-state'; empty.style.padding='20px';
+    empty.innerHTML = '<div class="big">Нет строк</div>';
+    return empty;
+  }
+  table.innerHTML = thead + body;
+  return table;
+}
+
+function renderFixedlistSectionSummary(reg, reports){
+  // group by fixed question (using question text as key, since ids are per-config)
+  const wrap = document.createElement('div');
+  const byQuestion = {};
+  const order = [];
+  const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
+  rowsSorted.forEach(r=>{
+    const sec = sectionOf(r, reg.id);
+    if(!sec) return;
+    (sec.rows||[]).forEach(row=>{
+      const q = row.question || row.id;
+      if(!byQuestion[q]){ byQuestion[q]=[]; order.push(q); }
+      if(row.answer && row.answer.trim()){
+        byQuestion[q].push({manager:r.meta.manager, answer:row.answer});
+      }
+    });
+  });
+  order.forEach(q=>{
+    const block = document.createElement('div'); block.className='qa-block';
+    const answers = byQuestion[q];
+    let itemsHtml = answers.length
+      ? answers.map(a=>`<div class="qa-item"><div class="who">${esc(a.manager)}</div><div>${nl2br(a.answer)}</div></div>`).join('')
+      : '<div class="empty-state" style="padding:10px;text-align:left;">Ответов нет</div>';
+    block.innerHTML = `<h4>${esc(q)}</h4>${itemsHtml}`;
+    wrap.appendChild(block);
+  });
+  return wrap;
+}
+
+/* ---------------------------------------------------------------
+   ПОЛНЫЕ ОТЧЁТЫ — свёрнутые вкладки (аккордеон) по каждому отчёту
+--------------------------------------------------------------- */
+function buildReportAccordionItem(r, extraNote){
+  const entry = findEntryForReport(r);
+  const details = document.createElement('details'); details.className = 'acc-item';
+
+  const summary = document.createElement('summary');
+  summary.innerHTML = `<span class="acc-chevron">▸</span><span class="mgr-name">${esc(r.meta.manager)}</span>
+    <span class="acc-date">${fmtDate(r.meta.filledDate)}</span>`;
+  const withIndex = findIndexSection(r);
+  if(withIndex){
+    const badge = document.createElement('span');
+    badge.style.marginLeft = 'auto';
+    badge.innerHTML = idxBadge(withIndex.index.percent);
+    summary.appendChild(badge);
+  }
+  details.appendChild(summary);
+
+  if(extraNote){
+    const note = document.createElement('div');
+    note.className = 'acc-extra-note';
+    note.textContent = extraNote;
+    details.appendChild(note);
+  }
+
+  const body = document.createElement('div'); body.className = 'acc-body';
+  if(entry && entry.rawHtml){
+    const iframe = document.createElement('iframe');
+    iframe.className = 'report-frame';
+    iframe.srcdoc = entry.rawHtml;
+    const fitHeight = ()=>{ try{ iframe.style.height = (iframe.contentWindow.document.body.scrollHeight + 24) + 'px'; }catch(e){} };
+    iframe.addEventListener('load', fitHeight);
+    details.addEventListener('toggle', ()=>{ if(details.open) fitHeight(); });
+    body.appendChild(iframe);
+  } else {
+    // старый .json-файл без встроенной html-версии — собираем из структуры
+    r.sections.forEach(sec=>{
+      const t = document.createElement('div');
+      t.style.cssText = 'font-weight:700;font-size:13.5px;margin:14px 0 6px;';
+      t.textContent = sec.title;
+      body.appendChild(t);
+      body.appendChild(renderSingleSectionContent(sec));
+    });
+  }
+  details.appendChild(body);
+  return details;
+}
+
+function renderFullReportsAccordion(reports){
+  const wrap = document.createElement('div'); wrap.className = 'accordion-list';
+  const sorted = reports.slice().sort((a,b)=>
+    (a.meta.manager||'').localeCompare(b.meta.manager||'','ru') ||
+    (a.meta.filledDate||'').localeCompare(b.meta.filledDate||'')
+  );
+  sorted.forEach(r=> wrap.appendChild(buildReportAccordionItem(r)));
+  return wrap;
+}
+
+/* ---------------------------------------------------------------
+   ГРУППИРОВКА ПО МЕНЕДЖЕРАМ (по одному блоку на менеджера)
+--------------------------------------------------------------- */
+function renderByManager(reports, managers){
+  const registry = collectSectionRegistry(reports);
+  const container = document.createElement('div');
+  const sorted = managers.slice().sort((a,b)=>a.localeCompare(b,'ru'));
+  sorted.forEach((mgr, idx)=>{
+    const mgrReports = reports.filter(r=>(r.meta.manager||'Без имени')===mgr)
+      .sort((a,b)=>(a.meta.filledDate||'').localeCompare(b.meta.filledDate||''));
+    const card = document.createElement('section'); card.className='card';
+    const head = document.createElement('div'); head.className='card-head';
+    const datesLabel = mgrReports.map(r=>fmtDate(r.meta.filledDate)).join(', ');
+    head.innerHTML = `<span class="idx">${String(idx+1).padStart(2,'0')}</span><h2>${esc(mgr)} <span style="font-weight:400;font-size:12.5px;color:var(--ink-faint);">· ${esc(datesLabel)}</span></h2>`;
+    card.appendChild(head);
+    const body = document.createElement('div'); body.className='card-body';
+
+    mgrReports.forEach(r=>{
+      const sub = document.createElement('div');
+      sub.style.marginBottom = '18px';
+      sub.innerHTML = `<div style="font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin-bottom:8px;">Отчёт от ${fmtDate(r.meta.filledDate)}</div>`;
+      r.sections.forEach(sec=>{
+        const sTitle = document.createElement('div');
+        sTitle.style.fontWeight='700'; sTitle.style.fontSize='13.5px'; sTitle.style.margin='10px 0 6px';
+        sTitle.textContent = sec.title;
+        sub.appendChild(sTitle);
+        sub.appendChild(renderSingleSectionContent(sec));
+      });
+      body.appendChild(sub);
+    });
+
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+  return container;
+}
+
+function renderSingleSectionContent(sec){
+  const wrap = document.createElement('div');
+  if(sec.type==='fields'){
+    const table = document.createElement('table'); table.className='sumtable';
+    table.innerHTML = sec.fields.map(f=>{
+      const val = f.type==='rating' && f.value ? f.value+'/5' : (f.value||'—');
+      return `<tr><td style="width:32%;color:var(--ink-soft);font-weight:600;">${esc(f.label)}</td><td>${nl2br(val)}</td></tr>`;
+    }).join('');
+    if(sec.index){
+      table.innerHTML += `<tr class="total-row"><td>${esc(sec.index.label)}</td><td>${idxBadge(sec.index.percent)}</td></tr>`;
+    }
+    wrap.appendChild(table);
+  } else if(sec.type==='table'){
+    if(!sec.rows || !sec.rows.length){
+      wrap.innerHTML = '<div style="font-size:13px;color:var(--ink-faint);font-style:italic;">Нет данных</div>';
+    } else {
+      const table = document.createElement('table'); table.className='sumtable';
+      let thead = '<tr>'+sec.columns.map(c=>`<th>${esc(c.label)}</th>`).join('')+'</tr>';
+      let body = sec.rows.map(row=>'<tr>'+sec.columns.map(c=>{
+        const val = row[c.id];
+        if(val==='Низкий'||val==='Средний'||val==='Высокий'){
+          const cls = val==='Низкий'?'low':(val==='Высокий'?'high':'mid');
+          return `<td><span class="prio-tag ${cls}">${esc(val)}</span></td>`;
+        }
+        if(c.type==='date' && val){
+          return `<td>${esc(fmtDate(val))}</td>`;
+        }
+        return `<td>${nl2br(val||'—')}</td>`;
+      }).join('')+'</tr>').join('');
+      table.innerHTML = thead+body;
+      wrap.appendChild(table);
+    }
+  } else if(sec.type==='fixedlist'){
+    const table = document.createElement('table'); table.className='sumtable';
+    table.innerHTML = (sec.rows||[]).map(r=>`<tr><td style="width:32%;color:var(--ink-soft);">${esc(r.question)}</td><td>${nl2br(r.answer||'—')}</td></tr>`).join('');
+    wrap.appendChild(table);
+  } else if(sec.type==='okr'){
+    if(!sec.selected){
+      wrap.innerHTML = '<div style="font-size:13px;color:var(--ink-faint);font-style:italic;">Objective не выбран</div>';
+    } else {
+      const items = (sec.items||[]).filter(it=>it.text && it.text.trim());
+      let html = `<div style="font-weight:700;font-size:13.5px;margin-bottom:4px;">${esc(sec.selected.title)}</div>`;
+      if(sec.selected.hint){
+        html += `<div style="font-style:italic;color:var(--ink-faint);font-size:12.5px;margin-bottom:8px;">${esc(sec.selected.hint)}</div>`;
+      }
+      html += items.length
+        ? items.map(it=>`<div style="font-size:13px;padding:5px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;"><span>${esc(it.text)}</span>${it.qty?`<b style="font-family:var(--mono);white-space:nowrap;">${esc(it.qty)}</b>`:''}</div>`).join('')
+        : '<div style="font-size:12.5px;color:var(--ink-faint);">Мероприятия не заполнены</div>';
+      wrap.innerHTML = html;
+    }
+  }
+  return wrap;
+}
+
+/* ---------------------------------------------------------------
+   ЭКСПОРТ СВОДКИ
+--------------------------------------------------------------- */
+document.getElementById('btnPrint').addEventListener('click', ()=>window.print());
+document.getElementById('btnDownload').addEventListener('click', ()=>{
+  const styles = document.querySelector('style').outerHTML;
+  const content = document.getElementById('summaryRoot').innerHTML;
+  const stats = document.getElementById('statRow').outerHTML;
+  const from = document.getElementById('dateFrom').value;
+  const to = document.getElementById('dateTo').value;
+  const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><title>Сводка по отчётам менеджеров</title>${styles}</head>
+  <body style="padding-bottom:20px;"><div class="wrap">
+  <header class="top"><div class="eyebrow"><span class="dot"></span>Отдел продаж · Сводный отчёт</div>
+  <h1>Сводка по отчётам менеджеров</h1>
+  <div class="sub">Период: ${esc(fmtDate(from))} — ${esc(fmtDate(to))}. Сформировано ${esc(new Date().toLocaleString('ru-RU'))}.</div></header>
+  ${stats}
+  <div id="summaryRoot">${content}</div>
+  </div></body></html>`;
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `svodka_${from||'period'}_${to||'period'}.html`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+});
+</script>
+</body>
+</html>
