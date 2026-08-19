@@ -1,0 +1,1692 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Еженедельный отчёт менеджера</title>
+<style>
+  :root{
+    --bg:#F3F5F4;
+    --paper:#FFFFFF;
+    --ink:#1B2420;
+    --ink-soft:#5B6A63;
+    --ink-faint:#8B978F;
+    --line:#DCE3DF;
+    --line-strong:#C3CDC6;
+    --accent:#2F6F5E;
+    --accent-dark:#204F42;
+    --accent-soft:#E4EFEA;
+    --amber:#B8791E;
+    --amber-soft:#FBF0DE;
+    --red:#B8433A;
+    --red-soft:#FBE7E4;
+    --green:#3A7D4C;
+    --green-soft:#E7F3EA;
+    --radius:10px;
+    --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--sans);
+    background:
+      linear-gradient(var(--bg),var(--bg));
+    color:var(--ink);
+    line-height:1.5;
+    padding-bottom:120px;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(90deg, rgba(47,111,94,0.035) 1px, transparent 1px),
+      linear-gradient(rgba(47,111,94,0.035) 1px, transparent 1px);
+    background-size:28px 28px;
+    pointer-events:none;
+    z-index:0;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+
+  header.top{
+    padding:38px 0 26px;
+    border-bottom:2px solid var(--ink);
+    margin-bottom:28px;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--accent-dark);
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:10px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+  h1{
+    font-size:30px;
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+    font-weight:700;
+  }
+  .sub{color:var(--ink-soft);font-size:14.5px;max-width:56ch;}
+
+  .toolbar{
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    margin-top:18px;
+  }
+  .btn{
+    font-family:inherit;font-size:13px;font-weight:600;
+    border:1px solid var(--line-strong);
+    background:var(--paper);
+    color:var(--ink);
+    padding:9px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;
+    transition:.15s ease;
+  }
+  .btn:hover{border-color:var(--accent);color:var(--accent-dark);}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .btn.primary:hover{background:var(--accent-dark);border-color:var(--accent-dark);color:#fff;}
+  .btn.ghost{background:transparent;border-color:transparent;color:var(--ink-soft);padding:6px 8px;}
+  .btn.ghost:hover{color:var(--red);}
+  .btn.small{padding:5px 10px;font-size:12px;}
+  .btn.danger:hover{color:var(--red);border-color:var(--red);}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;}
+
+  .admin-toggle{
+    margin-left:auto;
+    display:flex;align-items:center;gap:8px;
+    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+  }
+  .switch{
+    width:38px;height:22px;border-radius:20px;background:var(--line-strong);
+    position:relative;cursor:pointer;transition:.2s;flex-shrink:0;
+  }
+  .switch.on{background:var(--accent);}
+  .switch::after{
+    content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+    background:#fff;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.3);
+  }
+  .switch.on::after{left:18px;}
+
+  .admin-bar{
+    display:none;
+    background:var(--accent-soft);
+    border:1px dashed var(--accent);
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:22px;
+    font-size:13px;
+    color:var(--accent-dark);
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .admin-bar.show{display:flex;}
+  .admin-bar strong{font-weight:700;}
+  .admin-bar .spacer{flex:1;}
+
+  section.card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    margin-bottom:18px;
+    position:relative;
+    overflow:visible;
+  }
+  .card-head{
+    display:flex;align-items:flex-start;gap:14px;
+    padding:18px 20px 14px;
+    border-bottom:1px solid var(--line);
+  }
+  .idx{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-faint);
+    padding-top:3px;
+    min-width:22px;
+  }
+  .card-head h2{
+    font-size:17px;margin:0;font-weight:700;flex:1;
+  }
+  .card-desc{
+    font-size:13px;color:var(--ink-soft);margin-top:4px;font-weight:400;
+  }
+  .card-body{padding:18px 20px 20px;}
+  .sec-actions{display:flex;gap:4px;align-items:center;}
+
+  .legend{
+    display:flex;flex-wrap:wrap;gap:10px;
+    margin:0 0 16px;
+  }
+  .legend .pill{
+    font-size:12px;border-radius:8px;padding:8px 10px;line-height:1.4;max-width:230px;
+  }
+  .pill.low{background:var(--green-soft);color:var(--green);}
+  .pill.mid{background:var(--amber-soft);color:var(--amber);}
+  .pill.high{background:var(--red-soft);color:var(--red);}
+  .pill b{display:block;font-size:12px;margin-bottom:2px;}
+
+  label.field-label{
+    display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);
+    margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em;
+  }
+  .field-hint{font-size:12.5px;color:var(--ink-faint);margin:-2px 0 8px;line-height:1.5;}
+  .rating-group{display:flex;gap:8px;}
+  .rating-btn{
+    width:44px;height:40px;border-radius:8px;border:1px solid var(--line-strong);
+    background:var(--paper);color:var(--ink-soft);font-family:inherit;font-size:15px;font-weight:700;
+    cursor:pointer;transition:.12s ease;
+  }
+  .rating-btn:hover{border-color:var(--accent);color:var(--accent-dark);}
+  .rating-btn.selected{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  input[type=text], input[type=date], input[type=number], textarea, select{
+    width:100%;
+    font-family:inherit;
+    font-size:14.5px;
+    color:var(--ink);
+    background:var(--bg);
+    border:1px solid var(--line-strong);
+    border-radius:7px;
+    padding:9px 11px;
+  }
+  input:focus, textarea:focus, select:focus{
+    outline:none;border-color:var(--accent);background:var(--paper);
+    box-shadow:0 0 0 3px var(--accent-soft);
+  }
+  textarea{resize:vertical;min-height:80px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end;}
+  .grid4{display:flex;flex-wrap:nowrap;gap:14px;align-items:flex-end;}
+  .grid4 > .field{flex:1 1 0;min-width:0;}
+  @media (max-width:640px){
+    .grid2{grid-template-columns:1fr;}
+    .grid4{flex-direction:column;}
+    .grid4 > .field{width:100%;}
+  }
+
+  table.dyn{width:100%;border-collapse:collapse;font-size:14px;}
+  table.dyn th{
+    text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;
+    color:var(--ink-soft);font-weight:700;padding:0 10px 8px;border-bottom:1px solid var(--line-strong);
+  }
+  table.dyn td{padding:6px 10px 6px 0;vertical-align:top;border-bottom:1px solid var(--line);}
+  table.dyn tr:last-child td{border-bottom:none;}
+  table.dyn td input, table.dyn td textarea, table.dyn td select{background:var(--paper);}
+  table.dyn .row-del{width:34px;text-align:center;}
+  .qcol{width:38%;font-size:13.5px;color:var(--ink-soft);padding-top:9px;line-height:1.4;}
+  .add-row{margin-top:10px;}
+
+  .col-actions{display:flex;gap:2px;}
+
+  footer.submit-bar{
+    position:fixed;left:0;right:0;bottom:0;
+    background:var(--paper);
+    border-top:1px solid var(--line);
+    padding:14px 0;
+    box-shadow:0 -6px 20px rgba(20,30,25,.06);
+    z-index:5;
+  }
+  footer.submit-bar .wrap{display:flex;align-items:center;gap:14px;}
+  .save-status{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
+  .submit-bar .spacer{flex:1;}
+
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(20,30,25,.45);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal{
+    background:var(--paper);border-radius:12px;max-width:440px;width:100%;
+    padding:22px;max-height:86vh;overflow:auto;
+  }
+  .modal h3{margin:0 0 4px;font-size:16px;}
+  .modal .hint{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+  .type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
+  .type-opt{
+    border:1px solid var(--line-strong);border-radius:8px;padding:10px;cursor:pointer;font-size:13px;
+  }
+  .type-opt input{width:auto;margin-right:6px;}
+  .type-opt.checked{border-color:var(--accent);background:var(--accent-soft);}
+
+  .toast{
+    position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);
+    background:var(--ink);color:#fff;padding:11px 18px;border-radius:8px;font-size:13.5px;
+    opacity:0;pointer-events:none;transition:.25s ease;z-index:60;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .empty-note{font-size:13px;color:var(--ink-faint);font-style:italic;padding:8px 0;}
+
+  .okr-hint-line{font-size:13px;color:var(--accent-dark);font-style:italic;margin-top:10px;line-height:1.5;}
+  .okr-item-list{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
+  .okr-item-row{display:flex;align-items:center;gap:12px;}
+  .okr-item-row .btn.ghost{color:var(--red);flex-shrink:0;}
+  .okr-item-row .btn.ghost:hover{background:var(--red-soft);}
+  .okr-item-row input[type=text]{flex:1;}
+  .okr-qty-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .okr-qty-label{font-size:13px;color:var(--ink-soft);white-space:nowrap;}
+  .okr-qty-wrap input[type=number]{width:76px;text-align:center;}
+  .okr-add-btn{margin-top:12px;color:var(--accent-dark);}
+  @media (max-width:640px){
+    .okr-item-row{flex-wrap:wrap;}
+    .okr-item-row input[type=text]{flex-basis:100%;order:2;}
+    .okr-qty-wrap{order:3;margin-left:32px;}
+  }
+
+  .index-box{margin-top:18px;border:1px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--bg);}
+  .idx-head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .idx-headline{display:flex;align-items:center;gap:16px;}
+  .idx-percent{font-family:var(--mono);font-size:34px;font-weight:700;min-width:82px;line-height:1;}
+  .idx-percent.good{color:var(--green);}
+  .idx-percent.warn{color:var(--amber);}
+  .idx-percent.bad{color:var(--red);}
+  .idx-caption{font-size:13px;color:var(--ink-soft);font-weight:600;}
+  .idx-note{font-size:11.5px;color:var(--ink-faint);font-weight:400;display:block;margin-top:3px;max-width:48ch;}
+  .idx-breakdown{margin-top:14px;display:flex;flex-direction:column;gap:2px;}
+  .idx-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px dashed var(--line-strong);}
+  .idx-row:last-child{border-bottom:none;}
+  .idx-row-label{color:var(--ink-soft);}
+  .idx-row-val{font-family:var(--mono);font-size:12.5px;}
+  .idx-row-val b{color:var(--ink);font-weight:700;}
+  .req::after{content:" *";color:var(--red);}
+  .col-editor{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:8px;}
+  .col-editor-row{display:flex;gap:8px;margin-bottom:6px;align-items:center;}
+  .col-editor-row input{flex:2;}
+  .col-editor-row select{flex:1;}
+  textarea.mono-area{font-family:var(--mono);font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow"><span class="dot"></span>Отдел продаж · Отчёт за неделю</div>
+    <h1>Еженедельный отчёт менеджера</h1>
+    <div class="sub">Заполните разделы по итогам недели. Отчёт скачается на ваше устройство после нажатия «Завершить заполнение» — его нужно передать для сводки.</div>
+    <div class="toolbar">
+      <button class="btn" id="btnReset">Начать заново</button>
+      <div class="admin-toggle">
+        Режим настройки
+        <div class="switch" id="adminSwitch"></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="admin-bar" id="adminBar">
+    <strong>Режим настройки включён.</strong>
+    <span>Можно добавлять разделы, поля и колонки таблиц.</span>
+    <div class="spacer"></div>
+    <button class="btn small" id="btnExportConfig">Экспорт конфигурации</button>
+    <button class="btn small" id="btnImportConfig">Импорт конфигурации</button>
+    <button class="btn small danger" id="btnResetConfig">Сбросить к стандартной</button>
+  </div>
+
+  <div class="admin-bar" id="driveBar" style="align-items:flex-start;">
+    <div style="flex:1;min-width:260px;">
+      <strong>Отправка на Google Диск</strong>
+      <div style="margin:4px 0 10px;font-weight:400;">Адрес веб-приложения задан в коде страницы и менеджерам недоступен для изменения. Каждый «Завершить заполнение» отправляет .html-отчёт в папку на Диске — сводка читает данные из него же.</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn small" id="btnTestGasUrl">Проверить связь</button>
+      </div>
+      <div id="gasStatus" style="font-family:var(--mono);font-size:11.5px;margin-top:8px;"></div>
+    </div>
+  </div>
+
+  <div id="formRoot"></div>
+
+  <div style="display:flex;justify-content:center;margin:6px 0 14px;">
+    <button class="btn" id="btnAddSection" style="display:none;">+ Добавить раздел</button>
+  </div>
+</div>
+
+<footer class="submit-bar">
+  <div class="wrap">
+    <span class="save-status" id="saveStatus">черновик сохраняется автоматически</span>
+    <span class="save-status" id="gasFooterStatus" style="margin-left:14px;"></span>
+    <div class="spacer"></div>
+    <button class="btn primary" id="btnSubmit">Завершить заполнение</button>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<input type="file" id="fileImport" accept=".json" style="display:none;">
+
+<script>
+/* ---------------------------------------------------------------
+   ДАННЫЕ / КОНФИГУРАЦИЯ
+--------------------------------------------------------------- */
+const STORAGE_CONFIG = 'salesSurvey.config.v1';
+const STORAGE_DRAFT  = 'salesSurvey.draft.v1';
+
+// URL веб-приложения Google Apps Script, куда отправляются .html-отчёты.
+// Задаётся здесь в коде — через интерфейс менеджеры его поменять не могут.
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbye9vd0pciymEo15mEuAfhonp_4Ck_CRoRBUyi4GIAfKNWhIVcbT8DjAsfHzKcVGjps/exec';
+
+function uid(prefix){
+  return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+
+const DEFAULT_CONFIG = {
+  version: 1,
+  title: "Еженедельный отчёт менеджера",
+  sections: [
+    {
+      id: "meta", type: "fields", title: "ФИО и дата заполнения",
+      desc: "Кто отчитывается и за какой период. ФИО указывайте строго по образцу: Кайратов Кайрат Кайратович — фамилия, имя и отчество по отдельности.",
+      locked: true,
+      fields: [
+        {id:"last_name", label:"Фамилия", type:"text", required:true, width:"third", placeholder:"Кайратов"},
+        {id:"first_name", label:"Имя", type:"text", required:true, width:"third", placeholder:"Кайрат"},
+        {id:"middle_name", label:"Отчество", type:"text", required:true, width:"third", placeholder:"Кайратович"},
+        {id:"fill_date", label:"Дата заполнения", type:"date", required:true, width:"half"},
+        {id:"period_start", label:"Период с", type:"date", required:false, width:"half"},
+        {id:"period_end", label:"по", type:"date", required:false, width:"half"}
+      ]
+    },
+    {
+      id: "okr_week", type: "okr", title: "OKR недели",
+      desc: "Выберите Objective недели из списка — ниже появятся мероприятия, каждое можно отредактировать и указать по нему количество.",
+      options: [
+        {
+          id: "volume",
+          title: "Objective на объемах",
+          hint: "Выбирается, когда в воронке мало лидов и нужно срочно нагонять базу.",
+          kpis: [
+            {label:"Объём", text:"Сделать первичные холодные звонки по новой базе (частные авто + автопарки/лизинговые компании)"},
+            {label:"Качество", text:"Выйти на ЛПР (владельца авто или ответственного за автопарк) и отправить расчёт КАСКО"},
+            {label:"Результат", text:"Назначить встречи/созвоны по расчёту КАСКО на следующую неделю"}
+          ]
+        },
+        {
+          id: "conversion",
+          title: "Objective на конверсии",
+          hint: "Выбирается, когда лиды есть, но они зависли на этапе «мы подумаем» или «считаем тариф».",
+          kpis: [
+            {label:"Объём", text:"Провести встречи/онлайн-презентации с прогретыми лидами по КАСКО"},
+            {label:"Качество", text:"Собрать данные по автопарку (марки, год, пробег, история убытков) и выставить точный расчёт КАСКО"},
+            {label:"Результат", text:"Отработать возражения по тарифу и франшизе"}
+          ]
+        },
+        {
+          id: "closing",
+          title: "Objective на дожиме и деньгах",
+          hint: "Выбирается, когда есть клиенты, готовые купить, но процесс тормозится из-за бюрократии или сомнений.",
+          kpis: [
+            {label:"Объём", text:"Связаться со всеми клиентами на этапе «Согласование условий КАСКО»"},
+            {label:"Качество", text:"Помочь клиенту (или ответственному за автопарк) пройти осмотр авто и оформить полис в кабинете"},
+            {label:"Результат", text:"Получить подписанные полисы КАСКО и первые оплаты"}
+          ]
+        },
+        {
+          id: "base",
+          title: "Objective на текущей базе",
+          hint: "Выбирается, когда нужно выжать максимум из тех, кто уже покупает.",
+          kpis: [
+            {label:"Объём", text:"Провести «звонки заботы» всем активным клиентам категории А (продление КАСКО)"},
+            {label:"Качество", text:"Предложить расширение покрытия (доп. риски, новые авто в автопарк, снятие франшизы)"},
+            {label:"Результат", text:"Собрать еженедельный объём премий по КАСКО не ниже [X] тенге"}
+          ]
+        },
+        {
+          id: "custom",
+          title: "Свой вариант",
+          isCustom: true,
+          hint: "",
+          kpis: []
+        }
+      ]
+    },
+    {
+      id:"activities_done", type:"fields", title:"Выполненные мероприятия",
+      desc:"Показатели активности за неделю.",
+      showIndex:true,
+      indexLabel:"Индекс результативности недели",
+      fields:[
+        {id:"contacts_search", label:"Поиск контактов", type:"number", width:"third", kpi:10, weight:1},
+        {id:"calls", label:"Звонки", type:"number", width:"third", kpi:10, weight:2},
+        {id:"meetings", label:"Встречи", type:"number", width:"third", kpi:5, weight:3}
+      ]
+    },
+    {
+      id:"weekly_numbers", type:"fields", title:"Премия и АВ за неделю",
+      desc:"Финансовые показатели за прошедшую неделю.",
+      fields:[
+        {id:"premium_week", label:"Премия за прошедшую неделю", type:"number", width:"third"},
+        {id:"av_week", label:"АВ за прошедшую неделю", type:"number", width:"third"},
+        {id:"new_clients_week", label:"Количество новых клиентов", type:"number", width:"third"}
+      ]
+    },
+    {
+      id:"leads_processed", type:"table", title:"Обработанные лиды",
+      desc:"Список компаний, с которыми была работа за неделю.",
+      addable:true,
+      columns:[
+        {id:"company", label:"Название компании", type:"text"},
+        {id:"result", label:"Результат обработки", type:"textarea"}
+      ]
+    },
+    {
+      id:"existing_clients", type:"table", title:"Работа с действующими клиентами",
+      desc:"Что было сделано по текущим клиентам за неделю.",
+      addable:true,
+      columns:[
+        {id:"client_name", label:"Наименование клиента", type:"text"},
+        {id:"what_done", label:"Что сделано", type:"textarea"}
+      ]
+    },
+    {
+      id:"problems", type:"table", title:"Проблемы",
+      desc:"С какими проблемами столкнулись на этой неделе.",
+      addable:true,
+      priorityLegend:true,
+      columns:[
+        {id:"priority", label:"Приоритет", type:"select", options:["Низкий","Средний","Высокий"]},
+        {id:"description", label:"Описание", type:"textarea"},
+        {id:"department", label:"Кто может помочь", type:"select", options:["IT","Юристы","Андеррайтинг","Выплатники","Продажи","Маркетинг","HR"]}
+      ]
+    },
+    {
+      id:"insights", type:"fixedlist", title:"Инсайты недели",
+      desc:"Короткие наблюдения по рынку и клиентам.",
+      columns:[
+        {id:"question", label:"Вопрос", type:"label"},
+        {id:"answer", label:"Ответ", type:"textarea"}
+      ],
+      rows:[
+        {id:"r1", question:"Что нового узнали о рынке?"},
+        {id:"r2", question:"Что предлагали конкуренты?"},
+        {id:"r3", question:"Что чаще всего спрашивают клиенты?"},
+        {id:"r4", question:"Какой вопрос поставил в тупик?"},
+        {id:"r5", question:"Какое возражение встречалось чаще всего?"},
+        {id:"r6", question:"Как удалось отработать?"},
+        {id:"r7", question:"Что мешает продавать продукт?"},
+        {id:"r8", question:"Другое"}
+      ]
+    },
+    {
+      id:"self_assessment", type:"fields", title:"Самооценка недели",
+      desc:"Оцените себя по каждому пункту от 1 до 5.",
+      fields:[
+        {id:"plan_execution", label:"Выполнение плана", type:"rating", width:"full",
+          hint:"1 — Далеко от плана, 3 — В графике, 5 — Иду на перевыполнение"},
+        {id:"new_clients_work", label:"Работа с новыми клиентами", type:"rating", width:"full",
+          hint:"1 — Не искал новых, 3 — Сделал норму звонков/встреч, 5 — Подключил сильных партнеров"},
+        {id:"existing_agents_work", label:"Работа с существующими агентами", type:"rating", width:"full",
+          hint:"1 — Работал только на входящих, 3 — Регулярно обзванивал базу, 5 — Реактивировал «уснувших»"},
+        {id:"bitrix_quality", label:"Качество ведения Bitrix", type:"rating", width:"full",
+          hint:"1 — Есть просроченные задачи и пустые сделки, 5 — Идеальный порядок, все звонки и комментарии зафиксированы"},
+        {id:"product_expertise", label:"Продуктовая экспертиза", type:"rating", width:"full",
+          hint:"1 — Плавал в вопросах агентов, 5 — Легко отрабатывал возражения, консультировал как эксперт"}
+      ]
+    }
+  ]
+};
+
+const PRIORITY_LEGEND = [
+  {k:"low", label:"Низкий", text:"Надо решить в ближайший месяц."},
+  {k:"mid", label:"Средний", text:"Решить до конца следующей недели."},
+  {k:"high", label:"Высокий", text:"Срочно решить — мешает продавать."}
+];
+
+function loadConfig(){
+  try{
+    const raw = localStorage.getItem(STORAGE_CONFIG);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+}
+function saveConfig(){
+  localStorage.setItem(STORAGE_CONFIG, JSON.stringify(config));
+}
+
+let config = loadConfig();
+let adminMode = false;
+
+/* ---------------------------------------------------------------
+   ЧЕРНОВИК (ОТВЕТЫ)
+--------------------------------------------------------------- */
+function emptyAnswersForSection(sec){
+  if(sec.type === "fields"){
+    const vals = {};
+    sec.fields.forEach(f=>vals[f.id] = "");
+    return vals;
+  }
+  if(sec.type === "table"){
+    return {rows: []};
+  }
+  if(sec.type === "fixedlist"){
+    const rows = {};
+    sec.rows.forEach(r=>rows[r.id] = "");
+    return {rows};
+  }
+  if(sec.type === "okr"){
+    return {selected: "", items: [], customTitle: ""};
+  }
+  return {};
+}
+
+function loadDraft(){
+  try{
+    const raw = localStorage.getItem(STORAGE_DRAFT);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {};
+}
+let draft = loadDraft();
+
+function ensureDraftShape(){
+  config.sections.forEach(sec=>{
+    if(!draft[sec.id]){
+      draft[sec.id] = emptyAnswersForSection(sec);
+    }
+    if(sec.type === "table" && !draft[sec.id].rows) draft[sec.id].rows = [];
+    if(sec.type === "fixedlist"){
+      if(!draft[sec.id].rows) draft[sec.id].rows = {};
+      sec.rows.forEach(r=>{ if(draft[sec.id].rows[r.id] === undefined) draft[sec.id].rows[r.id] = ""; });
+    }
+    if(sec.type === "fields"){
+      sec.fields.forEach(f=>{ if(draft[sec.id][f.id] === undefined) draft[sec.id][f.id] = ""; });
+    }
+    if(sec.type === "okr"){
+      if(draft[sec.id].selected === undefined) draft[sec.id].selected = "";
+      if(!Array.isArray(draft[sec.id].items)) draft[sec.id].items = [];
+      if(draft[sec.id].customTitle === undefined) draft[sec.id].customTitle = "";
+    }
+  });
+  if(!draft.meta) draft.meta = emptyAnswersForSection(config.sections.find(s=>s.id==='meta'));
+  if(!draft.meta.fill_date){
+    draft.meta.fill_date = new Date().toISOString().slice(0,10);
+  }
+}
+
+let saveTimer = null;
+function persistDraft(){
+  clearTimeout(saveTimer);
+  document.getElementById('saveStatus').textContent = 'сохранение…';
+  saveTimer = setTimeout(()=>{
+    localStorage.setItem(STORAGE_DRAFT, JSON.stringify(draft));
+    document.getElementById('saveStatus').textContent = 'черновик сохранён · ' + new Date().toLocaleTimeString('ru-RU');
+  }, 350);
+}
+
+/* ---------------------------------------------------------------
+   РЕНДЕР ФОРМЫ
+--------------------------------------------------------------- */
+const root = document.getElementById('formRoot');
+
+function widthClass(w){
+  if(w==='half') return 'grid2-item';
+  if(w==='third') return 'grid4-item';
+  return '';
+}
+
+function el(tag, attrs, children){
+  const e = document.createElement(tag);
+  if(attrs) for(const k in attrs){
+    if(k==='class') e.className = attrs[k];
+    else if(k==='html') e.innerHTML = attrs[k];
+    else if(k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else e.setAttribute(k, attrs[k]);
+  }
+  (children||[]).forEach(c=>{ if(c) e.appendChild(c); });
+  return e;
+}
+function text(t){ return document.createTextNode(t); }
+
+function renderAll(){
+  ensureDraftShape();
+  root.innerHTML = "";
+  config.sections.forEach((sec, i)=>{
+    root.appendChild(renderSection(sec, i));
+  });
+  document.getElementById('btnAddSection').style.display = adminMode ? 'inline-flex' : 'none';
+  document.getElementById('adminBar').classList.toggle('show', adminMode);
+  document.getElementById('driveBar').classList.toggle('show', adminMode);
+}
+
+function renderSection(sec, index){
+  const card = el('section', {class:'card', 'data-sec':sec.id});
+
+  const head = el('div',{class:'card-head'},[
+    el('div',{class:'idx'}, [text(String(index+1).padStart(2,'0'))]),
+    el('div',{style:'flex:1'},[
+      el('h2',{}, [text(sec.title)]),
+      sec.desc ? el('div',{class:'card-desc'},[text(sec.desc)]) : null
+    ])
+  ]);
+
+  if(adminMode){
+    const actions = el('div',{class:'sec-actions'});
+    actions.appendChild(iconBtn('✎', 'Переименовать раздел', ()=>promptRenameSection(sec)));
+    if(index>0) actions.appendChild(iconBtn('↑','Переместить вверх', ()=>moveSection(sec.id,-1)));
+    if(index<config.sections.length-1) actions.appendChild(iconBtn('↓','Переместить вниз', ()=>moveSection(sec.id,1)));
+    if(!sec.locked) actions.appendChild(iconBtn('🗑','Удалить раздел', ()=>deleteSection(sec.id)));
+    head.appendChild(actions);
+  }
+  card.appendChild(head);
+
+  const body = el('div',{class:'card-body'});
+
+  if(sec.priorityLegend){
+    const legend = el('div',{class:'legend'});
+    const map = {"Низкий":"low","Средний":"mid","Высокий":"high"};
+    PRIORITY_LEGEND.forEach(p=>{
+      legend.appendChild(el('div',{class:'pill '+p.k},[
+        el('b',{},[text(p.label)]), text(p.text)
+      ]));
+    });
+    body.appendChild(legend);
+  }
+
+  if(sec.type === 'fields') body.appendChild(renderFieldsBody(sec));
+  if(sec.type === 'table') body.appendChild(renderTableBody(sec));
+  if(sec.type === 'fixedlist') body.appendChild(renderFixedListBody(sec));
+  if(sec.type === 'okr') body.appendChild(renderOkrBody(sec));
+
+  if(adminMode && (sec.type === 'fields' || sec.type === 'table' || sec.type === 'fixedlist')){
+    const addRow = el('div',{style:'margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;'});
+    if(sec.type === 'fields'){
+      addRow.appendChild(el('button',{class:'btn small', onclick:()=>openFieldModal(sec)},[text('+ Добавить поле')]));
+    } else {
+      addRow.appendChild(el('button',{class:'btn small', onclick:()=>openColumnModal(sec)},[text('+ Добавить колонку')]));
+    }
+    body.appendChild(addRow);
+  }
+
+  card.appendChild(body);
+  return card;
+}
+
+function iconBtn(glyph, title, onClick){
+  return el('button',{class:'btn ghost small', title:title, onclick:onClick},[text(glyph)]);
+}
+
+/* ---- fields ---- */
+function renderFieldsBody(sec){
+  const wrap = el('div',{});
+  const groups = {full:[], half:[], third:[]};
+  sec.fields.forEach(f=> groups[f.width||'full'].push(f));
+
+  if(groups.half.length){
+    const g = el('div',{class:'grid2'});
+    groups.half.forEach(f=> g.appendChild(fieldBlock(sec, f)));
+    wrap.appendChild(g);
+  }
+  if(groups.third.length){
+    const g = el('div',{class:'grid4', style:'margin-top:14px;'});
+    groups.third.forEach(f=> g.appendChild(fieldBlock(sec, f)));
+    wrap.appendChild(g);
+  }
+  if(groups.full.length){
+    groups.full.forEach(f=>{
+      const b = fieldBlock(sec, f);
+      b.style.marginTop = '14px';
+      wrap.appendChild(b);
+    });
+  }
+  if(!sec.fields.length){
+    wrap.appendChild(el('div',{class:'empty-note'},[text('Пока нет полей. Добавьте первое поле.')]));
+  }
+  if(sec.showIndex){
+    const box = el('div',{class:'index-box', id:'idxbox_'+sec.id, html: indexBoxHtml(sec)});
+    wrap.appendChild(box);
+    if(adminMode){
+      const cfgBtn = el('button',{class:'btn small', style:'margin-top:10px;', onclick:()=>openKpiModal(sec)},[text('⚙ Настроить KPI и веса')]);
+      wrap.appendChild(cfgBtn);
+    }
+  }
+  return wrap;
+}
+
+function fieldBlock(sec, f){
+  const block = el('div',{class:'field'});
+  const lbl = el('label',{class:'field-label'+(f.required?' req':'')},[text(f.label)]);
+  if(adminMode){
+    const del = iconBtn('🗑','Удалить поле', (ev)=>{ ev.stopPropagation(); deleteField(sec.id, f.id); });
+    del.style.float='right';
+    lbl.appendChild(del);
+  }
+  block.appendChild(lbl);
+  if(f.hint){
+    block.appendChild(el('div',{class:'field-hint'},[text(f.hint)]));
+  }
+  block.appendChild(inputFor(f.type, draft[sec.id][f.id], f.tall, (val)=>{
+    draft[sec.id][f.id] = val; persistDraft();
+    if(sec.showIndex) refreshIndexBox(sec);
+  }, f.options, f.placeholder));
+  return block;
+}
+
+/* ---- performance index (weighted KPI achievement) ---- */
+function computeIndexParts(sec){
+  const parts = [];
+  sec.fields.forEach(f=>{
+    if(f.kpi && f.kpi>0){
+      const raw = Number(draft[sec.id][f.id]) || 0;
+      const ratio = raw / f.kpi;
+      const weight = f.weight || 1;
+      parts.push({id:f.id, label:f.label, value:raw, kpi:f.kpi, weight:weight, ratio:ratio, cappedRatio:Math.min(ratio,1)});
+    }
+  });
+  return parts;
+}
+function computeIndexPercent(parts){
+  const totalWeight = parts.reduce((s,p)=>s+p.weight,0);
+  if(!totalWeight) return 0;
+  const weighted = parts.reduce((s,p)=>s+p.cappedRatio*p.weight,0);
+  return Math.round(weighted/totalWeight*100);
+}
+function idxColorClass(percent){
+  if(percent>=85) return 'good';
+  if(percent>=60) return 'warn';
+  return 'bad';
+}
+function indexBoxHtml(sec){
+  const parts = computeIndexParts(sec);
+  const percent = computeIndexPercent(parts);
+  const rowsHtml = parts.map(p=>{
+    const pct = Math.round(p.ratio*100);
+    return `<div class="idx-row"><span class="idx-row-label">${escapeHtml(p.label)} <span style="color:var(--ink-faint);">· вес ${p.weight}</span></span><span class="idx-row-val">${p.value} / ${p.kpi} <b>(${pct}%)</b></span></div>`;
+  }).join('');
+  return `
+    <div class="idx-headline">
+      <div class="idx-percent ${idxColorClass(percent)}">${percent}%</div>
+      <div>
+        <div class="idx-caption">${escapeHtml(sec.indexLabel||'Индекс результативности')}</div>
+        <span class="idx-note">Каждый показатель учитывается не выше 100% от своего KPI. Вес растёт по приоритету: поиск контактов → звонки → встречи.</span>
+      </div>
+    </div>
+    ${parts.length ? `<div class="idx-breakdown">${rowsHtml}</div>` : '<div class="empty-note">Задайте KPI хотя бы для одного числового поля, чтобы считать индекс.</div>'}
+  `;
+}
+function refreshIndexBox(sec){
+  const boxEl = document.getElementById('idxbox_'+sec.id);
+  if(boxEl) boxEl.innerHTML = indexBoxHtml(sec);
+}
+
+function openKpiModal(sec){
+  const rows = sec.fields.filter(f=>f.type==='number').map(f=>`
+    <div class="col-editor" data-fid="${f.id}">
+      <div style="font-weight:600;font-size:13px;margin-bottom:6px;">${escapeHtml(f.label)}</div>
+      <div class="col-editor-row">
+        <label style="flex:1;font-size:12px;color:var(--ink-soft);">KPI (мин. в неделю)</label>
+        <input type="number" class="kpi-input" value="${f.kpi||''}" placeholder="—" style="flex:1;">
+      </div>
+      <div class="col-editor-row">
+        <label style="flex:1;font-size:12px;color:var(--ink-soft);">Вес (приоритет)</label>
+        <input type="number" class="weight-input" value="${f.weight||1}" min="0" step="1" style="flex:1;">
+      </div>
+    </div>
+  `).join('');
+  modalBody.innerHTML = `
+    <h3>Настройка индекса результативности</h3>
+    <div class="hint">KPI — минимальное количество в неделю. Вес — приоритет показателя: чем выше вес, тем сильнее он влияет на индекс. Оставьте KPI пустым, чтобы исключить поле из расчёта.</div>
+    ${rows || '<div class="empty-note">В разделе нет числовых полей.</div>'}
+    <div class="modal-actions">
+      <button class="btn" id="km_cancel">Отмена</button>
+      <button class="btn primary" id="km_save">Сохранить</button>
+    </div>
+  `;
+  overlay.classList.add('show');
+  document.getElementById('km_cancel').onclick = closeModal;
+  document.getElementById('km_save').onclick = ()=>{
+    modalBody.querySelectorAll('.col-editor').forEach(row=>{
+      const fid = row.dataset.fid;
+      const f = sec.fields.find(x=>x.id===fid);
+      const kpiVal = row.querySelector('.kpi-input').value;
+      const weightVal = row.querySelector('.weight-input').value;
+      f.kpi = kpiVal ? Number(kpiVal) : undefined;
+      f.weight = weightVal ? Number(weightVal) : 1;
+    });
+    saveConfig(); renderAll(); closeModal();
+  };
+}
+
+function inputFor(type, value, tall, onChange, options, placeholder){
+  let node;
+  if(type === 'textarea'){
+    node = el('textarea',{});
+    if(tall) node.style.minHeight = '140px';
+    if(placeholder) node.placeholder = placeholder;
+    node.value = value||'';
+    node.addEventListener('input', ()=>onChange(node.value));
+  } else if(type === 'select'){
+    node = el('select',{});
+    node.appendChild(el('option',{value:''},[text('—')]));
+    (options||[]).forEach(o=>{
+      const opt = el('option',{value:o},[text(o)]);
+      if(value===o) opt.selected = true;
+      node.appendChild(opt);
+    });
+    node.addEventListener('change', ()=>onChange(node.value));
+  } else if(type === 'rating'){
+    node = el('div',{class:'rating-group'});
+    for(let i=1; i<=5; i++){
+      const btn = el('button',{type:'button', class:'rating-btn'+(String(value)===String(i)?' selected':'')},[text(String(i))]);
+      btn.addEventListener('click', (ev)=>{
+        ev.preventDefault();
+        node.querySelectorAll('.rating-btn').forEach(b=>b.classList.remove('selected'));
+        btn.classList.add('selected');
+        onChange(String(i));
+      });
+      node.appendChild(btn);
+    }
+  } else {
+    node = el('input',{type: type==='number'?'number':(type==='date'?'date':'text')});
+    if(placeholder) node.placeholder = placeholder;
+    node.value = value||'';
+    node.addEventListener('input', ()=>onChange(node.value));
+  }
+  return node;
+}
+
+/* ---- dynamic tables ---- */
+function renderTableBody(sec){
+  const wrap = el('div',{});
+  const rows = draft[sec.id].rows;
+  const table = el('table',{class:'dyn'});
+  const thead = el('tr',{});
+  sec.columns.forEach(c=>{
+    const th = el('th',{}, [text(c.label)]);
+    if(adminMode){
+      const del = iconBtn('🗑','Удалить колонку', ()=>deleteColumn(sec.id, c.id));
+      del.style.marginLeft='4px';
+      th.appendChild(del);
+    }
+    thead.appendChild(th);
+  });
+  thead.appendChild(el('th',{class:'row-del'},[]));
+  table.appendChild(thead);
+
+  rows.forEach((row, ri)=>{
+    const tr = el('tr',{});
+    sec.columns.forEach(c=>{
+      const td = el('td',{});
+      td.appendChild(inputFor(c.type, row[c.id], false, (val)=>{
+        row[c.id]=val; persistDraft();
+      }, c.options, c.placeholder));
+      tr.appendChild(td);
+    });
+    const delTd = el('td',{class:'row-del'});
+    delTd.appendChild(iconBtn('✕','Удалить строку', ()=>{
+      rows.splice(ri,1); persistDraft(); renderAll();
+    }));
+    tr.appendChild(delTd);
+    table.appendChild(tr);
+  });
+  wrap.appendChild(table);
+  if(!rows.length){
+    wrap.appendChild(el('div',{class:'empty-note'},[text('Строк пока нет.')]));
+  }
+  if(sec.addable !== false){
+    wrap.appendChild(el('button',{class:'btn small add-row', onclick:()=>{
+      const newRow = {};
+      sec.columns.forEach(c=>newRow[c.id]='');
+      rows.push(newRow); persistDraft(); renderAll();
+    }},[text('+ Добавить строку')]));
+  }
+  return wrap;
+}
+
+/* ---- fixed list (insights) ---- */
+function renderFixedListBody(sec){
+  const table = el('table',{class:'dyn'});
+  sec.rows.forEach(r=>{
+    const tr = el('tr',{});
+    const q = el('td',{class:'qcol'},[text(r.question)]);
+    tr.appendChild(q);
+    const a = el('td',{});
+    a.appendChild(inputFor('textarea', draft[sec.id].rows[r.id], false, (val)=>{
+      draft[sec.id].rows[r.id]=val; persistDraft();
+    }));
+    tr.appendChild(a);
+    table.appendChild(tr);
+  });
+  return table;
+}
+
+/* ---- OKR недели (выпадающий список Objective + редактируемый список мероприятий с кол-вом) ---- */
+function renderOkrBody(sec){
+  const wrap = el('div',{});
+  const data = draft[sec.id];
+
+  const selLabel = el('label',{class:'field-label'},[text('Objective недели')]);
+  wrap.appendChild(selLabel);
+
+  const select = el('select',{});
+  select.appendChild(el('option',{value:''},[text('— Выберите Objective недели —')]));
+  sec.options.forEach(opt=>{
+    const o = el('option',{value:opt.id},[text(opt.title)]);
+    if(data.selected===opt.id) o.selected = true;
+    select.appendChild(o);
+  });
+  select.addEventListener('change', ()=>{
+    data.selected = select.value;
+    const opt = sec.options.find(o=>o.id===data.selected);
+    data.items = opt ? opt.kpis.map(k=>({id:uid('item'), text:k.text, qty:''})) : [];
+    persistDraft();
+    renderAll();
+  });
+  wrap.appendChild(select);
+
+  const selectedOpt = sec.options.find(o=>o.id===data.selected);
+  if(selectedOpt){
+    if(selectedOpt.isCustom){
+      const titleField = el('div',{class:'field', style:'margin-top:14px;'});
+      titleField.appendChild(el('label',{class:'field-label'},[text('Название своего OKR')]));
+      const titleInput = el('input',{type:'text', placeholder:'Опишите свой Objective недели'});
+      titleInput.value = data.customTitle||'';
+      titleInput.addEventListener('input', ()=>{ data.customTitle = titleInput.value; persistDraft(); });
+      titleField.appendChild(titleInput);
+      wrap.appendChild(titleField);
+    } else {
+      wrap.appendChild(el('div',{class:'okr-hint-line'},[text('Подсказка: '+selectedOpt.hint)]));
+    }
+
+    wrap.appendChild(el('div',{class:'field-label', style:'margin-top:18px;'},[text('Мероприятия/KPI для достижения цели')]));
+
+    const list = el('div',{class:'okr-item-list'});
+    data.items.forEach((item, idx)=>{
+      const row = el('div',{class:'okr-item-row'});
+      row.appendChild(iconBtn('✕','Удалить мероприятие', ()=>{
+        data.items.splice(idx,1); persistDraft(); renderAll();
+      }));
+      const textInput = el('input',{type:'text'});
+      textInput.value = item.text||'';
+      textInput.addEventListener('input', ()=>{ item.text = textInput.value; persistDraft(); });
+      row.appendChild(textInput);
+      const qtyWrap = el('div',{class:'okr-qty-wrap'});
+      qtyWrap.appendChild(el('span',{class:'okr-qty-label'},[text('Кол-во =')]));
+      const qtyInput = el('input',{type:'number'});
+      qtyInput.value = item.qty||'';
+      qtyInput.addEventListener('input', ()=>{ item.qty = qtyInput.value; persistDraft(); });
+      qtyWrap.appendChild(qtyInput);
+      row.appendChild(qtyWrap);
+      list.appendChild(row);
+    });
+    wrap.appendChild(list);
+
+    wrap.appendChild(el('button',{class:'btn small okr-add-btn', onclick:()=>{
+      data.items.push({id:uid('item'), text:'', qty:''});
+      persistDraft(); renderAll();
+    }},[text('+ Добавить мероприятие')]));
+  }
+
+  return wrap;
+}
+
+/* ---------------------------------------------------------------
+   АДМИН-ДЕЙСТВИЯ: разделы / поля / колонки
+--------------------------------------------------------------- */
+function moveSection(id, dir){
+  const idx = config.sections.findIndex(s=>s.id===id);
+  const swapWith = idx+dir;
+  if(swapWith<0 || swapWith>=config.sections.length) return;
+  const tmp = config.sections[idx];
+  config.sections[idx] = config.sections[swapWith];
+  config.sections[swapWith] = tmp;
+  saveConfig(); renderAll();
+}
+function promptRenameSection(sec){
+  const v = window.prompt('Название раздела:', sec.title);
+  if(v && v.trim()){ sec.title = v.trim(); saveConfig(); renderAll(); }
+}
+function deleteSection(id){
+  if(!confirm('Удалить раздел вместе с введёнными данными?')) return;
+  config.sections = config.sections.filter(s=>s.id!==id);
+  delete draft[id];
+  saveConfig(); persistDraft(); renderAll();
+}
+function deleteField(secId, fieldId){
+  const sec = config.sections.find(s=>s.id===secId);
+  sec.fields = sec.fields.filter(f=>f.id!==fieldId);
+  saveConfig(); renderAll();
+}
+function deleteColumn(secId, colId){
+  const sec = config.sections.find(s=>s.id===secId);
+  if(sec.columns.length<=1){ alert('Нужна хотя бы одна колонка.'); return; }
+  sec.columns = sec.columns.filter(c=>c.id!==colId);
+  if(sec.type==='table'){
+    draft[secId].rows.forEach(r=>delete r[colId]);
+  }
+  saveConfig(); persistDraft(); renderAll();
+}
+
+/* modal helpers */
+const overlay = document.getElementById('modalOverlay');
+const modalBody = document.getElementById('modalBody');
+function closeModal(){ overlay.classList.remove('show'); modalBody.innerHTML=''; }
+overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
+
+function openFieldModal(sec){
+  modalBody.innerHTML = `
+    <h3>Новое поле</h3>
+    <div class="hint">Раздел «${escapeHtml(sec.title)}»</div>
+    <label class="field-label">Название поля</label>
+    <input type="text" id="mf_label" placeholder="Например, Комментарий">
+    <div style="height:12px"></div>
+    <label class="field-label">Тип поля</label>
+    <div class="type-grid" id="mf_types">
+      ${typeOptionsHtml('text')}
+    </div>
+    <div id="mf_options_wrap" style="display:none;margin-top:12px;">
+      <label class="field-label">Варианты (через запятую)</label>
+      <input type="text" id="mf_options" placeholder="Вариант 1, Вариант 2">
+    </div>
+    <div style="height:12px"></div>
+    <label class="field-label">Подсказка под полем (необязательно)</label>
+    <input type="text" id="mf_hint" placeholder="Например: 1 — плохо, 5 — отлично">
+    <div class="modal-actions">
+      <button class="btn" id="mf_cancel">Отмена</button>
+      <button class="btn primary" id="mf_save">Добавить</button>
+    </div>
+  `;
+  overlay.classList.add('show');
+  wireTypeGrid('mf_types', 'mf_options_wrap');
+  document.getElementById('mf_cancel').onclick = closeModal;
+  document.getElementById('mf_save').onclick = ()=>{
+    const label = document.getElementById('mf_label').value.trim();
+    if(!label){ alert('Введите название поля'); return; }
+    const type = document.querySelector('#mf_types input:checked').value;
+    const options = type==='select' ? splitOptions(document.getElementById('mf_options').value) : undefined;
+    const hint = document.getElementById('mf_hint').value.trim() || undefined;
+    sec.fields.push({id:uid('f'), label, type, width:'full', required:false, options, hint});
+    saveConfig(); renderAll(); closeModal();
+  };
+}
+
+function openColumnModal(sec){
+  modalBody.innerHTML = `
+    <h3>Новая колонка</h3>
+    <div class="hint">Раздел «${escapeHtml(sec.title)}»</div>
+    <label class="field-label">Название колонки</label>
+    <input type="text" id="mc_label" placeholder="Например, Ссылка">
+    <div style="height:12px"></div>
+    <label class="field-label">Тип данных</label>
+    <div class="type-grid" id="mc_types">
+      ${typeOptionsHtml('text', true)}
+    </div>
+    <div id="mc_options_wrap" style="display:none;margin-top:12px;">
+      <label class="field-label">Варианты (через запятую)</label>
+      <input type="text" id="mc_options" placeholder="Вариант 1, Вариант 2">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="mc_cancel">Отмена</button>
+      <button class="btn primary" id="mc_save">Добавить</button>
+    </div>
+  `;
+  overlay.classList.add('show');
+  wireTypeGrid('mc_types', 'mc_options_wrap');
+  document.getElementById('mc_cancel').onclick = closeModal;
+  document.getElementById('mc_save').onclick = ()=>{
+    const label = document.getElementById('mc_label').value.trim();
+    if(!label){ alert('Введите название колонки'); return; }
+    const type = document.querySelector('#mc_types input:checked').value;
+    const options = type==='select' ? splitOptions(document.getElementById('mc_options').value) : undefined;
+    const col = {id:uid('c'), label, type, options};
+    sec.columns.push(col);
+    if(sec.type==='table'){
+      draft[sec.id].rows.forEach(r=>r[col.id]='');
+    } else if(sec.type==='fixedlist'){
+      // fixedlist: extend fixed rows with blank value for this column
+      sec.rows.forEach(r=>{ if(draft[sec.id].rows[r.id]===undefined) draft[sec.id].rows[r.id]=''; });
+    }
+    saveConfig(); persistDraft(); renderAll(); closeModal();
+  };
+}
+
+function typeOptionsHtml(defaultType, skipLabelType){
+  const types = [
+    ['text','Текст'], ['textarea','Многострочный текст'],
+    ['number','Число'], ['date','Дата'], ['select','Список (выбор)'], ['rating','Оценка 1–5']
+  ];
+  return types.map(([v,l])=>`
+    <label class="type-opt${v===defaultType?' checked':''}">
+      <input type="radio" name="typegrid" value="${v}" ${v===defaultType?'checked':''}> ${l}
+    </label>`).join('');
+}
+function wireTypeGrid(gridId, optionsWrapId){
+  const grid = document.getElementById(gridId);
+  const wrap = document.getElementById(optionsWrapId);
+  grid.querySelectorAll('input[type=radio]').forEach(r=>{
+    r.addEventListener('change', ()=>{
+      grid.querySelectorAll('.type-opt').forEach(o=>o.classList.remove('checked'));
+      r.closest('.type-opt').classList.add('checked');
+      wrap.style.display = r.value==='select' ? 'block' : 'none';
+    });
+  });
+}
+function splitOptions(str){
+  return str.split(',').map(s=>s.trim()).filter(Boolean);
+}
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function openAddSectionModal(){
+  modalBody.innerHTML = `
+    <h3>Новый раздел</h3>
+    <div class="hint">Выберите тип раздела и название.</div>
+    <label class="field-label">Название раздела</label>
+    <input type="text" id="ms_label" placeholder="Например, Обучение">
+    <div style="height:12px"></div>
+    <label class="field-label">Тип раздела</label>
+    <div class="type-grid" id="ms_types">
+      <label class="type-opt checked"><input type="radio" name="sectype" value="fields" checked> Обычные поля</label>
+      <label class="type-opt"><input type="radio" name="sectype" value="table"> Таблица (строки добавляются)</label>
+      <label class="type-opt"><input type="radio" name="sectype" value="fixedlist"> Список вопросов (фикс. строки)</label>
+    </div>
+    <div class="hint" style="margin-top:10px;">После создания раздела добавьте в него поля/колонки кнопкой внутри раздела.</div>
+    <div class="modal-actions">
+      <button class="btn" id="ms_cancel">Отмена</button>
+      <button class="btn primary" id="ms_save">Создать</button>
+    </div>
+  `;
+  overlay.classList.add('show');
+  document.getElementById('ms_types').querySelectorAll('input').forEach(r=>{
+    r.addEventListener('change', ()=>{
+      document.querySelectorAll('#ms_types .type-opt').forEach(o=>o.classList.remove('checked'));
+      r.closest('.type-opt').classList.add('checked');
+    });
+  });
+  document.getElementById('ms_cancel').onclick = closeModal;
+  document.getElementById('ms_save').onclick = ()=>{
+    const label = document.getElementById('ms_label').value.trim();
+    if(!label){ alert('Введите название раздела'); return; }
+    const type = document.querySelector('#ms_types input:checked').value;
+    const sec = {id:uid('sec'), type, title:label, desc:'', };
+    if(type==='fields') sec.fields = [];
+    if(type==='table'){ sec.addable = true; sec.columns = [{id:uid('c'),label:'Поле 1',type:'text'}]; }
+    if(type==='fixedlist'){
+      sec.columns = [{id:'question',label:'Вопрос',type:'label'},{id:'answer',label:'Ответ',type:'textarea'}];
+      sec.rows = [{id:uid('r'), question:'Новый вопрос'}];
+    }
+    config.sections.push(sec);
+    saveConfig(); ensureDraftShape(); persistDraft(); renderAll(); closeModal();
+  };
+}
+
+/* ---------------------------------------------------------------
+   ЭКСПОРТ / ИМПОРТ КОНФИГУРАЦИИ
+--------------------------------------------------------------- */
+function downloadFile(filename, content, mime){
+  const blob = new Blob([content], {type:mime});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+
+/* ---------------------------------------------------------------
+   ОТПРАВКА НА GOOGLE ДИСК (через Google Apps Script веб-приложение)
+--------------------------------------------------------------- */
+function loadGasUrl(){
+  return GAS_WEB_APP_URL.trim();
+}
+function setGasStatus(msg, kind){
+  const colors = {ok:'var(--green)', bad:'var(--red)', neutral:'var(--ink-faint)'};
+  const el1 = document.getElementById('gasStatus');
+  const el2 = document.getElementById('gasFooterStatus');
+  if(el1){ el1.textContent = msg; el1.style.color = colors[kind||'neutral']; }
+  if(el2){ el2.textContent = msg; el2.style.color = colors[kind||'neutral']; }
+}
+function refreshGasStatusIdle(){
+  const url = loadGasUrl();
+  setGasStatus(url ? '☁ Google Диск подключён' : '☁ Google Диск не настроен — отчёты скачиваются только локально', url ? 'ok' : 'neutral');
+}
+
+// Отправляем как text/plain, чтобы браузер не делал CORS-preflight
+// (Apps Script веб-приложение не отвечает на предварительный OPTIONS-запрос).
+async function sendToDrive(payload){
+  const url = loadGasUrl();
+  if(!url) return {skipped:true};
+  try{
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify(payload)
+    });
+    let json = null;
+    try{ json = await res.json(); }catch(e){}
+    if(json && json.ok) return {ok:true, saved:json.saved};
+    return {ok:false, error:(json && json.error) || ('HTTP '+res.status)};
+  }catch(err){
+    return {ok:false, error:String(err && err.message || err)};
+  }
+}
+
+document.getElementById('btnTestGasUrl').addEventListener('click', async ()=>{
+  setGasStatus('Проверяю связь…', 'neutral');
+  const result = await sendToDrive({
+    fileName: '_test_connection.html',
+    content: `<!DOCTYPE html><html><body>Проверка связи: ${new Date().toISOString()}</body></html>`,
+    mimeType: 'text/html'
+  });
+  if(result.ok) setGasStatus('☁ Связь есть — тестовый файл создан в папке на Диске', 'ok');
+  else setGasStatus('Ошибка связи: ' + (result.error||'неизвестно'), 'bad');
+});
+refreshGasStatusIdle();
+
+document.getElementById('btnExportConfig').onclick = ()=>{
+  downloadFile('konfiguraciya-oprosnika.json', JSON.stringify(config,null,2), 'application/json');
+};
+document.getElementById('btnImportConfig').onclick = ()=> document.getElementById('fileImport').click();
+document.getElementById('fileImport').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!parsed.sections) throw new Error('bad shape');
+      config = parsed;
+      saveConfig();
+      draft = {};
+      ensureDraftShape();
+      persistDraft();
+      renderAll();
+      showToast('Конфигурация импортирована');
+    }catch(err){
+      alert('Не удалось прочитать файл конфигурации.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+document.getElementById('btnResetConfig').onclick = ()=>{
+  if(!confirm('Сбросить конфигурацию к стандартной? Пользовательские разделы и поля будут удалены.')) return;
+  config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  saveConfig(); ensureDraftShape(); persistDraft(); renderAll();
+};
+
+/* ---------------------------------------------------------------
+   ADMIN SWITCH / RESET / TOAST
+--------------------------------------------------------------- */
+const adminSwitch = document.getElementById('adminSwitch');
+adminSwitch.addEventListener('click', ()=>{
+  adminMode = !adminMode;
+  adminSwitch.classList.toggle('on', adminMode);
+  renderAll();
+});
+document.getElementById('btnAddSection').addEventListener('click', openAddSectionModal);
+
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  if(!confirm('Очистить все введённые ответы в этом отчёте?')) return;
+  draft = {};
+  ensureDraftShape();
+  persistDraft();
+  renderAll();
+});
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ---------------------------------------------------------------
+   ОТПРАВКА / СКАЧИВАНИЕ ОТЧЁТА
+--------------------------------------------------------------- */
+function buildReport(){
+  const metaSec = config.sections.find(s=>s.id==='meta');
+  const fullName = ['last_name','first_name','middle_name']
+    .map(k=> (draft.meta && draft.meta[k] || '').trim())
+    .filter(Boolean)
+    .join(' ');
+  const meta = {
+    manager: fullName,
+    filledDate: (draft.meta && draft.meta.fill_date) || '',
+    periodStart: (draft.meta && draft.meta.period_start) || '',
+    periodEnd: (draft.meta && draft.meta.period_end) || '',
+    submittedAt: new Date().toISOString(),
+    surveyTitle: config.title
+  };
+  const sections = config.sections.filter(s=>s.id!=='meta').map(sec=>{
+    if(sec.type==='fields'){
+      const out = {
+        id:sec.id, title:sec.title, type:'fields',
+        fields: sec.fields.map(f=>({id:f.id, label:f.label, type:f.type, value:draft[sec.id][f.id], hint:f.hint}))
+      };
+      if(sec.showIndex){
+        const parts = computeIndexParts(sec);
+        out.index = {
+          label: sec.indexLabel || 'Индекс результативности',
+          percent: computeIndexPercent(parts),
+          parts: parts.map(p=>({id:p.id, label:p.label, value:p.value, kpi:p.kpi, weight:p.weight, achievedPercent:Math.round(p.ratio*100)}))
+        };
+      }
+      return out;
+    }
+    if(sec.type==='table'){
+      return {
+        id:sec.id, title:sec.title, type:'table',
+        columns: sec.columns.map(c=>({id:c.id,label:c.label,type:c.type})),
+        rows: draft[sec.id].rows
+      };
+    }
+    if(sec.type==='fixedlist'){
+      return {
+        id:sec.id, title:sec.title, type:'fixedlist',
+        columns: sec.columns.map(c=>({id:c.id,label:c.label,type:c.type})),
+        rows: sec.rows.map(r=>({id:r.id, question:r.question, answer: draft[sec.id].rows[r.id]||''}))
+      };
+    }
+    if(sec.type==='okr'){
+      const chosen = sec.options.find(o=>o.id===draft[sec.id].selected) || null;
+      let selectedOut = null;
+      if(chosen){
+        selectedOut = chosen.isCustom
+          ? {id:chosen.id, title:(draft[sec.id].customTitle||'').trim() || 'Свой вариант', hint:'', isCustom:true}
+          : {id:chosen.id, title:chosen.title, hint:chosen.hint, isCustom:false};
+      }
+      return {
+        id:sec.id, title:sec.title, type:'okr',
+        selected: selectedOut,
+        items: (draft[sec.id].items||[]).map(it=>({text:it.text||'', qty:it.qty||''}))
+      };
+    }
+  });
+  return {meta, sections};
+}
+
+function buildGaugeSvg(percent, size){
+  size = size || 128;
+  const strokeWidth = Math.round(size*0.1);
+  const r = (size - strokeWidth)/2;
+  const c = 2*Math.PI*r;
+  const pct = Math.max(0, Math.min(100, percent));
+  const offset = c * (1 - pct/100);
+  const color = pct>=85 ? 'var(--green)' : (pct>=60 ? 'var(--amber)' : 'var(--red)');
+  const fontSize = Math.round(size*0.24);
+  const cx = size/2, cy = size/2;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--line-strong)" stroke-width="${strokeWidth}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${strokeWidth}" stroke-linecap="round"
+      stroke-dasharray="${c}" stroke-dashoffset="${offset}" transform="rotate(-90 ${cx} ${cy})"/>
+    <text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" font-family="var(--mono)" font-weight="700" font-size="${fontSize}" fill="var(--ink)">${Math.round(pct)}%</text>
+  </svg>`;
+}
+
+function reportToReadableHtml(report){
+  const esc = escapeHtml;
+  const nl2br = (s)=> esc(String(s||'')).replace(/\n/g,'<br>');
+  const fmtDateRu = (d)=>{
+    if(!d) return '';
+    const p = d.split('-');
+    return p.length===3 ? `${p[2]}.${p[1]}.${p[0]}` : d;
+  };
+
+  /* ---- header ---- */
+  let head = `<div class="rpt-eyebrow">${esc(report.meta.surveyTitle||'Отчёт менеджера')}</div>
+    <h1>${esc(report.meta.manager||'Без имени')}</h1>
+    <div class="rpt-pills">`;
+  if(report.meta.filledDate) head += `<span class="rpt-pill">Заполнено ${esc(fmtDateRu(report.meta.filledDate))}</span>`;
+  if(report.meta.periodStart || report.meta.periodEnd){
+    head += `<span class="rpt-pill">Период ${esc(fmtDateRu(report.meta.periodStart))} – ${esc(fmtDateRu(report.meta.periodEnd))}</span>`;
+  }
+  head += `</div>`;
+
+  /* ---- sections ---- */
+  let cards = '';
+  report.sections.forEach((sec, i)=>{
+    let inner = '';
+
+    if(sec.type === 'fields'){
+      const allNumeric = sec.fields.length && sec.fields.every(f=>f.type==='number');
+      const allRating = sec.fields.length && sec.fields.every(f=>f.type==='rating');
+      if(allRating){
+        const vals = sec.fields.map(f=>Number(f.value)||0).filter(v=>v>0);
+        const avg = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : 0;
+        if(vals.length){
+          inner += `<div class="rating-avg">Средняя самооценка: <b>${avg.toFixed(1)} / 5</b></div>`;
+        }
+        inner += `<div class="rating-list">` + sec.fields.map(f=>{
+          const v = Number(f.value)||0;
+          const dots = [1,2,3,4,5].map(n=>`<span class="rdot${n<=v?' filled':''}"></span>`).join('');
+          return `<div class="rating-item">
+            <div class="rating-item-head"><span class="ri-label">${esc(f.label)}</span><span class="ri-value">${v?v+'/5':'<span class="muted">не оценено</span>'}</span></div>
+            <div class="rating-dots">${dots}</div>
+            ${f.hint ? `<div class="ri-hint">${esc(f.hint)}</div>` : ''}
+          </div>`;
+        }).join('') + `</div>`;
+      } else if(allNumeric){
+        inner += `<div class="stat-grid">` + sec.fields.map(f=>
+          `<div class="stat-tile"><div class="stat-num">${esc(f.value||0)}</div><div class="stat-lbl">${esc(f.label)}</div></div>`
+        ).join('') + `</div>`;
+        if(sec.index){
+          inner += `<div class="gauge-hero">
+            <div class="gauge-visual">${buildGaugeSvg(sec.index.percent, 128)}</div>
+            <div class="gauge-info">
+              <div class="gauge-title">${esc(sec.index.label)}</div>
+              <div class="gauge-breakdown">` + sec.index.parts.map(p=>
+                `<div class="gauge-row"><span>${esc(p.label)}</span><span>${esc(p.value)} / ${esc(p.kpi)} <b>(${p.achievedPercent}%)</b></span></div>`
+              ).join('') + `</div>
+            </div>
+          </div>`;
+        }
+      } else {
+        inner += `<div class="kv-list">` + sec.fields.map(f=>
+          `<div class="kv-row"><div class="kv-label">${esc(f.label)}</div><div class="kv-value">${nl2br(f.value)||'<span class="muted">—</span>'}</div></div>`
+        ).join('') + `</div>`;
+      }
+    }
+
+    if(sec.type === 'table'){
+      if(!sec.rows.length){
+        inner += `<p class="muted">Нет данных</p>`;
+      } else {
+        const priorityCol = sec.columns.find(c=>c.type==='select');
+        const headingCol = sec.columns.find(c=>c!==priorityCol) || sec.columns[0];
+        const restCols = sec.columns.filter(c=>c!==headingCol && c!==priorityCol);
+        inner += `<div class="row-cards">` + sec.rows.map(row=>{
+          const prioVal = priorityCol ? row[priorityCol.id] : null;
+          const prioClass = prioVal==='Высокий' ? 'high' : (prioVal==='Средний' ? 'mid' : (prioVal==='Низкий' ? 'low' : ''));
+          let card = `<div class="row-card ${prioClass?'rc-'+prioClass:''}">`;
+          const headingVal = headingCol.type === 'date' ? fmtDateRu(row[headingCol.id]) : row[headingCol.id];
+          card += `<div class="row-card-head"><span>${nl2br(headingVal) || '<span class="muted">—</span>'}</span>`;
+          if(prioVal) card += `<span class="prio-badge ${prioClass}">${esc(prioVal)}</span>`;
+          card += `</div>`;
+          if(restCols.length){
+            card += `<div class="row-card-body">` + restCols.map(c=>{
+              const raw = row[c.id];
+              const val = c.type === 'date' ? fmtDateRu(raw) : raw;
+              return `<div class="rc-line"><span class="rc-k">${esc(c.label)}:</span> ${nl2br(val)||'<span class="muted">—</span>'}</div>`;
+            }).join('') + `</div>`;
+          }
+          card += `</div>`;
+          return card;
+        }).join('') + `</div>`;
+      }
+    }
+
+    if(sec.type === 'fixedlist'){
+      inner += `<div class="qa-list">` + sec.rows.map(r=>
+        `<div class="qa-card"><div class="qa-q">${esc(r.question)}</div><div class="qa-a">${r.answer && r.answer.trim() ? nl2br(r.answer) : '<span class="muted">Нет ответа</span>'}</div></div>`
+      ).join('') + `</div>`;
+    }
+
+    if(sec.type === 'okr'){
+      if(sec.selected){
+        inner += `<div class="okr-report-title">${esc(sec.selected.title)}</div>`;
+        if(sec.selected.hint){
+          inner += `<div class="okr-report-hint">${esc(sec.selected.hint)}</div>`;
+        }
+        const items = (sec.items||[]).filter(it=>it.text && it.text.trim());
+        if(items.length){
+          inner += `<div class="okr-report-kpis">` + items.map(it=>
+            `<div class="okr-report-item"><span>${esc(it.text)}</span>${it.qty ? `<span class="okr-report-qty">Кол-во: ${esc(it.qty)}</span>` : ''}</div>`
+          ).join('') + `</div>`;
+        } else {
+          inner += `<p class="muted">Мероприятия не заполнены</p>`;
+        }
+      } else {
+        inner += `<p class="muted">Objective недели не выбран</p>`;
+      }
+    }
+
+    cards += `<section class="rpt-card">
+      <div class="rpt-card-head"><span class="rpt-num">${String(i+1).padStart(2,'0')}</span><h2>${esc(sec.title)}</h2></div>
+      <div class="rpt-card-body">${inner}</div>
+    </section>`;
+  });
+
+  const embeddedData = JSON.stringify(report).replace(/</g, '\\u003c');
+  return `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Отчёт — ${esc(report.meta.manager)}</title>
+  <script type="application/json" id="report-data">${embeddedData}<\/script>
+  <style>
+    :root{
+      --bg:#F3F5F4; --paper:#FFFFFF; --ink:#1B2420; --ink-soft:#5B6A63; --ink-faint:#8B978F;
+      --line:#DCE3DF; --line-strong:#C3CDC6;
+      --accent:#2F6F5E; --accent-dark:#204F42; --accent-soft:#E4EFEA;
+      --amber:#B8791E; --amber-soft:#FBF0DE; --red:#B8433A; --red-soft:#FBE7E4; --green:#3A7D4C; --green-soft:#E7F3EA;
+      --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+      --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    }
+    *{box-sizing:border-box;}
+    body{font-family:var(--sans);max-width:760px;margin:0 auto;color:var(--ink);padding:44px 22px 60px;background:var(--bg);line-height:1.55;}
+    .rpt-eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dark);margin-bottom:8px;}
+    h1{font-size:28px;margin:0 0 14px;letter-spacing:-.01em;}
+    .rpt-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:30px;}
+    .rpt-pill{background:var(--paper);border:1px solid var(--line-strong);border-radius:20px;padding:6px 13px;font-size:12.5px;color:var(--ink-soft);}
+    section.rpt-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:hidden;}
+    .rpt-card-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);}
+    .rpt-num{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:700;}
+    .rpt-card-head h2{font-size:15.5px;margin:0;font-weight:700;}
+    .rpt-card-body{padding:18px 20px 20px;}
+    .muted{color:var(--ink-faint);font-style:italic;}
+
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:12px;}
+    .stat-tile{background:var(--accent-soft);border-radius:10px;padding:16px;text-align:center;}
+    .stat-num{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--accent-dark);}
+    .stat-lbl{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-top:4px;}
+
+    .rating-avg{font-size:13.5px;font-weight:600;color:var(--accent-dark);background:var(--accent-soft);
+      border-radius:8px;padding:10px 14px;margin-bottom:14px;display:inline-block;}
+    .rating-list{display:flex;flex-direction:column;gap:14px;}
+    .rating-item{border-bottom:1px solid var(--line);padding-bottom:14px;}
+    .rating-item:last-child{border-bottom:none;padding-bottom:0;}
+    .rating-item-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14px;font-weight:600;}
+    .ri-value{font-family:var(--mono);font-weight:700;color:var(--accent-dark);white-space:nowrap;}
+    .rating-dots{display:flex;gap:6px;margin-top:8px;}
+    .rdot{width:16px;height:16px;border-radius:50%;background:var(--line-strong);display:inline-block;}
+    .rdot.filled{background:var(--accent);}
+    .ri-hint{font-size:12px;color:var(--ink-faint);margin-top:7px;line-height:1.5;}
+
+    .gauge-hero{display:flex;align-items:center;gap:22px;margin-top:20px;padding-top:20px;border-top:1px dashed var(--line-strong);flex-wrap:wrap;}
+    .gauge-title{font-weight:700;font-size:14px;margin-bottom:10px;}
+    .gauge-breakdown{display:flex;flex-direction:column;gap:6px;}
+    .gauge-row{display:flex;justify-content:space-between;gap:16px;font-size:12.5px;color:var(--ink-soft);min-width:220px;}
+    .gauge-row b{color:var(--ink);font-family:var(--mono);}
+
+    .kv-list{display:flex;flex-direction:column;}
+    .kv-row{display:grid;grid-template-columns:34% 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;}
+    .kv-row:last-child{border-bottom:none;}
+    .kv-label{color:var(--ink-soft);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;padding-top:1px;}
+
+    .row-cards{display:flex;flex-direction:column;gap:10px;}
+    .row-card{background:var(--bg);border:1px solid var(--line);border-left:4px solid var(--line-strong);border-radius:8px;padding:12px 14px;}
+    .row-card.rc-low{border-left-color:var(--green);}
+    .row-card.rc-mid{border-left-color:var(--amber);}
+    .row-card.rc-high{border-left-color:var(--red);}
+    .row-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;font-weight:600;font-size:14.5px;}
+    .prio-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;}
+    .prio-badge.low{background:var(--green-soft);color:var(--green);}
+    .prio-badge.mid{background:var(--amber-soft);color:var(--amber);}
+    .prio-badge.high{background:var(--red-soft);color:var(--red);}
+    .row-card-body{margin-top:8px;display:flex;flex-direction:column;gap:4px;}
+    .rc-line{font-size:13.5px;color:var(--ink-soft);}
+    .rc-k{color:var(--ink-faint);}
+
+    .qa-list{display:flex;flex-direction:column;gap:14px;}
+    .qa-card{border-left:3px solid var(--accent);padding-left:14px;}
+    .qa-q{font-size:12.5px;font-weight:700;color:var(--accent-dark);text-transform:uppercase;letter-spacing:.02em;margin-bottom:4px;}
+    .qa-a{font-size:14.5px;color:var(--ink);}
+
+    .okr-report-title{font-size:17px;font-weight:700;margin-bottom:6px;}
+    .okr-report-hint{font-size:13px;color:var(--ink-soft);font-style:italic;margin-bottom:16px;line-height:1.55;}
+    .okr-report-kpis{display:flex;flex-direction:column;gap:9px;}
+    .okr-report-item{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:13.5px;
+      padding:9px 0;border-bottom:1px solid var(--line);}
+    .okr-report-item:last-child{border-bottom:none;}
+    .okr-report-qty{font-family:var(--mono);font-size:12px;color:var(--accent-dark);font-weight:700;white-space:nowrap;flex-shrink:0;}
+
+    @media print{ body{background:#fff;padding:0 10px;} section.rpt-card{break-inside:avoid;box-shadow:none;} }
+    @media (max-width:480px){ .kv-row{grid-template-columns:1fr;} .gauge-hero{flex-direction:column;align-items:flex-start;} }
+  </style></head><body>
+    ${head}
+    ${cards}
+  </body></html>`;
+}
+
+function validateRequired(){
+  const missing = [];
+  config.sections.forEach(sec=>{
+    if(sec.type!=='fields') return;
+    sec.fields.forEach(f=>{
+      if(f.required && !String(draft[sec.id][f.id]||'').trim()){
+        missing.push(f.label);
+      }
+    });
+  });
+  return missing;
+}
+
+document.getElementById('btnSubmit').addEventListener('click', async ()=>{
+  const missing = validateRequired();
+  if(missing.length){
+    alert('Заполните обязательные поля: '+missing.join(', '));
+    return;
+  }
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+
+  const report = buildReport();
+  const managerSlug = (report.meta.manager||'menedzher').trim().replace(/\s+/g,'_').replace(/[^\wА-Яа-яЁё_-]/g,'');
+  const dateSlug = report.meta.filledDate || new Date().toISOString().slice(0,10);
+  const htmlFileName = `otchet_${managerSlug}_${dateSlug}.html`;
+  const htmlContent = reportToReadableHtml(report);
+
+  downloadFile(htmlFileName, htmlContent, 'text/html');
+
+  const gasConfigured = !!loadGasUrl();
+  if(gasConfigured){
+    btn.textContent = 'Отправка на Google Диск…';
+    const result = await sendToDrive({fileName: htmlFileName, content: htmlContent, mimeType:'text/html'});
+    if(result.ok){
+      showToast('Отчёт скачан и отправлен на Google Диск');
+    } else {
+      showToast('Отчёт скачан локально. На Google Диск отправить не удалось: ' + (result.error||'ошибка'));
+    }
+  } else {
+    showToast('Отчёт скачан (.html). Google Диск не настроен.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = originalLabel;
+  localStorage.removeItem(STORAGE_DRAFT);
+});
+
+/* ---------------------------------------------------------------
+   INIT
+--------------------------------------------------------------- */
+ensureDraftShape();
+renderAll();
+</script>
+</body>
+</html>
