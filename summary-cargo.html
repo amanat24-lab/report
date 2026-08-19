@@ -127,11 +127,6 @@
   .okr-summary-item:last-child{border-bottom:none;}
   .okr-summary-qty{font-family:var(--mono);font-size:12px;color:var(--accent-dark);font-weight:700;white-space:nowrap;}
 
-  .dyn-charts{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);}
-  .dyn-charts-title{font-size:12.5px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-bottom:12px;}
-  .dyn-chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
-  .dyn-chart-box{border:1px solid var(--line);border-radius:10px;padding:12px 10px 6px;background:var(--bg);}
-  .dyn-chart-label{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px;padding-left:4px;}
 
   .empty-state{text-align:center;padding:60px 20px;color:var(--ink-faint);}
   .empty-state .big{font-size:15px;color:var(--ink-soft);margin-bottom:6px;}
@@ -519,6 +514,27 @@ function reportSubmittedTime(report){
   return 0;
 }
 
+// Используется дедупликацией повторных отправок (группировка "тот же
+// отчёт за ту же неделю"). Динамика по неделям была отдельной функцией,
+// сейчас временно убрана целиком — эта функция дедупликации не затронута.
+function isoWeekInfo(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr+'T00:00:00');
+  if(isNaN(d)) return null;
+  const dayIdx = (d.getDay()+6)%7; // Пн=0 ... Вс=6
+  const monday = new Date(d); monday.setDate(d.getDate()-dayIdx);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
+  const thursday = new Date(monday); thursday.setDate(monday.getDate()+3);
+  const firstThursday = new Date(thursday.getFullYear(), 0, 4);
+  const firstThursdayDay = (firstThursday.getDay()+6)%7;
+  firstThursday.setDate(firstThursday.getDate()-firstThursdayDay+3);
+  const week = 1 + Math.round((thursday - firstThursday) / (7*86400000));
+  const key = thursday.getFullYear() + '-W' + String(week).padStart(2,'0');
+  const two = n => String(n).padStart(2,'0');
+  const label = `${two(monday.getDate())}.${two(monday.getMonth()+1)}–${two(sunday.getDate())}.${two(sunday.getMonth()+1)}`;
+  return {key, label, monday};
+}
+
 function dedupeReportsByWeek(reports){
   const groups = {};
   reports.forEach(r=>{
@@ -787,8 +803,6 @@ function renderBySection(reports, managers){
       body.appendChild(renderMixedShapeSectionSummary(reg, reports));
     } else if(reg.type==='fields'){
       body.appendChild(renderFieldsSectionSummary(reg, reports));
-      const dyn = renderDynamicsBlock(reg, reports);
-      if(dyn) body.appendChild(dyn);
     } else if(reg.type==='table'){
       body.appendChild(renderTableSectionSummary(reg, reports));
     } else if(reg.type==='fixedlist'){
@@ -831,94 +845,6 @@ function renderMixedShapeSectionSummary(reg, reports){
 
 function sectionOf(report, secId){
   return report.sections.find(s=>s.id===secId);
-}
-
-/* ---------------------------------------------------------------
-   ДИНАМИКА ПО НЕДЕЛЯМ — для числовых разделов (Премия и АВ / Выполненные мероприятия)
---------------------------------------------------------------- */
-const DYNAMICS_SECTION_IDS = ['activities_done', 'weekly_numbers'];
-
-function isoWeekInfo(dateStr){
-  if(!dateStr) return null;
-  const d = new Date(dateStr+'T00:00:00');
-  if(isNaN(d)) return null;
-  const dayIdx = (d.getDay()+6)%7; // Пн=0 ... Вс=6
-  const monday = new Date(d); monday.setDate(d.getDate()-dayIdx);
-  const sunday = new Date(monday); sunday.setDate(monday.getDate()+6);
-  const thursday = new Date(monday); thursday.setDate(monday.getDate()+3);
-  const firstThursday = new Date(thursday.getFullYear(), 0, 4);
-  const firstThursdayDay = (firstThursday.getDay()+6)%7;
-  firstThursday.setDate(firstThursday.getDate()-firstThursdayDay+3);
-  const week = 1 + Math.round((thursday - firstThursday) / (7*86400000));
-  const key = thursday.getFullYear() + '-W' + String(week).padStart(2,'0');
-  const two = n => String(n).padStart(2,'0');
-  const label = `${two(monday.getDate())}.${two(monday.getMonth()+1)}–${two(sunday.getDate())}.${two(sunday.getMonth()+1)}`;
-  return {key, label, monday};
-}
-
-function buildWeeklyDynamics(reports, secId, fieldIds){
-  const buckets = {};
-  reports.forEach(r=>{
-    const sec = sectionOf(r, secId);
-    if(!sec || sec.type !== 'fields') return;
-    const info = isoWeekInfo(r.meta.filledDate);
-    if(!info) return;
-    if(!buckets[info.key]) buckets[info.key] = {label:info.label, monday:info.monday, sums:{}};
-    fieldIds.forEach(fid=>{
-      const f = sec.fields.find(x=>x.id===fid);
-      const v = f ? Number(f.value)||0 : 0;
-      buckets[info.key].sums[fid] = (buckets[info.key].sums[fid]||0) + v;
-    });
-  });
-  return Object.values(buckets).sort((a,b)=>a.monday-b.monday);
-}
-
-function buildBarChartSvg(points){
-  const width = 320, height = 140;
-  const padding = {top:22, right:8, bottom:26, left:8};
-  const chartW = width - padding.left - padding.right;
-  const chartH = height - padding.top - padding.bottom;
-  const maxVal = Math.max(1, ...points.map(p=>p.value));
-  const gap = 10;
-  const barW = Math.max(16, (chartW - gap*(points.length-1)) / points.length);
-  let bars = '';
-  points.forEach((p,i)=>{
-    const h = (p.value/maxVal) * chartH;
-    const x = padding.left + i*(barW+gap);
-    const y = padding.top + (chartH - h);
-    bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(h,1).toFixed(1)}" rx="4" fill="var(--accent)"/>`;
-    bars += `<text x="${(x+barW/2).toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="middle" font-size="11" font-family="var(--mono)" font-weight="700" fill="var(--ink)">${esc(p.value)}</text>`;
-    bars += `<text x="${(x+barW/2).toFixed(1)}" y="${height-10}" text-anchor="middle" font-size="9.5" fill="var(--ink-faint)">${esc(p.label)}</text>`;
-  });
-  return `<svg width="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet">${bars}</svg>`;
-}
-
-function renderDynamicsBlock(reg, reports){
-  if(!DYNAMICS_SECTION_IDS.includes(reg.id)) return null;
-  const fieldIds = reg.fieldOrder.filter(fid => reg.columns[fid].type === 'number');
-  if(!fieldIds.length) return null;
-
-  const weekly = buildWeeklyDynamics(reports, reg.id, fieldIds);
-  if(weekly.length < 2) return null; // нечего сравнивать динамику по одной неделе
-
-  const wrap = document.createElement('div');
-  wrap.className = 'dyn-charts';
-  const title = document.createElement('div');
-  title.className = 'dyn-charts-title';
-  title.textContent = `Динамика по неделям — сумма по команде (${weekly.length} нед.)`;
-  wrap.appendChild(title);
-
-  const grid = document.createElement('div');
-  grid.className = 'dyn-chart-grid';
-  fieldIds.forEach(fid=>{
-    const points = weekly.map(w=>({label:w.label, value:w.sums[fid]||0}));
-    const box = document.createElement('div');
-    box.className = 'dyn-chart-box';
-    box.innerHTML = `<div class="dyn-chart-label">${esc(reg.columns[fid].label)}</div>` + buildBarChartSvg(points);
-    grid.appendChild(box);
-  });
-  wrap.appendChild(grid);
-  return wrap;
 }
 
 function renderFieldsSectionSummary(reg, reports){
