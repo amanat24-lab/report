@@ -55,7 +55,7 @@
 
   header{text-align:center; margin-bottom:44px;}
   .logo-row{display:flex; justify-content:center; margin-bottom:18px;}
-  .logo-img{height:32px; width:auto; display:block;}
+  .logo-img{height:48px; width:auto; display:block;}
   h1{font-size:clamp(28px,4.4vw,40px); font-weight:700; letter-spacing:-0.02em; margin:0; text-align:center;}
   .sub{margin:10px auto 0; max-width:480px; color:var(--ink-soft); font-size:15px; line-height:1.5; text-align:center;}
 
@@ -393,10 +393,18 @@
   <div class="modal glass">
     <button class="modal-close" id="modalCloseBtn" type="button" aria-label="Закрыть">&times;</button>
     <h3>Экспорт в PDF</h3>
-    <p class="modal-desc">Укажите название компании, для которой формируется расчёт страховой премии.</p>
+    <p class="modal-desc">Укажите компанию, для которой готовится расчёт, и того, кто его подготовил — эти контакты попадут в PDF.</p>
     <div class="field">
-      <label for="companyNameInput">Название компании</label>
+      <label for="companyNameInput">Компания-клиент</label>
       <div class="input-shell"><input type="text" id="companyNameInput" placeholder="ТОО «Компания»" autocomplete="off"></div>
+    </div>
+    <div class="field">
+      <label for="managerNameInput">Расчёт подготовил (ФИО)</label>
+      <div class="input-shell"><input type="text" id="managerNameInput" placeholder="Иванов Иван" autocomplete="off"></div>
+    </div>
+    <div class="field">
+      <label for="managerPhoneInput">Телефон менеджера</label>
+      <div class="input-shell"><input type="tel" id="managerPhoneInput" placeholder="+7 700 000 00 00" autocomplete="off"></div>
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" id="modalCancelBtn" type="button">Отмена</button>
@@ -615,7 +623,7 @@
   ]);
   const coverageSpecial = setupCoverage('Special', [
     '',
-    '.'
+    ''
   ]);
 
   function syncFrom(source, target){
@@ -635,12 +643,16 @@
 
   const pdfOverlay = document.getElementById('pdfOverlay');
   const companyNameInput = document.getElementById('companyNameInput');
+  const managerNameInput = document.getElementById('managerNameInput');
+  const managerPhoneInput = document.getElementById('managerPhoneInput');
   const modalGenerateBtn = document.getElementById('modalGenerateBtn');
   const modalCancelBtn = document.getElementById('modalCancelBtn');
   const modalCloseBtn = document.getElementById('modalCloseBtn');
 
   function openModal(){
     companyNameInput.value = '';
+    managerNameInput.value = '';
+    managerPhoneInput.value = '';
     modalGenerateBtn.disabled = true;
     pdfOverlay.classList.add('open');
     setTimeout(()=> companyNameInput.focus(), 150);
@@ -674,6 +686,8 @@
   function generatePdf(){
     const companyName = companyNameInput.value.trim();
     if(!companyName) return;
+    const preparedByName = managerNameInput.value.trim();
+    const preparedByPhone = managerPhoneInput.value.trim();
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit:'pt', format:'a4' });
@@ -682,48 +696,60 @@
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const marginX = 44;
-    let y = 56;
+    const dateStr = new Date().toLocaleDateString('ru-RU');
+
+    // ---- header band ----
+    doc.setFillColor(244,248,255);
+    doc.rect(0, 0, pageWidth, 132, 'F');
 
     try{
-      doc.addImage(LOGO_B64, 'PNG', marginX, y-22, 118, 118*197/1280);
+      doc.addImage(LOGO_B64, 'PNG', marginX, 34, 177, 177*197/1280);
     }catch(e){}
 
     doc.setFont('DejaVu','bold');
-    doc.setFontSize(17);
+    doc.setFontSize(18);
     doc.setTextColor(29,29,31);
-    doc.text('Расчёт страховой премии', pageWidth-marginX, y, {align:'right'});
+    doc.text('Расчёт страховой премии', pageWidth-marginX, 52, {align:'right'});
 
-    y += 48;
-    doc.setDrawColor(225,225,228);
+    doc.setFont('DejaVu','normal');
+    doc.setFontSize(10.5);
+    doc.setTextColor(120,120,128);
+    doc.text('Коммерческое предложение по страхованию груза', pageWidth-marginX, 70, {align:'right'});
+
+    doc.setFontSize(9.5);
+    doc.setTextColor(150,150,158);
+    doc.text('от ' + dateStr, pageWidth-marginX, 88, {align:'right'});
+
+    doc.setDrawColor(0,113,227);
+    doc.setLineWidth(2);
+    doc.line(0, 132, pageWidth, 132);
+
+    let y = 168;
+
+    // ---- client block ----
+    doc.setFont('DejaVu','normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(150,150,158);
+    doc.text('РАСЧЁТ ДЛЯ', marginX, y);
+
+    y += 22;
+    doc.setFont('DejaVu','bold');
+    doc.setFontSize(20);
+    doc.setTextColor(29,29,31);
+    doc.text(companyName, marginX, y);
+
+    y += 22;
+    doc.setDrawColor(230,230,234);
     doc.setLineWidth(1);
     doc.line(marginX, y, pageWidth-marginX, y);
-    y += 32;
 
-    doc.setFont('DejaVu','normal');
-    doc.setFontSize(10.5);
-    doc.setTextColor(110,110,115);
-    doc.text('Компания', marginX, y);
-    doc.setFont('DejaVu','bold');
-    doc.setFontSize(13);
-    doc.setTextColor(29,29,31);
-    doc.text(companyName, marginX, y+18);
+    y += 34;
 
-    doc.setFont('DejaVu','normal');
-    doc.setFontSize(10.5);
-    doc.setTextColor(110,110,115);
-    doc.text('Дата расчёта', pageWidth-marginX, y, {align:'right'});
-    doc.setFont('DejaVu','bold');
-    doc.setFontSize(13);
-    doc.setTextColor(29,29,31);
-    doc.text(new Date().toLocaleDateString('ru-RU'), pageWidth-marginX, y+18, {align:'right'});
-
-    y += 44;
-
-    function block(result, points, accent){
+    function block(result, points, accent, number, fillTint, borderTint){
       if(!result) return;
 
-      const innerW = pageWidth - marginX*2 - 40;
-      const baseH = 128;
+      const pad = 24;
+      const innerW = pageWidth - marginX*2 - pad*2;
 
       doc.setFont('DejaVu','normal');
       doc.setFontSize(9.5);
@@ -732,67 +758,80 @@
         const lines = doc.splitTextToSize('•  ' + p, innerW);
         coverageLines = coverageLines.concat(lines);
       });
-      const coverageH = coverageLines.length ? (26 + coverageLines.length*13) : 0;
-      const boxH = baseH + coverageH;
 
-      if(y + boxH > pageHeight - 60){
+      const premiumOffset = 138;               // distance from box top to premium baseline (with pad=24)
+      const coverageExtra = coverageLines.length ? (52 + (coverageLines.length-1)*13) : 0;
+      const bottomPad = 30;
+      const boxH = premiumOffset + coverageExtra + bottomPad;
+
+      if(y + boxH > pageHeight - 70){
         doc.addPage();
         y = 56;
       }
 
-      doc.setFillColor(248,249,251);
-      doc.setDrawColor(233,234,238);
-      doc.roundedRect(marginX, y, pageWidth-marginX*2, boxH, 12, 12, 'FD');
+      doc.setFillColor(fillTint[0],fillTint[1],fillTint[2]);
+      doc.setDrawColor(borderTint[0],borderTint[1],borderTint[2]);
+      doc.setLineWidth(1);
+      doc.roundedRect(marginX, y, pageWidth-marginX*2, boxH, 14, 14, 'FD');
 
-      let iy = y + 30;
+      const badgeCX = marginX + pad + 12;
+      const badgeCY = y + pad + 10;
+      doc.setFillColor(accent[0],accent[1],accent[2]);
+      doc.circle(badgeCX, badgeCY, 12, 'F');
+      doc.setFont('DejaVu','bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(255,255,255);
+      doc.text(number, badgeCX, badgeCY+3.2, {align:'center'});
+
+      let iy = y + pad + 14;
       doc.setFont('DejaVu','bold');
       doc.setFontSize(13);
-      doc.setTextColor(accent[0],accent[1],accent[2]);
-      doc.text(result.label, marginX+20, iy);
+      doc.setTextColor(29,29,31);
+      doc.text(result.label, badgeCX + 22, iy);
 
-      const col2 = marginX + 20 + (pageWidth - marginX*2 - 40)/2;
+      const col2 = marginX + pad + (pageWidth - marginX*2 - pad*2)/2;
 
-      iy += 24;
+      iy += 30;
       doc.setFont('DejaVu','normal');
-      doc.setFontSize(10);
-      doc.setTextColor(110,110,115);
-      doc.text('Валюта / Ставка', marginX+20, iy);
-      doc.text('Страховая сумма', col2, iy);
+      doc.setFontSize(9.5);
+      doc.setTextColor(130,130,138);
+      doc.text('ВАЛЮТА / СТАВКА', marginX+pad, iy);
+      doc.text('СТРАХОВАЯ СУММА', col2, iy);
 
       iy += 18;
       doc.setFont('DejaVu','bold');
       doc.setFontSize(13);
-      doc.setTextColor(29,29,31);
-      doc.text(result.currency + '  ·  ' + String(result.rate).replace('.', ',') + ' %', marginX+20, iy);
+      doc.setTextColor(40,40,44);
+      doc.text(result.currency + '  ·  ' + String(result.rate).replace('.', ',') + ' %', marginX+pad, iy);
       doc.text(formatMoney(result.sum) + ' ' + result.currency, col2, iy);
 
-      iy += 26;
+      iy += 28;
       doc.setFont('DejaVu','normal');
-      doc.setFontSize(10);
-      doc.setTextColor(110,110,115);
-      doc.text('Страховая премия', marginX+20, iy);
+      doc.setFontSize(9.5);
+      doc.setTextColor(130,130,138);
+      doc.text('СТРАХОВАЯ ПРЕМИЯ', marginX+pad, iy);
 
-      iy += 22;
+      iy += 24;
       doc.setFont('DejaVu','bold');
-      doc.setFontSize(19);
+      doc.setFontSize(21);
       doc.setTextColor(accent[0],accent[1],accent[2]);
-      doc.text(formatMoney(result.premium) + ' ₸', marginX+20, iy);
+      doc.text(formatMoney(result.premium) + ' ₸', marginX+pad, iy);
 
       if(coverageLines.length){
-        iy += 18;
-        doc.setDrawColor(235,235,238);
+        iy += 20;
+        doc.setDrawColor(borderTint[0],borderTint[1],borderTint[2]);
         doc.setLineWidth(0.75);
-        doc.line(marginX+20, iy, pageWidth-marginX-20, iy);
-        iy += 16;
+        doc.line(marginX+pad, iy, pageWidth-marginX-pad, iy);
+        iy += 17;
         doc.setFont('DejaVu','normal');
         doc.setFontSize(9);
-        doc.setTextColor(140,140,145);
-        doc.text('ЧТО ПОКРЫВАЕТ ТАРИФ', marginX+20, iy);
-        iy += 14;
+        doc.setTextColor(140,140,148);
+        doc.text('ЧТО ПОКРЫВАЕТ ТАРИФ', marginX+pad, iy);
+        iy += 15;
         doc.setFontSize(10);
-        doc.setTextColor(60,60,64);
+        doc.setTextColor(60,60,66);
         coverageLines.forEach(line=>{
-          doc.text(line, marginX+20, iy);
+          doc.text(line, marginX+pad, iy);
           iy += 13;
         });
       }
@@ -800,16 +839,37 @@
       y += boxH + 18;
     }
 
-    block(cardStandard.lastResult, coverageStandard.getPoints(), [0,113,227]);
-    block(cardSpecial.lastResult, coverageSpecial.getPoints(), [31,169,113]);
+    block(cardStandard.lastResult, coverageStandard.getPoints(), [0,113,227], '01', [240,246,255], [210,228,250]);
+    block(cardSpecial.lastResult, coverageSpecial.getPoints(), [31,169,113], '02', [237,250,244], [200,232,218]);
 
-    y += 8;
-    doc.setDrawColor(225,225,228);
+    y += 4;
+    doc.setDrawColor(230,230,234);
+    doc.setLineWidth(1);
     doc.line(marginX, y, pageWidth-marginX, y);
-    y += 22;
+    y += 24;
+
+    if(preparedByName || preparedByPhone){
+      doc.setFont('DejaVu','normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(150,150,158);
+      doc.text('РАСЧЁТ ПОДГОТОВИЛ', marginX, y);
+      y += 17;
+      doc.setFont('DejaVu','bold');
+      doc.setFontSize(12.5);
+      doc.setTextColor(40,40,44);
+      let line = preparedByName || '';
+      if(preparedByPhone) line += (line ? '   ·   ' : '') + preparedByPhone;
+      doc.text(line, marginX, y);
+      y += 24;
+    }
+
     doc.setFont('DejaVu','normal');
     doc.setFontSize(9);
-    doc.setTextColor(165,165,170);
+    doc.setTextColor(160,160,166);
+    doc.text('Расчёт актуален на дату заполнения: ' + dateStr, marginX, y);
+    y += 15;
+    doc.setFontSize(8.5);
+    doc.setTextColor(178,178,183);
     doc.text('Премия = (Ставка % / 100) × Страховая сумма в KZT', marginX, y);
 
     const safeName = companyName.replace(/[\\/:*?"<>|]/g,'').trim().replace(/\s+/g,'_') || 'company';
