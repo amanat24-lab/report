@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Тулкит менеджера — Страхование грузов | Amanat</title>
+<style>
+  :root {
+    --accent: #1f9e4a;
+    --accent-dim: #157a38;
+    --ink: #0b0c0e;
+    --ink-soft: #23262b;
+    --muted: #4a4e56;
+    --muted-2: #6b6f78;
+    --line: rgba(255,255,255,0.55);
+    --line-soft: rgba(11,12,14,0.08);
+    --glass-bg: rgba(255,255,255,0.62);
+    --glass-bg-strong: rgba(255,255,255,0.78);
+    --glass-border: rgba(255,255,255,0.75);
+    --red-text: #b60018;
+    --red-bg: rgba(255,72,66,0.14);
+    --red-border: rgba(255,72,66,0.28);
+    --green-text: #106629;
+    --green-bg: rgba(31,158,74,0.14);
+    --green-border: rgba(31,158,74,0.30);
+    --amber-text: #7a4600;
+    --amber-bg: rgba(255,159,10,0.16);
+    --amber-border: rgba(255,159,10,0.32);
+    --blue-text: #1d3a8f;
+    --blue-bg: rgba(64,90,220,0.13);
+    --blue-border: rgba(64,90,220,0.28);
+  }
+
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  html { scroll-behavior: smooth; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+  }
+
+  body {
+    padding: 0 350px;
+    background:
+      radial-gradient(900px 620px at 8% 0%, rgba(46,204,113,0.55), transparent 60%),
+      radial-gradient(800px 560px at 92% 12%, rgba(64,140,255,0.40), transparent 58%),
+      radial-gradient(700px 700px at 30% 60%, rgba(255,206,84,0.30), transparent 55%),
+      radial-gradient(900px 800px at 85% 85%, rgba(120,80,255,0.28), transparent 55%),
+      linear-gradient(180deg, #eaf6ee 0%, #e7f0fb 45%, #f3eefc 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: none;
+    width: auto;
+    margin: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  /* ---------- GLASS BASE ---------- */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px rgba(20,30,40,0.10), inset 0 1px 0 rgba(255,255,255,0.5);
+  }
+
+  /* ---------- HEADER / COVER ---------- */
+  .cover {
+    margin-top: 40px;
+    padding: 56px 48px;
+    border-radius: 26px;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 12px 40px rgba(20,30,40,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+    position: relative;
+  }
+  .cover-kicker {
+    text-transform: uppercase;
+    letter-spacing: 1.6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--accent-dim);
+    margin-bottom: 18px;
+  }
+  .cover h1 {
+    font-size: 42px;
+    line-height: 1.14;
+    margin: 0 0 20px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    max-width: 700px;
+  }
+  .cover p {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--muted);
+    max-width: 560px;
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .cover-meta {
+    margin-top: 36px;
+    padding-top: 26px;
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    gap: 48px;
+    font-size: 13px;
+    color: var(--muted-2);
+  }
+  .cover-meta div strong {
+    display: block;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    letter-spacing: -0.01em;
+  }
+
+  /* ---------- STICKY NAV ---------- */
+  .nav {
+    position: sticky;
+    top: 16px;
+    z-index: 50;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 28px rgba(20,30,40,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+    padding: 12px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+  }
+  .nav a {
+    text-decoration: none;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+    transition: all 0.15s ease;
+    padding: 6px 12px;
+    border-radius: 10px;
+  }
+  .nav a:hover {
+    color: #fff;
+    background: var(--accent);
+  }
+
+  /* ---------- CONTENT WRAPPER ---------- */
+  .content { padding: 8px 0 100px; }
+
+  /* Intro strengths block */
+  .strengths {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 8px 0 56px;
+  }
+  .strength-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 28px rgba(20,30,40,0.09), inset 0 1px 0 rgba(255,255,255,0.5);
+    border-radius: 18px;
+    padding: 22px 24px;
+  }
+  .strength-card .num {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--accent-dim);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .strength-card p { margin: 0; font-size: 14.5px; color: var(--ink-soft); line-height: 1.55; font-weight: 500; }
+  .strength-card .tip {
+    margin-top: 10px;
+    font-size: 12.5px;
+    color: var(--muted);
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  /* Section headers */
+  .section { margin-top: 64px; }
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--accent-dim);
+    margin-bottom: 10px;
+  }
+  .section-label .bar {
+    width: 16px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  .section h2 {
+    font-size: 26px;
+    margin: 0 0 6px;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .section .lead {
+    font-size: 14.5px;
+    color: var(--muted);
+    margin: 0 0 26px;
+    max-width: 620px;
+    line-height: 1.55;
+    font-weight: 500;
+  }
+
+  /* Q&A card — each one its own glass block */
+  .qa {
+    background: var(--glass-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 6px 22px rgba(20,30,40,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+    border-radius: 18px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    padding: 22px 24px;
+  }
+  .qa .q {
+    padding: 0 0 10px;
+    background: transparent;
+    font-weight: 700;
+    font-size: 15.5px;
+    color: var(--ink);
+    border-bottom: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    letter-spacing: -0.01em;
+  }
+  .qa .q::before { content: none; }
+  .qa .a { padding: 0; font-size: 14.5px; color: var(--ink-soft); }
+  .qa .a p { margin: 0 0 10px; line-height: 1.6; font-weight: 500; }
+  .qa .a p:last-child { margin-bottom: 0; }
+  .qa .a ol, .qa .a ul { margin: 8px 0 0; padding-left: 20px; }
+  .qa .a li { margin-bottom: 5px; font-weight: 500; }
+
+  .cite {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    background: rgba(11,12,14,0.06);
+    border: 1px solid rgba(11,12,14,0.10);
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 8px;
+    white-space: nowrap;
+  }
+  .cite.note { background: rgba(11,12,14,0.06); color: var(--muted); }
+  .cite.deck { background: var(--blue-bg); color: var(--blue-text); border-color: var(--blue-border); }
+
+  /* Verdict badges */
+  .badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 4px 11px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+  }
+  .badge.yes { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); }
+  .badge.no { background: var(--red-bg); color: var(--red-text); border-color: var(--red-border); }
+  .badge.warn { background: var(--amber-bg); color: var(--amber-text); border-color: var(--amber-border); }
+
+  /* Package comparison */
+  .packages { display: grid; grid-template-columns: 1fr; gap: 12px; margin: 22px 0 12px; }
+  .package {
+    border-radius: 18px;
+    padding: 20px 22px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 6px 22px rgba(20,30,40,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .package.top { background: var(--green-bg); border-color: var(--green-border); }
+  .package .ptitle { flex: 0 0 auto; font-weight: 750; font-size: 15px; color: var(--ink); }
+  .package .ptag {
+    flex: 0 0 auto; margin-bottom: 0; font-size: 11px; color: var(--accent-dim);
+    font-weight: 800; text-transform: uppercase; letter-spacing: 0.4px;
+  }
+  .package p { flex: 1 1 100%; margin: 8px 0 0; font-size: 14px; color: var(--ink-soft); line-height: 1.55; font-weight: 500; }
+  .package .pfor { flex: 1 1 100%; font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line-soft); padding-top: 10px; margin-top: 10px; font-weight: 500; }
+
+  /* Risk catalog — each category its own glass block */
+  .risk-cat {
+    margin-bottom: 16px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 6px 22px rgba(20,30,40,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+    border-radius: 18px;
+    padding: 20px 22px 22px;
+  }
+  .risk-cat-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .risk-cat-head .icon {
+    font-size: 18px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.5); border: 1px solid var(--line-soft); border-radius: 11px; flex-shrink: 0;
+  }
+  .risk-cat-head h3 { margin: 0; font-size: 15.5px; font-weight: 750; color: var(--ink); letter-spacing: -0.01em; }
+  .risk-items { display: flex; flex-wrap: wrap; gap: 7px; margin-left: 50px; }
+  .risk-item {
+    background: rgba(11,12,14,0.055); border: 1px solid rgba(11,12,14,0.08);
+    border-radius: 20px; padding: 6px 13px; font-size: 12.5px; color: var(--ink-soft); font-weight: 500;
+  }
+  .risk-pkg-row { margin-left: 50px; margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .pkg-pill { font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 20px; border: 1px solid transparent; }
+  .pkg-pill.p1 { background: var(--green-bg); color: var(--green-text); border-color: var(--green-border); }
+  .pkg-pill.p2 { background: var(--amber-bg); color: var(--amber-text); border-color: var(--amber-border); }
+  .pkg-pill.p3 { background: rgba(11,12,14,0.06); color: var(--muted); border-color: rgba(11,12,14,0.10); }
+  .risk-source { margin-left: 50px; margin-top: 8px; }
+
+  /* Exclusions grid */
+  .excl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .excl-item {
+    background: var(--red-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--red-border);
+    box-shadow: 0 6px 20px rgba(182,0,24,0.06);
+    border-radius: 16px;
+    padding: 16px 18px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .excl-item strong { display: block; color: var(--red-text); font-size: 13.5px; margin-bottom: 4px; font-weight: 700; }
+  .excl-item.deck { background: var(--blue-bg); border-color: var(--blue-border); }
+  .excl-item.deck strong { color: var(--blue-text); }
+  .excl-item.warn-deck { background: var(--amber-bg); border-color: var(--amber-border); }
+  .excl-item.warn-deck strong { color: var(--amber-text); }
+
+  /* Checklist / memo */
+  .memo {
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 28px rgba(20,30,40,0.09), inset 0 1px 0 rgba(255,255,255,0.55);
+    border-radius: 20px;
+    padding: 28px 30px;
+  }
+  .memo ol { margin: 0; padding-left: 20px; }
+  .memo li { margin-bottom: 12px; font-size: 14.5px; color: var(--ink-soft); line-height: 1.55; font-weight: 500; }
+  .memo li:last-child { margin-bottom: 0; }
+
+  /* Red flags */
+  .flags { display: grid; gap: 12px; }
+  .flag {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--amber-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--amber-border);
+    box-shadow: 0 6px 20px rgba(122,70,0,0.06);
+    border-radius: 16px;
+    padding: 16px 20px;
+  }
+  .flag .icon { font-size: 15px; opacity: 0.85; }
+  .flag .txt { font-size: 13.5px; color: var(--ink-soft); line-height: 1.5; font-weight: 500; }
+  .flag .txt strong { color: var(--amber-text); font-weight: 700; }
+
+  /* Objection table */
+  .objections {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13.5px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 28px rgba(20,30,40,0.09), inset 0 1px 0 rgba(255,255,255,0.5);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  .objections th {
+    text-align: left; background: rgba(11,12,14,0.05); color: var(--muted);
+    padding: 12px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;
+    font-weight: 800; border-bottom: 1px solid var(--line-soft);
+  }
+  .objections td {
+    padding: 16px 20px; border-bottom: 1px solid var(--line-soft);
+    vertical-align: top; color: var(--ink-soft); line-height: 1.5; font-weight: 500;
+  }
+  .objections tr:last-child td { border-bottom: none; }
+  .objections td:first-child { font-weight: 700; color: var(--ink); width: 34%; padding-right: 24px; }
+
+  /* Legend footer note */
+  .legend {
+    margin-top: 56px;
+    padding: 20px 24px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 6px 22px rgba(20,30,40,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+    color: var(--muted);
+    border-radius: 18px;
+    font-size: 12px;
+    display: flex;
+    gap: 26px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-weight: 500;
+  }
+  .legend b { color: var(--ink); }
+  .legend .cite-example {
+    background: rgba(255,255,255,0.7);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 10.5px;
+    border: 1px solid var(--line-soft);
+  }
+
+  .footer-note {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line-soft);
+    font-size: 11.5px;
+    color: var(--muted-2);
+    text-align: center;
+    font-weight: 500;
+  }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; max-width: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="cover-kicker">Тулкит для отдела продаж</div>
+    <h1>Страхование грузов: справочник менеджера по продажам</h1>
+    <p>Быстрые ответы на вопросы клиентов о покрытии, исключениях, выплатах и процессе — с указанием пунктов договора для подтверждения на месте.</p>
+    <div class="cover-meta">
+      <div><strong>Amanat</strong>Правила добровольного страхования грузов</div>
+      <div><strong>Издание 4</strong>от 31.03.2023 г.</div>
+      <div><strong>Формат</strong>вопрос → короткий ответ → пункт договора</div>
+    </div>
+  </div>
+
+  <!-- STICKY NAV -->
+  <div class="nav">
+    <a href="#strengths">💪 Сильные стороны</a>
+    <a href="#cmr">🚚 Почему не CMR</a>
+    <a href="#coverage">📦 Покрытие</a>
+    <a href="#risks">⚠️ Риски</a>
+    <a href="#exclusions">🚫 Исключения</a>
+    <a href="#excluded-cargo">🐘 Не страхуем</a>
+    <a href="#money">💰 Деньги</a>
+    <a href="#process">🔄 Процесс</a>
+    <a href="#memo">📋 Памятка</a>
+    <a href="#flags">🚩 Красные флаги</a>
+    <a href="#objections">🗣️ Возражения</a>
+  </div>
+
+  <div class="content">
+
+    <!-- STRENGTHS -->
+    <div class="section" id="strengths" style="margin-top:0;">
+      <div class="section-label"><span class="bar"></span>Прежде чем звонить клиенту</div>
+      <h2>Наши сильные стороны</h2>
+      <p class="lead">Используйте это в начале разговора или когда клиент сомневается.</p>
+    </div>
+    <div class="strengths">
+      <div class="strength-card">
+        <div class="num">01 · УДОБСТВО</div>
+        <p>Весь процесс оформления — полностью онлайн, приезжать в офис не нужно.</p>
+      </div>
+      <div class="strength-card">
+        <div class="num">02 · ЦЕНА</div>
+        <p>Одни из самых низких тарифов на рынке. Каждый тариф считается индивидуально под груз и маршрут.</p>
+      </div>
+      <div class="strength-card" style="grid-column: span 2;">
+        <div class="num">03 · ПРИЁМ ПРИ ВОЗРАЖЕНИИ "У ДРУГИХ ДЕШЕВЛЕ"</div>
+        <p>Предложите клиенту прислать договор конкурента — сравните условия за 10 минут. На практике при разборе условий наш тариф чаще оказывается выгоднее, потому что у "дешёвых" предложений часто уже покрытие или больше исключений.</p>
+        <div class="tip">Реальный кейс: клиент был уверен, что у другой СК дешевле — после сравнения договоров оказалось, что условия Amanat выгоднее.</div>
+      </div>
+    </div>
+
+    <!-- SECTION: CMR ARGUMENT -->
+    <div class="section" id="cmr">
+      <div class="section-label"><span class="bar"></span>Аргумент в продажах</div>
+      <h2>Почему полиса CMR недостаточно для защиты вашего груза?</h2>
+      <p class="lead">Многие грузовладельцы ошибочно полагают, что наличие у перевозчика полиса CMR гарантирует им полную безопасность. На деле CMR — это страхование ответственности транспортной компании, а не самого товара. Вот 3 причины, почему надёжнее страховать сам груз:</p>
+    </div>
+    <div class="strengths" style="grid-template-columns: 1fr;">
+      <div class="strength-card">
+        <div class="num">01</div>
+        <p><strong>Компенсация за килограммы, а не за реальную стоимость.</strong> Выплаты по CMR жёстко ограничены международной конвенцией (в среднем это около $10–12 за 1 кг повреждённого веса). Если вы везёте электронику, одежду, медикаменты или дорогое оборудование, эта сумма покроет лишь крошечную часть убытков. Полноценное страхование груза возместит 100% стоимости товара по инвойсу.</p>
+      </div>
+      <div class="strength-card">
+        <div class="num">02</div>
+        <p><strong>Зависимость от вины водителя.</strong> Полис CMR сработает, только если доказано, что в порче груза виноват перевозчик. Если товар пострадал из-за стихийного бедствия, вооружённого ограбления, или в ДТП въехал другой водитель — CMR не выплатит ничего. Страхование груза покрывает убытки «от всех рисков» независимо от того, по чьей вине произошёл инцидент.</p>
+      </div>
+      <div class="strength-card">
+        <div class="num">03</div>
+        <p><strong>Скорость и нервы.</strong> Процесс получения выплат по CMR может тянуться месяцами, так как требует расследований и юридического доказательства вины перевозчика (иногда через суд). При страховании груза вы получаете деньги быстро и напрямую от страховой — достаточно просто зафиксировать сам факт повреждения или утраты.</p>
+      </div>
+    </div>
+
+    <!-- SECTION: COVERAGE -->
+    <div class="section" id="coverage">
+      <div class="section-label"><span class="bar"></span>Блок 1</div>
+      <h2>Про покрытие</h2>
+      <p class="lead">Что и когда застраховано.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Что покрывает страховка и когда начинается защита?</div>
+      <div class="a">
+        <p>С момента передачи груза перевозчику для погрузки и до выгрузки в месте назначения (или получения груза получателем). Плюс 5 дней хранения на складе после выгрузки уже включены бесплатно.</p>
+        <span class="cite">п. 16, п. 17</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Какая территория действия?</div>
+      <div class="a">
+        <p>Совпадает с маршрутом перевозки, указанным в договоре.</p>
+        <span class="cite">п. 18</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Какие есть варианты покрытия (пакеты)?</div>
+      <div class="a">
+        <p>Три пакета на выбор — см. таблицу ниже.</p>
+        <span class="cite">п. 8</span>
+      </div>
+    </div>
+
+    <div class="packages">
+      <div class="package top">
+        <div class="ptitle">Максимальный</div>
+        <div class="ptag">Все риски</div>
+        <p>Любые причины повреждения груза, кроме прямо исключённых.</p>
+        <div class="pfor">Для дорогого / чувствительного груза</div>
+        <span class="cite" style="margin-left:0;">п. 8, пп. 1</span>
+      </div>
+      <div class="package">
+        <div class="ptitle">Средний</div>
+        <div class="ptag">Частная авария</div>
+        <p>Конкретный список: пожар, ДТП, стихийные бедствия, крушение транспорта.</p>
+        <div class="pfor">Баланс цены и защиты</div>
+        <span class="cite" style="margin-left:0;">п. 8, пп. 2</span>
+      </div>
+      <div class="package">
+        <div class="ptitle">Базовый</div>
+        <div class="ptag">Крупные ЧП</div>
+        <p>Только крушение, пожар, взрыв. Мелкие повреждения не покрываются.</p>
+        <div class="pfor">Бюджетный вариант</div>
+        <span class="cite" style="margin-left:0;">п. 8, пп. 3</span>
+      </div>
+    </div>
+
+    <div class="qa" style="margin-top:18px;">
+      <div class="q">А если груз украли?</div>
+      <div class="a">
+        <span class="badge warn">Зависит от обстоятельств</span>
+        <p>Со следами взлома (сломанный замок, повреждённая пломба) — покрывается. Если пломбы и упаковка целые, а груз пропал — не страховой случай.</p>
+        <span class="cite">п. 10, пп. 3 и 6</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">А порча груза от времени или условий хранения?</div>
+      <div class="a">
+        <span class="badge no">Не покрывается</span>
+        <p>Естественная убыль (усушка, гниение, коррозия, испарение и т.п.) не покрывается никогда — это правило действует у любой страховой компании, не только у нас.</p>
+        <span class="cite">п. 10, пп. 5</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Можно застраховать расходы на саму доставку, а не только груз?</div>
+      <div class="a">
+        <span class="badge yes">Да</span>
+        <p>В страховую сумму можно включить провозную плату, охрану, таможенные сборы — до 20% сверху стоимости груза.</p>
+        <span class="cite">п. 6, пп. 3</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">А если перевозчик найден через биржу грузоперевозок (агрегатор)?</div>
+      <div class="a">
+        <span class="badge no">Не застраховано</span>
+        <p>Важно уточнять это у клиента ещё на этапе оформления — если часть маршрута везёт "биржевой" перевозчик, эту часть указывать в покрытии нельзя.</p>
+        <span class="cite">п. 12, пп. 6</span>
+      </div>
+    </div>
+
+    <!-- SECTION: RISKS -->
+    <div class="section" id="risks">
+      <div class="section-label"><span class="bar"></span>Блок 1.5</div>
+      <h2>Какие конкретно риски покрываются</h2>
+      <p class="lead">В пакетах выше риски объединены в формулировки — здесь они разложены по отдельности, как в тексте договора, с указанием, в каком пакете какой риск действует.</p>
+    </div>
+
+    <div class="risk-cat">
+      <div class="risk-cat-head">
+        <div class="icon">🔥</div>
+        <h3>Огонь и стихийные бедствия</h3>
+      </div>
+      <div class="risk-items">
+        <span class="risk-item">Пожар</span>
+        <span class="risk-item">Молния</span>
+        <span class="risk-item">Буря, вихрь</span>
+        <span class="risk-item">Другие стихийные бедствия</span>
+      </div>
+      <div class="risk-pkg-row">
+        <span class="pkg-pill p1">Пакет «Все риски»</span>
+        <span class="pkg-pill p2">Пакет «Частная авария»</span>
+        <span class="pkg-pill p3">Пакет «Базовый» — только полная утрата</span>
+      </div>
+      <div class="risk-source"><span class="cite">п. 8, пп. 2</span></div>
+    </div>
+
+    <div class="risk-cat">
+      <div class="risk-cat-head">
+        <div class="icon">🚛</div>
+        <h3>Транспортные происшествия</h3>
+      </div>
+      <div class="risk-items">
+        <span class="risk-item">Крушение или столкновение транспортных средств между собой</span>
+        <span class="risk-item">Удар о неподвижные или плавучие предметы</span>
+        <span class="risk-item">Посадка судна на мель</span>
+        <span class="risk-item">Провал мостов</span>
+        <span class="risk-item">Повреждение судна льдом</span>
+        <span class="risk-item">Подмочка груза забортной водой</span>
+      </div>
+      <div class="risk-pkg-row">
+        <span class="pkg-pill p1">Пакет «Все риски»</span>
+        <span class="pkg-pill p2">Пакет «Частная авария»</span>
+        <span class="pkg-pill p3">Пакет «Базовый» — включая случаи крушения</span>
+      </div>
+      <div class="risk-source"><span class="cite">п. 8, пп. 2</span></div>
+    </div>
+
+    <div class="risk-cat">
+      <div class="risk-cat-head">
+        <div class="icon">💥</div>
+        <h3>Взрыв</h3>
+      </div>
+      <div class="risk-items">
+        <span class="risk-item">Убытки от взрыва на транспортном средстве</span>
+      </div>
+      <div class="risk-pkg-row">
+        <span class="pkg-pill p1">Пакет «Все риски»</span>
+        <span class="pkg-pill p2">Пакет «Частная авария»</span>
+        <span class="pkg-pill p3">Пакет «Базовый»</span>
+      </div>
+      <div class="risk-source"><span class="cite">п. 8, пп. 2</span></div>
+    </div>
+
+    <div class="risk-cat">
+      <div class="risk-cat-head">
+        <div class="icon">🧯</div>
+        <h3>Меры по спасению и тушению пожара</h3>
+      </div>
+      <div class="risk-items">
+        <span class="risk-item">Убытки от мер, принятых для спасания груза</span>
+        <span class="risk-item">Убытки от мер по тушению пожара</span>
+      </div>
+      <div class="risk-pkg-row">
+        <span class="pkg-pill p1">Пакет «Все риски»</span>
+        <span class="pkg-pill p2">Пакет «Частная авария»</span>
+        <span class="pkg-pill p3">Пакет «Базовый»</span>
+      </div>
+      <div class="risk-source"><span class="cite">п. 8, пп. 2</span></div>
+    </div>
+
+    <div class="risk-cat">
+      <div class="risk-cat-head">
+        <div class="icon">🛟</div>
+        <h3>Пропажа транспортного средства без вести</h3>
+      </div>
+      <div class="risk-items">
+        <span class="risk-item">Пропажа судна без вести</span>
+        <span class="risk-item">Пропажа самолёта без вести</span>
+      </div>
+      <div class="risk-pkg-row">
+        <span class="pkg-pill p1">Пакет «Все риски»</span>
+        <span class="pkg-pill p2">Пакет «Частная авария»</span>
+        <span class="pkg-pill p3">Пакет «Базовый»</span>
+      </div>
+      <div class="risk-source"><span class="cite">п. 8, пп. 2</span></div>
+    </div>
+
+    <div class="risk-cat">
+      <div class="risk-cat-head">
+        <div class="icon">⚓</div>
+        <h3>Погрузка и выгрузка (только водный транспорт)</h3>
+      </div>
+      <div class="risk-items">
+        <span class="risk-item">Повреждение или утрата при погрузке груза на судно</span>
+        <span class="risk-item">При укладке груза на судно</span>
+        <span class="risk-item">При выгрузке груза с судна</span>
+        <span class="risk-item">При приёме судном топлива</span>
+      </div>
+      <div class="risk-pkg-row">
+        <span class="pkg-pill p1">Пакет «Все риски»</span>
+        <span class="pkg-pill p2">Пакет «Частная авария»</span>
+        <span class="pkg-pill p3">Пакет «Базовый» — только утрата</span>
+      </div>
+      <div class="risk-source"><span class="cite">п. 8, пп. 2</span></div>
+    </div>
+
+    <div class="risk-cat">
+      <div class="risk-cat-head">
+        <div class="icon">⚖️</div>
+        <h3>Общая авария</h3>
+      </div>
+      <div class="risk-items">
+        <span class="risk-item">Выбрасывание груза за борт для общего спасения</span>
+        <span class="risk-item">Повреждение судна и груза при спасательных мерах</span>
+        <span class="risk-item">Тушение возникшего на судне пожара</span>
+        <span class="risk-item">Снятие судна с мели</span>
+        <span class="risk-item">Вынужденный заход судна в порт</span>
+      </div>
+      <div class="risk-pkg-row">
+        <span class="pkg-pill p1">Пакет «Все риски»</span>
+        <span class="pkg-pill p2">Пакет «Частная авария»</span>
+        <span class="pkg-pill p3">Пакет «Базовый»</span>
+      </div>
+      <div class="risk-source"><span class="cite">п. 8, пп. 1–2</span></div>
+    </div>
+
+    <div class="risk-cat">
+      <div class="risk-cat-head">
+        <div class="icon">🧾</div>
+        <h3>Расходы на предотвращение убытков</h3>
+      </div>
+      <div class="risk-items">
+        <span class="risk-item">Необходимые и целесообразные расходы страхователя, направленные на предотвращение или уменьшение убытков (по указанию страховщика, в фактическом размере)</span>
+      </div>
+      <div class="risk-pkg-row">
+        <span class="pkg-pill p1">Пакет «Все риски»</span>
+        <span class="pkg-pill p2">Пакет «Частная авария»</span>
+        <span class="pkg-pill p3">Пакет «Базовый»</span>
+      </div>
+      <div class="risk-source"><span class="cite">п. 8, пп. 1–2</span></div>
+    </div>
+
+    <div class="risk-cat" style="border: 1px solid var(--green-line); background: var(--green-bg); border-radius: 10px; padding: 16px 18px 18px;">
+      <div class="risk-cat-head" style="margin-bottom: 8px;">
+        <div class="icon" style="background:#fff;">✨</div>
+        <h3>Любая иная причина повреждения или утраты</h3>
+      </div>
+      <p style="margin: 0 0 8px 46px; font-size: 13px; color: var(--ink);">Помимо перечисленных выше конкретных рисков, пакет «Все риски» дополнительно покрывает повреждение или утрату груза <strong>по любой другой причине</strong>, кроме случаев из раздела «Исключения» ниже. Это главное отличие максимального пакета — не нужно гадать, попадает ли конкретная причина ЧП в список.</p>
+      <div class="risk-pkg-row" style="margin-top:0;">
+        <span class="pkg-pill p1">Только пакет «Все риски»</span>
+      </div>
+      <div class="risk-source"><span class="cite">п. 8, пп. 1</span></div>
+    </div>
+
+
+    <div class="section" id="exclusions">
+      <div class="section-label"><span class="bar"></span>Блок 2</div>
+      <h2>Про исключения</h2>
+      <p class="lead">Что мы точно не покрываем — проговаривайте это клиенту заранее, чтобы не было конфликта при выплате.</p>
+    </div>
+
+    <div class="excl-grid">
+      <div class="excl-item">
+        <strong>Военные действия и санкции</strong>
+        Теракты, конфискация властями, гражданские волнения. <span class="cite">п. 10, пп. 1</span>
+      </div>
+      <div class="excl-item">
+        <strong>Конфликт РФ–Украина</strong>
+        Исключён полностью, включая любое расширение конфликта. <span class="cite">п. 11, пп. 8</span>
+      </div>
+      <div class="excl-item">
+        <strong>Заводской брак</strong>
+        Изначальный дефект товара — не повреждение при перевозке. <span class="cite">п. 11, пп. 5</span>
+      </div>
+      <div class="excl-item">
+        <strong>Штрафы, неустойки, упущенная выгода</strong>
+        Возмещается только сам груз, а не косвенные потери. <span class="cite">п. 11, пп. 7</span>
+      </div>
+      <div class="excl-item">
+        <strong>Состояние опьянения</strong>
+        Если ЧП произошло из-за алкоголя/наркотиков у сотрудников страхователя. <span class="cite">п. 10, пп. 7</span>
+      </div>
+      <div class="excl-item">
+        <strong>Смена маршрута без согласования</strong>
+        Защита прекращается, если маршрут не согласован заранее. <span class="cite">п. 11, пп. 2</span>
+      </div>
+      <div class="excl-item">
+        <strong>Возврат груза отправителю</strong>
+        Повреждение при обратной перевозке не покрывается по любой причине. <span class="cite">п. 11, пп. 3</span>
+      </div>
+      <div class="excl-item">
+        <strong>Форс-мажор ≠ военный форс-мажор</strong>
+        Пожар, буря, наводнение — покрываются, это другая категория. <span class="cite">п. 8</span>
+      </div>
+    </div>
+
+    <!-- SECTION: EXCLUDED CARGO TYPES -->
+    <div class="section" id="excluded-cargo">
+      <div class="section-label"><span class="bar"></span>Блок 2.5</div>
+      <h2>Грузы, которые мы не страхуем</h2>
+      <p class="lead">Это не из текста Правил, а из внутренней презентации по андеррайтингу — уточняйте на этапе первого разговора с клиентом, чтобы не терять время на расчёт по грузу, который не возьмём.</p>
+    </div>
+
+    <div class="excl-grid">
+      <div class="excl-item deck">
+        <strong>Животные / птицы</strong>
+        Перевозка живых животных и птиц не страхуется. <span class="cite deck">презентация</span>
+      </div>
+      <div class="excl-item deck">
+        <strong>Б/у имущество и техника</strong>
+        Серверы, компьютеры, принтеры и другая б/у техника. <span class="cite deck">презентация</span>
+      </div>
+      <div class="excl-item deck">
+        <strong>Предметы искусства и антиквариат</strong>
+        Картины, антиквариат, дорогостоящие и трудно оценимые изделия. <span class="cite deck">презентация</span>
+      </div>
+      <div class="excl-item deck">
+        <strong>Груз, уже повреждённый на момент отгрузки</strong>
+        Перевозка груза, который уже в нерабочем состоянии. <span class="cite deck">презентация</span>
+      </div>
+      <div class="excl-item deck">
+        <strong>Несоблюдение температурного режима</strong>
+        Как отдельный риск — не страхуется. <span class="cite deck">презентация</span>
+      </div>
+      <div class="excl-item deck">
+        <strong>Порча зерновых культур</strong>
+        Гниение, усыхание зерновых — не страхуется как риск. <span class="cite deck">презентация</span>
+      </div>
+      <div class="excl-item warn-deck">
+        <strong>Потеря товарного вида</strong>
+        Только по индивидуальному согласованию с андеррайтером и юристами. <span class="cite deck">презентация</span>
+      </div>
+      <div class="excl-item warn-deck">
+        <strong>Б/у автомобили</strong>
+        Покрывается не всегда — нужен осмотр и индивидуальное решение. <span class="cite deck">презентация</span>
+      </div>
+    </div>
+
+    <!-- SECTION: MONEY -->
+    <div class="section" id="money">
+      <div class="section-label"><span class="bar"></span>Блок 3</div>
+      <h2>Про деньги</h2>
+      <p class="lead">Тарифы и порядок выплат.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Сколько стоит полис?</div>
+      <div class="a">
+        <p>Тариф считается индивидуально под груз, маршрут и выбранный пакет — точную цифру без расчёта назвать нельзя. По рынку в среднем мы дешевле — стоит сразу предложить прислать расчёт.</p>
+        <span class="cite note">внутренняя практика</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">У другой компании дешевле, зачем платить вам?</div>
+      <div class="a">
+        <p>Предложите: <em>«Пришлите мне их договор, я за 10 минут сравню условия и тариф»</em>. Часто у более дешёвых предложений уже покрытие или больше исключений — это стоит показать наглядно, а не спорить на словах.</p>
+        <span class="cite note">внутренняя практика</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Сколько я получу при полной утрате груза?</div>
+      <div class="a">
+        <p>Действительная стоимость груза (по счёту-фактуре) минус стоимость того, что удалось спасти.</p>
+        <span class="cite">п. 35, пп. 1</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">А при частичном повреждении груза?</div>
+      <div class="a">
+        <p>Возмещаются расходы на восстановление повреждённой части с учётом износа заменяемых компонентов.</p>
+        <span class="cite">п. 35, пп. 3</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Если я застраховал груз на сумму меньше реальной стоимости?</div>
+      <div class="a">
+        <span class="badge warn">Важно предупредить клиента</span>
+        <p>Выплата будет пропорционально снижена. Пример: застраховали на 70% от реальной стоимости — при ущербе получите 70% от суммы ущерба, а не 100%.</p>
+        <span class="cite">п. 34</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Могу я застраховать груз в двух компаниях сразу?</div>
+      <div class="a">
+        <span class="badge yes">Можно</span>
+        <p>Не запрещено, но суммарная выплата от всех страховщиков не может превышать реальный ущерб.</p>
+        <span class="cite">п. 36</span>
+      </div>
+    </div>
+
+    <!-- SECTION: PROCESS -->
+    <div class="section" id="process">
+      <div class="section-label"><span class="bar"></span>Блок 4</div>
+      <h2>Про процесс</h2>
+      <p class="lead">Как всё работает на практике — от оформления до выплаты.</p>
+    </div>
+
+    <div class="qa">
+      <div class="q">Нужно приезжать в офис?</div>
+      <div class="a">
+        <span class="badge yes">Нет</span>
+        <p>Весь процесс оформления — онлайн.</p>
+        <span class="cite note">внутренняя практика</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Сколько ждать деньги после ЧП?</div>
+      <div class="a">
+        <p>До 15 рабочих дней после подачи всех документов. Если чего-то не хватает — вам сообщат об этом в течение 3 рабочих дней.</p>
+        <span class="cite">п. 44</span><span class="cite">п. 43</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Можно расторгнуть договор досрочно?</div>
+      <div class="a">
+        <span class="badge yes">Да</span>
+        <p>Условия и порядок прописываются в самом договоре.</p>
+        <span class="cite">п. 45, п. 46</span>
+      </div>
+    </div>
+
+    <div class="qa">
+      <div class="q">Что если получатель груза — иностранная компания под санкциями?</div>
+      <div class="a">
+        <p>Потребуется отдельное письмо от получателя с согласием на выплату в пользу страхователя. Стоит выяснить заранее, если у клиента иностранные партнёры.</p>
+        <span class="cite">п. 26, пп. 12</span><span class="cite">п. 42</span>
+      </div>
+    </div>
+
+    <!-- MEMO: what to do -->
+    <div class="section" id="memo">
+      <div class="section-label"><span class="bar"></span>Памятка клиенту</div>
+      <h2>Что делать, если груз повредился в пути</h2>
+      <p class="lead">Отправляйте это клиенту сразу при заключении договора — снижает риск спора при выплате.</p>
+    </div>
+    <div class="memo">
+      <ol>
+        <li>Сразу сообщить нам и в компетентные органы (полиция и т.д.) <span class="cite">п. 29, пп. 2–3</span></li>
+        <li>Если пломбы нарушены — <strong>не вскрывать</strong> груз до приезда представителя страховщика <span class="cite">п. 29, пп. 4</span></li>
+        <li>Сфотографировать пломбы (до и после вскрытия), повреждения, процесс разгрузки <span class="cite">п. 29, пп. 7</span></li>
+        <li>Составить акт приёма-передачи груза с подписями всех участников <span class="cite">п. 29, пп. 7</span></li>
+        <li>Не продавать и не утилизировать повреждённый груз без согласия страховщика <span class="cite">п. 29, пп. 10</span></li>
+      </ol>
+    </div>
+
+    <!-- RED FLAGS -->
+    <div class="section" id="flags">
+      <div class="section-label"><span class="bar"></span>Важно</div>
+      <h2>Красные флаги при оформлении</h2>
+      <p class="lead">Уточняйте это у клиента заранее — иначе высок риск отказа в выплате позже.</p>
+    </div>
+    <div class="flags">
+      <div class="flag">
+        <div class="icon">🚩</div>
+        <div class="txt"><strong>Перевозчик через биржу грузоперевозок</strong> — такие перевозки не страхуются. <span class="cite">п. 12, пп. 6</span></div>
+      </div>
+      <div class="flag">
+        <div class="icon">🚩</div>
+        <div class="txt"><strong>Смена маршрута без согласования</strong> — защита прекращается автоматически. <span class="cite">п. 11, пп. 2</span></div>
+      </div>
+      <div class="flag">
+        <div class="icon">🚩</div>
+        <div class="txt"><strong>Пломбы и упаковка</strong> должны оставаться целыми до осмотра — иначе споры при хищении. <span class="cite">п. 10, пп. 3; п. 29, пп. 4</span></div>
+      </div>
+      <div class="flag">
+        <div class="icon">🚩</div>
+        <div class="txt"><strong>Страховая сумма</strong> должна соответствовать реальной стоимости груза — иначе выплата будет пропорционально снижена. <span class="cite">п. 34</span></div>
+      </div>
+    </div>
+
+    <!-- OBJECTIONS -->
+    <div class="section" id="objections">
+      <div class="section-label"><span class="bar"></span>Шпаргалка</div>
+      <h2>Быстрые ответы на возражения</h2>
+    </div>
+    <table class="objections">
+      <tr><th>Возражение клиента</th><th>Что ответить</th></tr>
+      <tr>
+        <td>«У конкурента дешевле»</td>
+        <td>«Пришлите их договор, сравню за 10 минут» — часто у нас лучше условия при сопоставимой цене.</td>
+      </tr>
+      <tr>
+        <td>«Долго ждать выплату»</td>
+        <td>Нет — максимум 15 рабочих дней после полного пакета документов.</td>
+      </tr>
+      <tr>
+        <td>«Нужно ехать в офис?»</td>
+        <td>Нет, всё оформляется онлайн.</td>
+      </tr>
+      <tr>
+        <td>«Моя перевозка идёт через биржу перевозчиков»</td>
+        <td>Уточните заранее — такие перевозки не застрахованы, нужно проговорить это до оформления.</td>
+      </tr>
+    </table>
+
+    <!-- LEGEND -->
+    <div class="legend">
+      <div><span class="cite-example">п. 16</span> &nbsp;— пункт Правил страхования Amanat (издание 4 от 31.03.2023)</div>
+      <div><span class="cite-example" style="background:#9aa1a920;">внутренняя практика</span> &nbsp;— не из договора, а рабочий подход отдела продаж</div>
+      <div><span class="cite-example" style="background:#5b6b8c20;">презентация</span> &nbsp;— из внутренней презентации по андеррайтингу, не из текста Правил</div>
+    </div>
+
+    <div class="footer-note">
+      Тулкит подготовлен на основе «Правил добровольного страхования грузов» АО «СК Amanat», издание 4 от 31.03.2023 г. · Для внутреннего использования отделом продаж
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
