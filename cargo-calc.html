@@ -99,15 +99,16 @@
     color:var(--ink-faint); margin-bottom:10px; text-align:center;
   }
   .segmented{
-    display:flex; gap:5px; padding:5px;
+    display:flex; gap:4px; padding:4px;
     background:rgba(118,118,128,0.08); border-radius:14px;
-    justify-content:center; flex-wrap:wrap;
+    justify-content:center; flex-wrap:nowrap;
   }
   .seg-btn{
-    flex:1 1 60px; max-width:110px;
+    flex:1 1 0; min-width:0; max-width:70px;
     display:flex; align-items:center; justify-content:center;
-    padding:9px 10px; border:none; border-radius:10px; background:transparent;
-    color:var(--ink-soft); font-size:13px; font-weight:600; font-family:inherit;
+    padding:8px 4px; border:none; border-radius:9px; background:transparent;
+    color:var(--ink-soft); font-size:11.5px; font-weight:600; font-family:inherit;
+    letter-spacing:-0.01em;
     cursor:pointer; transition:background .25s ease, color .25s ease, box-shadow .25s ease;
   }
   .seg-btn.active{background:#fff; color:var(--ink); box-shadow:0 3px 10px rgba(0,0,0,0.08);}
@@ -149,19 +150,7 @@
   .rate-sum-row.single-field{justify-content:center;}
   .rate-sum-row.single-field .field{flex:0 1 260px;}
 
-  .card-calc-btn{
-    appearance:none; border:none; cursor:pointer; font-family:inherit; width:100%;
-    font-size:15px; font-weight:600; color:#fff;
-    background:linear-gradient(180deg,#1a93ff,var(--blue));
-    padding:13px 20px; border-radius:999px;
-    box-shadow:0 10px 22px rgba(0,113,227,0.28);
-    transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
-  }
-  .special .card-calc-btn{background:linear-gradient(180deg,#2fd189,var(--green)); box-shadow:0 10px 22px rgba(31,169,113,0.28);}
-  .card-calc-btn:hover:not(:disabled){transform:translateY(-1px);}
-  .card-calc-btn:disabled{opacity:0.35; cursor:not-allowed; box-shadow:none;}
-
-  .card-req-hint{font-size:12px; color:var(--ink-faint); min-height:15px; margin-top:-8px;}
+  .card-req-hint{font-size:12px; color:var(--ink-faint); min-height:15px; margin-top:4px;}
 
   .premium-out{width:100%; padding-top:14px; border-top:1px dashed var(--line);}
   .premium-out .label{font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px;}
@@ -287,6 +276,30 @@
   .formula-note{text-align:center; margin-top:36px; font-size:12.5px; color:var(--ink-faint); font-style:italic;}
   .formula-note code{font-style:normal; background:rgba(118,118,128,0.1); padding:2px 8px; border-radius:6px; color:var(--ink-soft);}
 
+  .guide-section{margin-top:36px; width:100%;}
+  .guide-card{padding:26px 28px;}
+  .guide-item{border-bottom:1px solid var(--line); padding:15px 0;}
+  .guide-item:first-of-type{padding-top:2px;}
+  .guide-item:last-child{border-bottom:none; padding-bottom:2px;}
+  .guide-item summary{
+    cursor:pointer; font-size:14px; font-weight:600; color:var(--ink);
+    list-style:none; display:flex; align-items:center; justify-content:space-between;
+    gap:14px; -webkit-tap-highlight-color:transparent;
+  }
+  .guide-item summary::-webkit-details-marker{display:none;}
+  .guide-item summary::after{
+    content:"+"; font-size:19px; font-weight:400; color:var(--ink-faint);
+    transition:transform .2s ease; flex-shrink:0; line-height:1;
+  }
+  .guide-item[open] summary::after{transform:rotate(45deg);}
+  .guide-content{margin-top:10px; font-size:13.5px; color:var(--ink-soft); line-height:1.6;}
+  .guide-content p{margin:0 0 8px;}
+  .guide-content p:last-child{margin-bottom:0;}
+  .guide-content ul{margin:8px 0 0; padding-left:20px;}
+  .guide-content li{margin-bottom:5px;}
+  .guide-content li:last-child{margin-bottom:0;}
+  .guide-content strong{color:var(--ink);}
+
   .tariffs.single{display:flex; justify-content:center;}
   .tariffs.single .tariff-card{max-width:460px; width:100%;}
 
@@ -359,7 +372,6 @@
         </div>
       </div>
 
-      <button class="card-calc-btn" id="calcStandardBtn" disabled>Рассчитать</button>
       <div class="card-req-hint" id="reqHintStandard"></div>
 
       <div class="premium-out">
@@ -419,7 +431,6 @@
         </div>
       </div>
 
-      <button class="card-calc-btn" id="calcSpecialBtn" disabled>Рассчитать</button>
       <div class="card-req-hint" id="reqHintSpecial"></div>
 
       <div class="premium-out">
@@ -448,6 +459,91 @@
   </div>
 
   <p class="formula-note">Премия = <code>(Ставка % / 100) × Страховая сумма в KZT</code></p>
+
+  <section class="guide-section" id="managerGuide">
+    <div class="guide-card glass">
+      <div class="section-label"><span class="dot"></span>Как пользоваться калькулятором</div>
+
+      <details class="guide-item">
+        <summary>Как задать тариф</summary>
+        <div class="guide-content">
+          <p>В каждой карточке ("Стандартный тариф" и "Особые условия") введите ставку в поле "Ставка" — это процент, который будет применяться к страховой сумме. Тарифы независимы: можно заполнить только один из них, тогда клиент увидит и сможет посчитать только его.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Как ввести валюту, курс и сумму</summary>
+        <div class="guide-content">
+          <p>Валюта и курс — общие для обеих карточек. Выберите валюту вверху любого блока. Если это не тенге — появится поле для курса, введите его вручную (по официальному курсу Нацбанка, ссылка рядом с полем). Как только курс указан, поле суммы разблокируется.</p>
+          <p>Страховая сумма вводится один раз и синхронизируется между обеими карточками. Премия считается сразу, без отдельной кнопки — просто вводите цифры.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Как заполнить "Что покрывает тариф"</summary>
+        <div class="guide-content">
+          <p>Под каждой карточкой — список коротких пунктов вместо сплошного текста. Нажмите "+ Добавить пункт", чтобы добавить условие покрытия (например, "Полная гибель груза при ДТП"). Пункты попадают в PDF и в ссылку для клиента.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Как скачать расчёт в PDF</summary>
+        <div class="guide-content">
+          <p>Кнопка "Скачать расчёт в PDF" становится активной, как только посчитан хотя бы один тариф. В открывшемся окне укажите компанию-клиента и по желанию — свои контакты (они попадут в PDF как "Расчёт подготовил"). Файл получится в виде готового коммерческого предложения с логотипом, тарифами и условиями покрытия.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Как отправить калькулятор клиенту</summary>
+        <div class="guide-content">
+          <p>Кнопка "Отправить клиенту" становится активной, как только заполнена хотя бы одна ставка. В открывшемся окне укажите название компании клиента и свои контакты — нажмите "Сформировать ссылку" и скопируйте её.</p>
+          <p>В эту ссылку зашиты: ставки тарифов, пункты покрытия и ваши контакты. Клиент по ссылке видит премию сразу, но <strong>не видит и не может изменить ставку</strong> — он только выбирает валюту и вводит сумму.</p>
+          <p><strong>Важно:</strong> ссылка статична — при открытии в ней всегда одни и те же ставка и условия. Если тариф для клиента изменился, сформируйте новую ссылку и отправьте её заново — старая продолжит работать со старыми цифрами.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="guide-section hidden" id="clientGuide">
+    <div class="guide-card glass">
+      <div class="section-label"><span class="dot"></span>Как пользоваться калькулятором</div>
+
+      <details class="guide-item">
+        <summary>Как выбрать валюту и курс</summary>
+        <div class="guide-content">
+          <p>Выберите валюту груза вверху карточки. Если это не тенге — появится поле для курса. Введите актуальный курс вручную (ссылка на курсы Нацбанка — рядом с полем). Курс не сохраняется между визитами, вводите его заново при каждом расчёте.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Как ввести страховую сумму</summary>
+        <div class="guide-content">
+          <p>Введите сумму в поле "Страховая сумма" — премия рассчитается сразу же, без отдельной кнопки. Если условий несколько, сумма одинаковая для всех — вводить её нужно только один раз.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Что означает блок "Что покрывает тариф"</summary>
+        <div class="guide-content">
+          <p>Это список условий, которые входят в выбранный тариф — что именно покрывает страхование. Список зафиксирован менеджером и не редактируется.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Как скачать расчёт в PDF</summary>
+        <div class="guide-content">
+          <p>Нажмите "Скачать расчёт в PDF" — потребуется указать только название вашей компании. Готовый файл будет содержать сумму, премию, условия покрытия и контакты менеджера.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Если возникли вопросы</summary>
+        <div class="guide-content">
+          <p>Контакты менеджера, который подготовил для вас этот расчёт, указаны в баннере в верхней части страницы.</p>
+        </div>
+      </details>
+    </div>
+  </section>
 </div>
 
 <div class="modal-overlay" id="shareOverlay">
@@ -598,7 +694,6 @@
     const sumShell         = sumInput.closest('.input-shell');
     const rateInput      = document.getElementById('rate'+suffix);
     const rateShell        = rateInput.closest('.input-shell');
-    const calcBtn         = document.getElementById('calc'+suffix+'Btn');
     const reqHint          = document.getElementById('reqHint'+suffix);
     const premiumEl         = document.getElementById('premium'+suffix);
     const premiumSubEl       = document.getElementById('premiumSub'+suffix);
@@ -685,13 +780,11 @@
 
     function validate(){
       const err = check();
-      calcBtn.disabled = !!err;
       reqHint.textContent = err || '';
+      return err;
     }
 
     function calc(){
-      const err = check();
-      if(err) return;
       const sum = parseFormatted(sumInput.value);
       const fx = currentFx();
       const sumKZT = sum * fx;
@@ -720,6 +813,16 @@
       refreshExportButton();
     }
 
+    // Live recalculation: runs on every relevant input change, no button needed
+    function recalc(){
+      const err = validate();
+      if(err){
+        resetPremium();
+      } else {
+        calc();
+      }
+    }
+
     attachSpacedInput(sumInput, ()=>{
       const val = parseFormatted(sumInput.value);
       const fx = currentFx();
@@ -731,22 +834,18 @@
       allCards.forEach(c => {
         if(c.sumInput !== sumInput){
           c.applySharedKZT();
-          c.resetPremium();
-          c.validate();
+          c.recalc();
         }
       });
-      resetPremium();
-      validate();
+      recalc();
     });
 
-    rateInput.addEventListener('input', ()=>{ resetPremium(); validate(); refreshShareButton(); });
+    rateInput.addEventListener('input', ()=>{ recalc(); refreshShareButton(); });
 
     fxRateInput.addEventListener('input', ()=>{
       const v = parseFloat(fxRateInput.value);
       setFxRateGlobal(v > 0 ? v : null, fxRateInput);
     });
-
-    calcBtn.addEventListener('click', calc);
 
     function hasValidRate(){
       const r = parseFloat(rateInput.value);
@@ -768,7 +867,7 @@
     }
 
     const handle = {
-      sumInput, rateInput, resetPremium, validate, applySharedKZT, applyCurrency, setFxDisplay,
+      sumInput, rateInput, resetPremium, validate, recalc, applySharedKZT, applyCurrency, setFxDisplay,
       hasValidRate, lockRate, hideRateField,
       get lastResult(){ return lastResult; }
     };
@@ -789,14 +888,14 @@
     sharedFx = null;
     allCards.forEach(c => c.applyCurrency(code));
     allCards.forEach(c => c.applySharedKZT());
-    allCards.forEach(c => { c.resetPremium(); c.validate(); });
+    allCards.forEach(c => c.recalc());
   }
 
   function setFxRateGlobal(value, sourceInput){
     sharedFx = value;
     allCards.forEach(c => c.setFxDisplay(value, sourceInput));
     allCards.forEach(c => c.applySharedKZT());
-    allCards.forEach(c => { c.resetPremium(); c.validate(); });
+    allCards.forEach(c => c.recalc());
   }
 
   const cardStandard = setupCard('Standard', 'Стандартный тариф');
@@ -889,6 +988,8 @@
 
   if(isClientMode){
     shareRow.classList.add('hidden');
+    document.getElementById('managerGuide').classList.add('hidden');
+    document.getElementById('clientGuide').classList.remove('hidden');
 
     if(clientConfig.co){
       document.getElementById('pageTitle').textContent = 'Калькулятор расчёта стоимости страхования груза для ' + clientConfig.co;
@@ -923,7 +1024,7 @@
       clientBanner.classList.remove('hidden');
     }
 
-    allCards.forEach(c => { c.resetPremium(); c.validate(); });
+    allCards.forEach(c => c.recalc());
   }
   refreshShareButton();
 
