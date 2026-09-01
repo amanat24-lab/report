@@ -6,22 +6,30 @@
 <title>Калькулятор страховой премии — Cargo Insurance</title>
 <style>
   :root{
-    --bg-0:#eef1f6;
-    --bg-1:#fbfbfd;
-    --ink:#1d1d1f;
-    --ink-soft:#6e6e73;
-    --ink-faint:#a1a1a6;
-    --glass:rgba(255,255,255,0.55);
-    --glass-border:rgba(255,255,255,0.8);
-    --line:rgba(60,60,67,0.12);
-    --blue:#0071e3;
-    --blue-ink:#0058b9;
-    --green:#1fa971;
+    --bg-0:#e7ecf5;
+    --bg-1:#f7f8fb;
+    --ink:#0c0c0e;
+    --ink-soft:#48484f;
+    --ink-faint:#7c7c84;
+    --glass:rgba(255,255,255,0.64);
+    --glass-border:rgba(255,255,255,0.9);
+    --line:rgba(30,30,40,0.13);
+    --blue:#0a84ff;
+    --blue-ink:#0060df;
+    --green:#12b76a;
     --card-pad:24px;
     --radius-lg:26px;
     --radius-sm:12px;
-    --shadow-glass:0 8px 30px rgba(0,0,0,0.05), 0 1px 1px rgba(0,0,0,0.03);
-    --shadow-lift:0 16px 40px rgba(0,0,0,0.08);
+    --shadow-glass:
+      0 20px 44px rgba(15,20,40,0.14),
+      0 2px 6px rgba(15,20,40,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.85),
+      inset 0 -1px 0 rgba(15,20,40,0.05);
+    --shadow-lift:
+      0 26px 56px rgba(15,20,40,0.20),
+      0 4px 10px rgba(15,20,40,0.08),
+      inset 0 1px 0 rgba(255,255,255,0.9),
+      inset 0 -1px 0 rgba(15,20,40,0.05);
   }
 
   *{box-sizing:border-box;}
@@ -32,9 +40,10 @@
     font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
     color:var(--ink);
     background:
-      radial-gradient(circle at 12% 8%, rgba(0,113,227,0.10), transparent 40%),
-      radial-gradient(circle at 88% 14%, rgba(31,169,113,0.10), transparent 42%),
-      radial-gradient(circle at 50% 100%, rgba(0,113,227,0.06), transparent 50%),
+      radial-gradient(circle at 12% 8%, rgba(10,132,255,0.30), transparent 42%),
+      radial-gradient(circle at 88% 12%, rgba(18,183,106,0.27), transparent 44%),
+      radial-gradient(circle at 30% 92%, rgba(10,132,255,0.20), transparent 48%),
+      radial-gradient(circle at 78% 88%, rgba(18,183,106,0.18), transparent 46%),
       linear-gradient(180deg, var(--bg-0), var(--bg-1) 60%);
     min-height:100%;
     -webkit-font-smoothing:antialiased;
@@ -44,25 +53,27 @@
     justify-content:center;
   }
 
-  .orb{position:fixed; border-radius:50%; filter:blur(70px); z-index:0; pointer-events:none;}
-  .orb-a{width:420px;height:420px;top:-140px;left:-120px;background:rgba(0,113,227,0.16);}
-  .orb-b{width:380px;height:380px;bottom:-160px;right:-100px;background:rgba(31,169,113,0.14);}
+  .orb{position:fixed; border-radius:50%; filter:blur(80px) saturate(180%); z-index:0; pointer-events:none;}
+  .orb-a{width:460px;height:460px;top:-160px;left:-140px;background:rgba(10,132,255,0.34);}
+  .orb-b{width:420px;height:420px;bottom:-180px;right:-120px;background:rgba(18,183,106,0.30);}
 
   .wrap{
-    position:relative; z-index:1; max-width:920px; width:100%; flex:0 1 920px;
+    position:relative; z-index:1; max-width:1370px; width:100%; flex:0 1 1370px;
     display:flex; flex-direction:column; align-items:stretch;
   }
 
-  header{text-align:center; margin-bottom:44px;}
+  header{text-align:center; margin-bottom:36px;}
   .logo-row{display:flex; justify-content:center; margin-bottom:18px;}
   .logo-img{height:48px; width:auto; display:block;}
-  h1{font-size:clamp(28px,4.4vw,40px); font-weight:700; letter-spacing:-0.02em; margin:0; text-align:center;}
-  .sub{margin:10px auto 0; max-width:480px; color:var(--ink-soft); font-size:15px; line-height:1.5; text-align:center;}
+  h1{font-size:clamp(28px,4.4vw,40px); font-weight:700; letter-spacing:-0.02em; margin:0; text-align:center; color:var(--ink);}
+  .sub{margin:10px auto 0; max-width:520px; color:var(--ink-soft); font-size:15px; line-height:1.5; text-align:center;}
 
   .glass{
-    background:var(--glass);
-    backdrop-filter:blur(24px) saturate(180%);
-    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    background:
+      linear-gradient(155deg, rgba(255,255,255,0.36) 0%, rgba(255,255,255,0) 34%),
+      var(--glass);
+    backdrop-filter:blur(30px) saturate(220%);
+    -webkit-backdrop-filter:blur(30px) saturate(220%);
     border:1px solid var(--glass-border);
     border-radius:var(--radius-lg);
     box-shadow:var(--shadow-glass);
@@ -71,33 +82,41 @@
 
   section{margin-bottom:22px; width:100%;}
 
-  .tariffs{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);
-    align-items:stretch;
-    gap:16px;
-    width:100%;
+  .section-label{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:12px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--ink-soft); margin:0 0 16px 0; text-align:center;
   }
-  .vs{align-self:center; justify-self:center; font-size:11px; font-weight:700; letter-spacing:0.1em; color:var(--ink-faint); text-transform:uppercase;}
-  .tariff-card{
-    padding:var(--card-pad);
-    display:flex; flex-direction:column; align-items:center; gap:16px;
-    text-align:center;
-    transition:box-shadow .25s ease;
-  }
-  .tariff-card:hover{box-shadow:var(--shadow-lift);}
-  .tariff-card.special{border-color:rgba(31,169,113,0.35);}
+  .section-label .dot{width:6px;height:6px;border-radius:50%; background:var(--blue);}
 
-  .badge-row{display:flex; align-items:center; justify-content:center; gap:10px;}
-  .badge{width:26px;height:26px;border-radius:50%; background:var(--blue); color:#fff; display:flex;align-items:center;justify-content:center; font-size:12px; font-weight:700; flex-shrink:0;}
-  .special .badge{background:var(--green);}
-  .badge-row .title{font-size:13px; font-weight:700; letter-spacing:0.02em; color:var(--ink-soft); text-transform:uppercase;}
-
-  .currency-block{width:100%;}
-  .currency-block .mini-label{
-    font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase;
-    color:var(--ink-faint); margin-bottom:10px; text-align:center;
+  /* ---------- tooltip ---------- */
+  .tooltip{position:relative; display:inline-flex; align-items:center;}
+  .tooltip-btn{
+    width:15px; height:15px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(118,118,128,0.18); color:var(--ink-faint); font-size:10px; font-weight:700;
+    display:inline-flex; align-items:center; justify-content:center; margin-left:5px; padding:0;
+    font-family:inherit; line-height:1;
   }
+  .tooltip-bubble{
+    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%) translateY(4px);
+    width:220px; background:rgba(20,22,30,0.94); color:#fff; font-size:12px; font-weight:400;
+    line-height:1.45; padding:10px 12px; border-radius:12px; text-align:left;
+    box-shadow:0 12px 28px rgba(0,0,0,0.28);
+    opacity:0; pointer-events:none; transition:opacity .15s ease, transform .15s ease;
+    z-index:30;
+  }
+  .tooltip-bubble::after{
+    content:""; position:absolute; top:100%; left:50%; transform:translateX(-50%);
+    border:6px solid transparent; border-top-color:rgba(20,22,30,0.94);
+  }
+  .tooltip.open .tooltip-bubble{opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0);}
+  .tooltip-bubble.wide{width:280px;}
+  .tooltip-bubble .example-line{display:block; margin-top:6px;}
+  .tooltip-bubble .example-line:first-child{margin-top:0;}
+  .tooltip-bubble strong{color:#fff; font-weight:700;}
+
+  /* ---------- currency & rates panel ---------- */
+  .rates-panel{padding:24px;}
   .segmented{
     display:flex; gap:4px; padding:4px;
     background:rgba(118,118,128,0.08); border-radius:14px;
@@ -111,117 +130,368 @@
     letter-spacing:-0.01em;
     cursor:pointer; transition:background .25s ease, color .25s ease, box-shadow .25s ease;
   }
-  .seg-btn.active{background:#fff; color:var(--ink); box-shadow:0 3px 10px rgba(0,0,0,0.08);}
+  .seg-btn.active{background:#fff; color:var(--ink); box-shadow:0 3px 10px rgba(15,20,40,0.14), inset 0 1px 0 rgba(255,255,255,0.9);}
   .seg-btn:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
 
-  .fx-row{
-    width:100%;
-    display:flex; flex-direction:column; align-items:center; gap:10px;
-    margin-top:14px;
+  .rates-grid{
+    margin-top:18px; display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    gap:10px;
   }
-  .fx-row.hidden{display:none;}
-  .fx-fields{display:flex; align-items:flex-end; justify-content:center; gap:14px; flex-wrap:wrap; width:100%;}
+  .rate-field{display:flex; flex-direction:column; gap:6px;}
+  .rate-field label{
+    font-size:11.5px; font-weight:600; color:var(--ink-soft); display:flex; align-items:center;
+  }
+  .rate-field label .req-dot{width:5px;height:5px;border-radius:50%; background:var(--blue); margin-left:5px;}
+  .rate-field .input-shell{height:42px;}
+  .rate-field .input-shell input{font-size:14px;}
+
+  .rates-footer{
+    margin-top:16px; display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap;
+  }
+  .fx-link{font-size:12.5px; color:var(--blue); text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:5px;}
+  .fx-link:hover{text-decoration:underline;}
+  .fx-hint{font-size:11.5px; color:var(--ink-faint); text-align:center;}
+
+  /* ---------- cargo category picker ---------- */
+  .category-panel{padding:22px 24px;}
+  .category-select-row{display:flex; justify-content:center;}
+  .category-select-row select{
+    width:100%; max-width:420px; border:1px solid var(--line); border-radius:12px;
+    padding:11px 14px; font-size:14px; font-family:inherit; color:var(--ink);
+    background:#fff; outline:none; cursor:pointer;
+  }
+  .category-select-row select:focus{border-color:var(--blue); box-shadow:0 0 0 4px rgba(10,132,255,0.14);}
+  .category-risks{
+    margin-top:14px; text-align:center;
+  }
+  .category-risks-label{font-size:11.5px; color:var(--ink-faint); margin-bottom:8px;}
+  .category-risks-chips{display:flex; flex-wrap:wrap; gap:6px; justify-content:center;}
+  .category-risk-chip{
+    display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--ink-soft);
+    background:rgba(118,118,128,0.1); padding:5px 10px; border-radius:999px;
+  }
+  .recommend-badge{
+    display:none; align-items:center; gap:4px; font-size:9.5px; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.02em; color:#fff; background:linear-gradient(135deg,#ff9f0a,#ff6b35);
+    padding:3px 9px; border-radius:999px; white-space:nowrap;
+  }
+  .tariff-card.recommended .recommend-badge{display:inline-flex;}
+  .tariff-card.recommended{box-shadow:0 0 0 2px rgba(255,159,10,0.55), var(--shadow-glass);}
+  .category-reason{
+    margin-top:12px; font-size:12.5px; color:var(--ink-soft); line-height:1.55; text-align:left;
+    background:rgba(255,159,10,0.08); border:1px solid rgba(255,159,10,0.25); border-radius:12px;
+    padding:11px 13px;
+  }
+  .category-reason strong{color:var(--ink);}
+  .cargo-comment-field{margin-top:16px; text-align:left;}
+  .cargo-comment-field label{display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:8px;}
+  .cargo-comment-field textarea{
+    width:100%; resize:vertical; min-height:52px; border:1px solid var(--line);
+    border-radius:var(--radius-sm); background:#fff; font-family:inherit; font-size:13px;
+    color:var(--ink); padding:10px 12px; line-height:1.45; outline:none;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .cargo-comment-field textarea:focus{border-color:var(--blue); box-shadow:0 0 0 4px rgba(10,132,255,0.12);}
+  .cargo-comment-field textarea::placeholder{color:var(--ink-faint);}
+
+  .block-toggle-header{
+    display:flex; align-items:center; gap:10px; padding:0 10px; margin-bottom:6px;
+  }
+  .block-toggle-header span:first-child{flex:1;}
+  .block-toggle-header span{font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.03em; color:var(--ink-faint); width:64px; text-align:center;}
+  .block-toggle-list{display:flex; flex-direction:column; gap:6px;}
+  .block-toggle-row{
+    display:flex; align-items:center; gap:10px; padding:8px 10px;
+    background:rgba(255,255,255,0.5); border:1px solid var(--line); border-radius:10px;
+  }
+  .block-toggle-row .name{font-size:12.5px; color:var(--ink); flex:1;}
+  .block-toggle-row .opt{width:64px; display:flex; justify-content:center;}
+  .block-toggle-row input[type=checkbox]{width:15px; height:15px; accent-color:var(--blue); cursor:pointer;}
+  .block-toggle-row .opt.na{color:var(--ink-faint); font-size:12px;}
+
+  .pdf-tariff-picker{display:flex; flex-direction:column; gap:8px;}
+  .pdf-tariff-row{
+    display:flex; align-items:center; gap:10px; padding:9px 12px;
+    background:rgba(255,255,255,0.5); border:1px solid var(--line); border-radius:10px;
+  }
+  .pdf-tariff-row input[type=checkbox]{width:16px; height:16px; accent-color:var(--blue); cursor:pointer; flex-shrink:0;}
+  .pdf-tariff-row .name{flex:1; font-size:13px; color:var(--ink);}
+  .pdf-tariff-row.disabled{opacity:0.5;}
+  .pdf-tariff-row .hint{font-size:10.5px; color:var(--ink-faint);}
+
+  /* ---------- field / input primitives ---------- */
   .field{display:flex; flex-direction:column; gap:8px; flex:0 1 100%; min-width:0;}
-  .field label{font-size:12px; font-weight:600; color:var(--ink-soft); letter-spacing:0.02em;}
+  .field label{font-size:12px; font-weight:600; color:var(--ink-soft); letter-spacing:0.02em; display:flex; align-items:center; justify-content:center;}
   .input-shell{
     display:flex; align-items:center; background:#fff; border:1px solid var(--line);
     border-radius:var(--radius-sm); padding:0 12px; height:48px; min-width:0; width:100%;
     transition:border-color .2s ease, box-shadow .2s ease;
   }
-  .input-shell:focus-within{border-color:var(--blue); box-shadow:0 0 0 4px rgba(0,113,227,0.12);}
+  .input-shell:focus-within{border-color:var(--blue); box-shadow:0 0 0 4px rgba(10,132,255,0.14);}
   .input-shell .prefix{color:var(--ink-faint); font-weight:600; margin-right:6px; font-size:15px; white-space:nowrap;}
   .input-shell .suffix{color:var(--ink-faint); font-weight:600; margin-left:6px; font-size:14px;}
   .input-shell input{flex:1; border:none; outline:none; font-size:16px; font-family:inherit; color:var(--ink); background:transparent; min-width:0; text-align:left;}
   .input-shell input::placeholder{color:var(--ink-faint);}
-
-  .fx-link{font-size:12.5px; color:var(--blue); text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:5px;}
-  .fx-link:hover{text-decoration:underline;}
-  .fx-hint{font-size:11.5px; color:var(--ink-faint); text-align:center; max-width:340px; line-height:1.4;}
-
-  .input-shell.disabled{background:rgba(118,118,128,0.06); border-style:dashed;}
+  .input-shell.disabled{background:rgba(118,118,128,0.06);}
   .input-shell.disabled input{color:var(--ink-faint);}
-  .sum-warning{
-    font-size:11.5px; color:#ff3b30; text-align:left; margin-top:6px;
-    min-height:0; line-height:1.4;
-  }
+  .input-shell.locked{background:rgba(118,118,128,0.06);}
+  .input-shell.locked input{color:var(--ink-soft); cursor:not-allowed;}
+
+  .sum-warning{font-size:11.5px; color:#ff3b30; text-align:left; margin-top:6px; line-height:1.4;}
 
   .rate-sum-row{display:flex; gap:12px; width:100%; min-width:0;}
   .rate-sum-row .field{flex:1; min-width:0;}
   .rate-sum-row.single-field{justify-content:center;}
   .rate-sum-row.single-field .field{flex:0 1 260px;}
 
-  .card-req-hint{font-size:12px; color:var(--ink-faint); min-height:15px; margin-top:4px;}
+  .card-req-hint{font-size:12px; color:var(--ink-faint); min-height:15px; margin-top:4px; text-align:center;}
 
-  .premium-out{width:100%; padding-top:14px; border-top:1px dashed var(--line);}
-  .premium-out .label{font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px;}
-  .premium-out .value{font-size:26px; font-weight:700; letter-spacing:-0.01em; color:var(--ink-faint); transition:color .2s ease; font-variant-numeric:tabular-nums;}
+  /* ---------- tariffs ---------- */
+  .tariffs{
+    display:flex;
+    align-items:stretch;
+    gap:16px;
+    width:100%;
+  }
+  .tariffs .tariff-card{flex:1 1 0; min-width:0;}
+  .tariffs.single{justify-content:center;}
+  .tariffs.single .tariff-card{flex:0 1 460px;}
+  .vs{flex:0 0 auto; align-self:center; font-size:11px; font-weight:700; letter-spacing:0.1em; color:var(--ink-faint); text-transform:uppercase;}
+  .package-desc{
+    font-size:12px; color:var(--ink-soft); line-height:1.55; text-align:left;
+    background:rgba(255,255,255,0.4); border:1px solid var(--line); border-radius:12px;
+    padding:11px 13px; width:100%;
+  }
+  .tariff-card{
+    padding:var(--card-pad);
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+    text-align:center; position:relative;
+    transition:box-shadow .25s ease, transform .25s ease;
+  }
+  .tariff-card:hover{box-shadow:var(--shadow-lift); transform:translateY(-2px);}
+  .tariff-card.special{border-color:rgba(26,157,104,0.4);}
+  .tariff-card.standard{
+    background:
+      linear-gradient(155deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 34%),
+      radial-gradient(circle at 18% -6%, rgba(10,132,255,0.20), transparent 62%),
+      var(--glass);
+  }
+  .tariff-card.special{
+    background:
+      linear-gradient(155deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 34%),
+      radial-gradient(circle at 18% -6%, rgba(18,183,106,0.20), transparent 62%),
+      var(--glass);
+  }
+
+  .badge-row{display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;}
+  .badge{width:26px;height:26px;border-radius:50%; background:var(--blue); color:#fff; display:flex;align-items:center;justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; box-shadow:0 3px 8px rgba(10,132,255,0.35), inset 0 1px 0 rgba(255,255,255,0.4);}
+  .special .badge{background:var(--green); box-shadow:0 3px 8px rgba(18,183,106,0.35), inset 0 1px 0 rgba(255,255,255,0.4);}
+  .badge-row .title{font-size:13px; font-weight:700; letter-spacing:0.02em; color:var(--ink-soft); text-transform:uppercase;}
+
+  /* ---------- franchise ---------- */
+  .franchise-config{width:100%; display:flex; gap:12px;}
+  .franchise-config .field{flex:1;}
+  .franchise-type-select{
+    width:100%; height:48px; border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:0 12px; font-size:13.5px; font-family:inherit; color:var(--ink);
+    background:#fff; outline:none; cursor:pointer;
+  }
+  .franchise-type-select:focus{border-color:var(--blue); box-shadow:0 0 0 4px rgba(10,132,255,0.12);}
+  .franchise-note-field{width:100%;}
+  .franchise-note-field textarea{
+    width:100%; resize:vertical; min-height:44px; border:1px solid var(--line);
+    border-radius:var(--radius-sm); background:#fff; font-family:inherit; font-size:13px;
+    color:var(--ink-soft); padding:10px 12px; line-height:1.45; outline:none;
+  }
+  .franchise-note-field textarea:focus{border-color:var(--blue); box-shadow:0 0 0 4px rgba(10,132,255,0.12);}
+
+  .franchise-row{
+    width:100%; display:flex; align-items:center; gap:12px; text-align:left;
+    padding:12px 14px; background:rgba(255,255,255,0.45); border:1px solid var(--line); border-radius:14px;
+  }
+  .franchise-row .switch{position:relative; width:42px; height:25px; flex-shrink:0;}
+  .franchise-row .switch input{opacity:0; width:100%; height:100%; margin:0; cursor:pointer; position:absolute; z-index:2;}
+  .franchise-row .switch .track{position:absolute; inset:0; background:rgba(118,118,128,0.28); border-radius:999px; transition:background .2s ease;}
+  .franchise-row .switch .thumb{
+    position:absolute; top:2px; left:2px; width:21px; height:21px; border-radius:50%; background:#fff;
+    box-shadow:0 2px 4px rgba(0,0,0,0.22); transition:transform .2s ease;
+  }
+  .franchise-row .switch input:checked + .track{background:var(--green);}
+  .franchise-row .switch input:checked ~ .thumb{transform:translateX(17px);}
+  .franchise-text{flex:1; min-width:0;}
+  .franchise-text .title{font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:2px;}
+  .franchise-text .note{font-size:11.5px; color:var(--ink-soft); line-height:1.4;}
+
+  .send-toggle-row{
+    width:100%; display:flex; align-items:center; justify-content:center; gap:10px; text-align:left;
+    padding:9px 14px; background:rgba(255,255,255,0.4); border:1px solid var(--line); border-radius:12px;
+  }
+  .send-toggle-row .switch{position:relative; width:38px; height:23px; flex-shrink:0;}
+  .send-toggle-row .switch input{opacity:0; width:100%; height:100%; margin:0; cursor:pointer; position:absolute; z-index:2;}
+  .send-toggle-row .switch .track{position:absolute; inset:0; background:rgba(118,118,128,0.28); border-radius:999px; transition:background .2s ease;}
+  .send-toggle-row .switch .thumb{
+    position:absolute; top:2px; left:2px; width:19px; height:19px; border-radius:50%; background:#fff;
+    box-shadow:0 2px 4px rgba(0,0,0,0.22); transition:transform .2s ease;
+  }
+  .send-toggle-row .switch input:checked + .track{background:var(--blue);}
+  .send-toggle-row .switch input:checked ~ .thumb{transform:translateX(15px);}
+  .send-toggle-row .send-toggle-label{font-size:12px; font-weight:600; color:var(--ink-soft);}
+  .send-toggle-row.off{opacity:0.55;}
+
+  /* ---------- premium + ring ---------- */
+  .premium-out{width:100%; padding-top:14px; border-top:1px dashed var(--line); display:flex; align-items:center; gap:14px;}
+  .ring-wrap{position:relative; width:56px; height:56px; flex-shrink:0;}
+  .ring-wrap svg{width:100%; height:100%; transform:rotate(-90deg);}
+  .ring-track{fill:none; stroke:rgba(118,118,128,0.18); stroke-width:6;}
+  .ring-progress{
+    fill:none; stroke-width:6; stroke-linecap:round;
+    transition:stroke-dashoffset .5s cubic-bezier(.4,0,.2,1);
+  }
+  .ring-progress-inner{
+    fill:none; stroke-width:6; stroke-linecap:round;
+    transition:stroke-dashoffset .5s cubic-bezier(.4,0,.2,1);
+  }
+  .ring-center{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; color:var(--ink); pointer-events:none; line-height:1.1;
+  }
+  .ring-wrap.pulse{animation:ringPulse .5s ease;}
+  @keyframes ringPulse{0%{transform:scale(1);} 45%{transform:scale(1.1);} 100%{transform:scale(1);}}
+
+  /* ---------- "calculating" overlay (covers the whole tariff card) ---------- */
+  .card-overlay{
+    position:absolute; inset:0; z-index:20; border-radius:inherit;
+    background:rgba(255,255,255,0.62);
+    backdrop-filter:blur(8px) saturate(160%); -webkit-backdrop-filter:blur(8px) saturate(160%);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .card-overlay.visible{opacity:1; pointer-events:auto;}
+  .calc-loading{display:flex; flex-direction:column; align-items:center; gap:12px;}
+  .calc-icon{
+    width:52px; height:60px; flex-shrink:0; background:#fff; border:1px solid var(--line);
+    border-radius:13px; padding:6px; display:flex; flex-direction:column; gap:5px;
+    box-shadow:0 10px 24px rgba(15,20,40,0.14);
+  }
+  .calc-screen{
+    height:13px; background:rgba(57,181,74,0.14); border-radius:4px;
+    display:flex; align-items:center; justify-content:flex-end; padding:0 4px; overflow:hidden;
+  }
+  .calc-screen .calc-dots{font-size:10px; font-weight:700; color:var(--green); letter-spacing:2px;}
+  .calc-screen .calc-dots span{animation:calcDotBlink 1.2s ease-in-out infinite;}
+  .calc-screen .calc-dots span:nth-child(1){animation-delay:0s;}
+  .calc-screen .calc-dots span:nth-child(2){animation-delay:.2s;}
+  .calc-screen .calc-dots span:nth-child(3){animation-delay:.4s;}
+  @keyframes calcDotBlink{0%,80%,100%{opacity:0.15;} 40%{opacity:1;}}
+  .calc-buttons{flex:1; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr); gap:3px;}
+  .calc-buttons span{background:rgba(118,118,128,0.2); border-radius:3px; animation:calcPress 1.6s ease-in-out infinite;}
+  .calc-buttons span:nth-child(1){animation-delay:0s;}
+  .calc-buttons span:nth-child(2){animation-delay:.12s;}
+  .calc-buttons span:nth-child(3){animation-delay:.24s;}
+  .calc-buttons span:nth-child(4){animation-delay:.36s;}
+  .calc-buttons span:nth-child(5){animation-delay:.48s;}
+  .calc-buttons span:nth-child(6){animation-delay:.6s;}
+  .calc-buttons span:nth-child(7){animation-delay:.72s;}
+  .calc-buttons span:nth-child(8){animation-delay:.84s;}
+  .calc-buttons span:nth-child(9){animation-delay:.96s;}
+  @keyframes calcPress{0%,100%{transform:scale(1); background:rgba(118,118,128,0.2);} 40%{transform:scale(0.75); background:var(--green);}}
+  .calc-loading-text{font-size:13px; color:var(--ink-soft); font-weight:600;}
+  .premium-body{flex:1; min-width:0; text-align:left;}
+  .premium-out .label{font-size:11px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:4px; display:flex; align-items:center; flex-wrap:wrap; gap:6px;}
+  .value-badge{
+    display:inline-flex; align-items:center; font-size:9px; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.03em; color:#fff; background:linear-gradient(135deg,var(--blue),var(--green));
+    padding:2px 8px; border-radius:999px; white-space:nowrap;
+  }
+  .premium-out .value{font-size:24px; font-weight:700; letter-spacing:-0.01em; color:var(--ink-faint); transition:color .2s ease; font-variant-numeric:tabular-nums;}
   .premium-out .value.ready{color:var(--ink);}
   .special .premium-out .value.ready{color:var(--green);}
   .standard .premium-out .value.ready{color:var(--blue-ink);}
-  .premium-out .premium-sub{
-    font-size:12px; color:var(--ink-faint); margin-top:4px;
-    font-variant-numeric:tabular-nums;
+  .value-pitch{margin-top:9px; font-size:12px; color:var(--ink-soft); line-height:1.5;}
+  .value-pitch strong{color:var(--ink); font-weight:700;}
+  .ring-legend{display:flex; flex-direction:column; gap:2px; margin-top:6px;}
+  .ring-legend-item{display:flex; align-items:center; gap:6px; font-size:11px; color:var(--ink-soft);}
+  .ring-legend-dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+  .ring-legend-dot.outer{background:linear-gradient(135deg,var(--blue),var(--green));}
+  .ring-legend-dot.inner{background:#ff9f0a;}
+  .premium-chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;}
+  .premium-chip{
+    font-size:11px; font-weight:600; color:var(--ink-soft); background:rgba(118,118,128,0.1);
+    padding:4px 9px; border-radius:999px; font-variant-numeric:tabular-nums;
   }
 
+  /* ---------- coverage ---------- */
   .coverage-block{width:100%; padding-top:14px; border-top:1px solid var(--line); text-align:left;}
-  .coverage-block .mini-label{text-align:left; margin-bottom:10px;}
-  .coverage-list{display:flex; flex-direction:column; gap:8px; width:100%; margin-bottom:10px;}
-  .coverage-item{display:flex; align-items:center; gap:8px;}
-  .coverage-item .bullet{color:var(--ink-faint); font-size:13px; flex-shrink:0;}
-  .coverage-item input{
-    flex:1; min-width:0; border:1px solid var(--line); border-radius:10px;
-    padding:9px 12px; font-size:13px; font-family:inherit; color:var(--ink);
-    background:#fff; outline:none; transition:border-color .2s ease, box-shadow .2s ease;
+  .coverage-block .mini-label{display:block; font-size:13px; font-weight:700; color:var(--ink); margin-bottom:10px; text-align:left; transition:color .2s ease;}
+  .coverage-footer{
+    margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);
+    font-size:12.5px; font-weight:700; color:var(--green); text-align:center;
   }
-  .coverage-item input:focus{border-color:var(--blue); box-shadow:0 0 0 3px rgba(0,113,227,0.12);}
-  .coverage-item input::placeholder{color:var(--ink-faint);}
-  .coverage-remove{
-    width:24px; height:24px; border:none; border-radius:50%; flex-shrink:0;
-    background:rgba(118,118,128,0.12); color:var(--ink-faint); font-size:15px; line-height:1;
+
+  .coverage-chips{display:flex; flex-wrap:wrap; gap:8px; width:100%; margin-bottom:12px;}
+  .coverage-chip{
+    display:flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--line);
+    border-radius:999px; padding:6px 8px 6px 12px; font-size:12.5px; color:var(--ink);
+  }
+  .coverage-chip .emoji{font-size:14px;}
+  .coverage-chip .coverage-remove{
+    width:18px; height:18px; border:none; border-radius:50%; flex-shrink:0;
+    background:rgba(118,118,128,0.14); color:var(--ink-faint); font-size:12px; line-height:1;
     cursor:pointer; display:flex; align-items:center; justify-content:center;
     transition:background .2s ease, color .2s ease;
   }
-  .coverage-remove:hover{background:rgba(255,59,48,0.12); color:#ff3b30;}
+  .coverage-chip .coverage-remove:hover{background:rgba(255,59,48,0.14); color:#ff3b30;}
+
+  .coverage-picker{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .coverage-picker select{
+    flex:1; min-width:160px; border:1px solid var(--line); border-radius:10px;
+    padding:9px 10px; font-size:13px; font-family:inherit; color:var(--ink);
+    background:#fff; outline:none; cursor:pointer;
+  }
+  .coverage-picker select:focus{border-color:var(--blue); box-shadow:0 0 0 3px rgba(10,132,255,0.12);}
+  .coverage-picker input[type=text]{
+    flex:1; min-width:160px; border:1px solid var(--line); border-radius:10px;
+    padding:9px 12px; font-size:13px; font-family:inherit; color:var(--ink);
+    background:#fff; outline:none;
+  }
   .add-point-btn{
-    align-self:flex-start; background:none; border:1px dashed var(--line); border-radius:10px;
-    padding:8px 14px; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    background:none; border:1px dashed var(--line); border-radius:10px;
+    padding:9px 14px; font-size:12.5px; font-weight:600; color:var(--ink-soft);
     cursor:pointer; font-family:inherit; transition:border-color .2s ease, color .2s ease;
   }
   .add-point-btn:hover{border-color:var(--blue); color:var(--blue);}
 
-  .hidden{display:none !important;}
+  .coverage-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(96px,1fr)); gap:8px; width:100%;}
+  .coverage-card{
+    display:flex; flex-direction:column; align-items:center; gap:7px; padding:12px 8px;
+    background:rgba(255,255,255,0.5); border:1px solid var(--line); border-radius:14px; text-align:center;
+  }
+  .coverage-card .icon{
+    width:34px; height:34px; border-radius:10px; flex-shrink:0; font-size:18px;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(155deg, rgba(255,255,255,0.6), rgba(255,255,255,0.15)), rgba(57,181,74,0.14);
+  }
+  .coverage-card .label{font-size:11px; color:var(--ink-soft); line-height:1.3; word-break:break-word;}
 
+  /* ---------- share / export ---------- */
+  .hidden{display:none !important;}
   .client-banner{
     width:100%; text-align:center; padding:12px 20px; margin-bottom:22px;
-    border-radius:14px; background:rgba(0,113,227,0.08); border:1px solid rgba(0,113,227,0.18);
+    border-radius:14px; background:rgba(10,132,255,0.08); border:1px solid rgba(10,132,255,0.18);
     font-size:13px; color:var(--blue-ink); font-weight:600;
   }
-
   .share-row{display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:8px;}
   .share-btn{
     appearance:none; border:none; cursor:pointer; font-family:inherit;
     font-size:15px; font-weight:600; color:#fff;
     background:linear-gradient(180deg,#2fd189,var(--green));
     padding:14px 34px; border-radius:999px;
-    box-shadow:0 10px 24px rgba(31,169,113,0.28);
+    box-shadow:0 10px 24px rgba(18,183,106,0.32), inset 0 1px 0 rgba(255,255,255,0.35);
     transition:transform .18s ease, opacity .18s ease, box-shadow .18s ease;
     display:inline-flex; align-items:center; gap:8px;
   }
   .share-btn:hover:not(:disabled){transform:translateY(-1px);}
   .share-btn:disabled{opacity:0.35; cursor:not-allowed; box-shadow:none;}
-
-  .locked-note{
-    font-size:11px; color:var(--ink-faint); font-weight:500; margin-top:-6px; text-align:left;
-  }
-  .input-shell.locked{background:rgba(118,118,128,0.06);}
-  .input-shell.locked input{color:var(--ink-soft); cursor:not-allowed;}
-
-  .coverage-readonly{width:100%; text-align:left; margin:0; padding:0; list-style:none;}
-  .coverage-readonly li{
-    display:flex; gap:8px; align-items:flex-start; font-size:13px; color:var(--ink-soft);
-    line-height:1.5; margin-bottom:6px;
-  }
-  .coverage-readonly li::before{content:"•"; color:var(--ink-faint); flex-shrink:0;}
 
   .export-row{display:flex; flex-direction:column; align-items:center; gap:8px; margin-top:8px;}
   .export-btn{
@@ -229,7 +499,7 @@
     font-size:15px; font-weight:600; color:#fff;
     background:linear-gradient(180deg,#2c2c2e,#1d1d1f);
     padding:14px 34px; border-radius:999px;
-    box-shadow:0 10px 24px rgba(0,0,0,0.18);
+    box-shadow:0 10px 24px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.2);
     transition:transform .18s ease, opacity .18s ease, box-shadow .18s ease;
     display:inline-flex; align-items:center; gap:8px;
   }
@@ -237,9 +507,47 @@
   .export-btn:disabled{opacity:0.35; cursor:not-allowed; box-shadow:none;}
   .export-hint{font-size:12px; color:var(--ink-faint); text-align:center;}
 
+  .formula-note{text-align:center; margin-top:36px; font-size:12.5px; color:var(--ink-faint); font-style:italic;}
+  .formula-note code{font-style:normal; background:rgba(118,118,128,0.1); padding:2px 8px; border-radius:6px; color:var(--ink-soft);}
+
+  /* ---------- causes of loss ---------- */
+  .causes-section{margin-top:8px;}
+  .causes-card{padding:26px 28px;}
+  .causes-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(120px,1fr)); gap:14px; margin-top:4px;}
+  .cause-item{display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center;}
+  .cause-icon{
+    width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    font-size:20px; background:linear-gradient(155deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1)), rgba(10,132,255,0.12);
+    border:1px solid var(--line);
+  }
+  .cause-label{font-size:12px; color:var(--ink-soft); font-weight:600; line-height:1.3;}
+
+  /* ---------- illustrative cases ---------- */
+  .cases-section{margin-top:8px;}
+  .cases-card{padding:26px 28px;}
+  .cases-disclaimer{font-size:11px; color:var(--ink-faint); text-align:center; margin:-6px 0 16px; font-style:italic;}
+  .cases-grid{display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px;}
+  .case-item{
+    display:flex; flex-direction:column; gap:9px; padding:16px 16px 15px; text-align:left;
+    background:rgba(255,255,255,0.45); border:1px solid var(--line); border-radius:16px;
+  }
+  .case-head{display:flex; align-items:center; gap:10px;}
+  .case-icon{
+    width:38px; height:38px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    font-size:18px; background:linear-gradient(155deg, rgba(255,255,255,0.5), rgba(255,255,255,0.1)), rgba(255,159,10,0.14);
+    border:1px solid var(--line);
+  }
+  .case-title{font-size:13px; font-weight:700; color:var(--ink); line-height:1.3;}
+  .case-story{font-size:12.5px; color:var(--ink-soft); line-height:1.5;}
+  .case-outcome{
+    font-size:11.5px; font-weight:600; color:var(--green); line-height:1.4;
+    padding-top:9px; border-top:1px dashed var(--line);
+  }
+
+  /* ---------- modals ---------- */
   .modal-overlay{
-    position:fixed; inset:0; background:rgba(29,29,31,0.4);
-    backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+    position:fixed; inset:0; background:rgba(18,20,28,0.46);
+    backdrop-filter:blur(14px) saturate(140%); -webkit-backdrop-filter:blur(14px) saturate(140%);
     display:flex; align-items:center; justify-content:center;
     z-index:50; padding:20px;
     opacity:0; pointer-events:none;
@@ -249,11 +557,12 @@
   .modal{
     width:100%; max-width:400px; padding:30px; position:relative; text-align:center;
     transform:translateY(10px); transition:transform .25s ease;
+    max-height:90vh; overflow-y:auto;
   }
   .modal-overlay.open .modal{transform:translateY(0);}
   .modal h3{margin:0 0 8px; font-size:19px; font-weight:700; letter-spacing:-0.01em;}
   .modal-desc{margin:0 0 22px; font-size:13.5px; color:var(--ink-soft); line-height:1.5;}
-  .modal .field{text-align:left; margin-bottom:24px;}
+  .modal .field{text-align:left; margin-bottom:22px;}
   .modal-actions{display:flex; gap:10px;}
   .btn-secondary,.btn-primary{
     flex:1; border:none; border-radius:999px; padding:13px 16px;
@@ -273,9 +582,7 @@
   }
   .modal-close:hover{background:rgba(118,118,128,0.2);}
 
-  .formula-note{text-align:center; margin-top:36px; font-size:12.5px; color:var(--ink-faint); font-style:italic;}
-  .formula-note code{font-style:normal; background:rgba(118,118,128,0.1); padding:2px 8px; border-radius:6px; color:var(--ink-soft);}
-
+  /* ---------- guide accordion ---------- */
   .guide-section{margin-top:36px; width:100%;}
   .guide-card{padding:26px 28px;}
   .guide-item{border-bottom:1px solid var(--line); padding:15px 0;}
@@ -300,16 +607,15 @@
   .guide-content li:last-child{margin-bottom:0;}
   .guide-content strong{color:var(--ink);}
 
-  .tariffs.single{display:flex; justify-content:center;}
-  .tariffs.single .tariff-card{max-width:460px; width:100%;}
-
   @media (max-width:720px){
-    .tariffs{grid-template-columns:1fr;}
+    .tariffs{flex-direction:column;}
+    .tariffs.single .tariff-card{flex:1 1 auto; max-width:none;}
     .vs{padding:2px 0;}
     .rate-sum-row{flex-direction:column;}
+    .franchise-config{flex-direction:column;}
   }
 
-  @media (prefers-reduced-motion:reduce){ *{transition:none !important;} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important;} }
 </style>
 </head>
 <body>
@@ -317,53 +623,86 @@
 <div class="orb orb-a"></div>
 <div class="orb orb-b"></div>
 
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a84ff"/>
+      <stop offset="100%" stop-color="#12b76a"/>
+    </linearGradient>
+    <linearGradient id="ringGradAmber" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff9f0a"/>
+      <stop offset="100%" stop-color="#ff6b35"/>
+    </linearGradient>
+  </defs>
+</svg>
+
 <div class="wrap">
   <header>
     <div class="logo-row">
       <img class="logo-img" src="data:image/png;base64,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" alt="Amanat — Be in Sure">
     </div>
     <h1 id="pageTitle">Калькулятор страховой премии</h1>
-    <p class="sub">Расчёт премии по грузу для стандартного и особого тарифа. Курс валюты вводится вручную по данным Нацбанка РК.</p>
+    <p class="sub">Расчёт премии по грузу для стандартного и особого тарифа, сразу в нескольких валютах. Курсы вводятся вручную по данным Нацбанка РК.</p>
   </header>
 
   <div class="client-banner hidden" id="clientBanner"></div>
 
+  <section class="category-panel glass">
+    <div class="section-label"><span class="dot"></span>Тип груза
+      <span class="tooltip">
+        <button type="button" class="tooltip-btn">?</button>
+        <span class="tooltip-bubble">Выберите категорию, чтобы увидеть характерные риски для такого груза и рекомендованный пакет покрытия.</span>
+      </span>
+    </div>
+    <div class="category-select-row">
+      <select id="categorySelect"></select>
+    </div>
+    <div class="category-risks hidden" id="categoryRisks">
+      <div class="category-risks-label">Характерные риски для этой категории</div>
+      <div class="category-risks-chips" id="categoryRisksChips"></div>
+      <div class="category-reason" id="categoryReason"></div>
+    </div>
+    <div class="cargo-comment-field">
+      <label for="cargoComment">Комментарий к грузу (необязательно)</label>
+      <textarea id="cargoComment" rows="2" placeholder="Например: груз хрупкий, нужна дополнительная упаковка"></textarea>
+    </div>
+  </section>
+
   <section class="tariffs">
 
-    <!-- STANDARD -->
+<!-- STANDARD -->
     <div class="tariff-card glass standard">
-      <div class="badge-row"><span class="badge">01</span><span class="title">Стандартный тариф</span></div>
+      <div class="badge-row"><span class="badge">01</span><span class="title">Стандартный тариф</span><span class="recommend-badge">★ Рекомендуем</span></div>
 
-      <div class="currency-block">
-        <div class="mini-label">Валюта груза</div>
-        <div class="segmented" id="segmentedStandard" role="tablist" aria-label="Валюта — стандартный тариф"></div>
-
-        <div class="fx-row hidden" id="fxRowStandard">
-          <div class="fx-fields">
-            <div class="field">
-              <label for="fxRateStandard">Курс к тенге (KZT)</label>
-              <div class="input-shell">
-                <span class="prefix">1 <span id="fxCurrencyCodeStandard">USD</span> =</span>
-                <input type="number" id="fxRateStandard" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
-                <span class="suffix">₸</span>
-              </div>
-            </div>
-          </div>
-          <a class="fx-link" href="https://data.nationalbank.kz/" target="_blank" rel="noopener">Курсы Нацбанка РК ↗</a>
-          <div class="fx-hint">Курс не сохраняется — вводите актуальное значение при каждом расчёте.</div>
-        </div>
+      <div class="send-toggle-row hidden" id="sendToggleRowStandard">
+        <label class="switch">
+          <input type="checkbox" id="sendToggleStandard" checked>
+          <span class="track"></span>
+          <span class="thumb"></span>
+        </label>
+        <span class="send-toggle-label">Отправлять этот тариф клиенту</span>
       </div>
 
-      <div class="rate-sum-row">
+      <div class="rate-sum-row" id="rateRowStandard">
         <div class="field">
-          <label for="rateStandard">Ставка</label>
+          <label for="rateStandard">Ставка
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Процент от страховой суммы, который берётся как премия. Видна только вам — клиент её не видит и не может изменить.</span>
+            </span>
+          </label>
           <div class="input-shell">
             <input type="number" id="rateStandard" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
             <span class="suffix">%</span>
           </div>
         </div>
         <div class="field">
-          <label for="sumStandard">Страховая сумма</label>
+          <label for="sumStandard">Страховая сумма
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Стоимость груза, которую вы хотите застраховать. От неё считается премия.</span>
+            </span>
+          </label>
           <div class="input-shell">
             <span class="prefix" id="sumStandardPrefix">₸</span>
             <input type="text" id="sumStandard" inputmode="decimal" placeholder="0">
@@ -371,58 +710,126 @@
           <div class="sum-warning" id="sumWarningStandard"></div>
         </div>
       </div>
-
       <div class="card-req-hint" id="reqHintStandard"></div>
 
-      <div class="premium-out">
-        <div class="label">Страховая премия</div>
-        <div class="value" id="premiumStandard">— ₸</div>
-        <div class="premium-sub" id="premiumSubStandard"></div>
-      </div>
-
-      <div class="coverage-block">
-        <div class="mini-label">Что покрывает тариф</div>
-        <div class="coverage-list" id="coverageStandard"></div>
-        <button type="button" class="add-point-btn" id="addPointStandard">+ Добавить пункт</button>
-      </div>
-    </div>
-
-    <div class="vs">vs</div>
-
-    <!-- SPECIAL -->
-    <div class="tariff-card glass special">
-      <div class="badge-row"><span class="badge">02</span><span class="title">Особые условия</span></div>
-
-      <div class="currency-block">
-        <div class="mini-label">Валюта груза</div>
-        <div class="segmented" id="segmentedSpecial" role="tablist" aria-label="Валюта — особые условия"></div>
-
-        <div class="fx-row hidden" id="fxRowSpecial">
-          <div class="fx-fields">
-            <div class="field">
-              <label for="fxRateSpecial">Курс к тенге (KZT)</label>
-              <div class="input-shell">
-                <span class="prefix">1 <span id="fxCurrencyCodeSpecial">USD</span> =</span>
-                <input type="number" id="fxRateSpecial" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
-                <span class="suffix">₸</span>
-              </div>
-            </div>
+      <div class="franchise-config hidden" id="franchiseConfigStandard">
+        <div class="field">
+          <label for="franchiseDiscountStandard">Скидка за франшизу</label>
+          <div class="input-shell">
+            <input type="number" id="franchiseDiscountStandard" inputmode="decimal" placeholder="0" min="0" max="100" step="1">
+            <span class="suffix">%</span>
           </div>
-          <a class="fx-link" href="https://data.nationalbank.kz/" target="_blank" rel="noopener">Курсы Нацбанка РК ↗</a>
-          <div class="fx-hint">Курс не сохраняется — вводите актуальное значение при каждом расчёте.</div>
+        </div>
+        <div class="field">
+          <label for="franchiseTypeStandard">Тип франшизы</label>
+          <select id="franchiseTypeStandard" class="franchise-type-select">
+            <option value="unconditional">Безусловная (вычитается)</option>
+            <option value="conditional">Условная (порог)</option>
+          </select>
+        </div>
+      </div>
+      <div class="franchise-note-field hidden" id="franchiseNoteFieldStandard">
+        <textarea id="franchiseNoteStandard" rows="2" placeholder="Например: франшиза 100 000 ₸ — при наступлении случая первые 100 000 ₸ ущерба клиент покрывает самостоятельно"></textarea>
+      </div>
+
+      <div class="franchise-row hidden" id="franchiseRowStandard">
+        <label class="switch">
+          <input type="checkbox" id="franchiseToggleStandard">
+          <span class="track"></span>
+          <span class="thumb"></span>
+        </label>
+        <div class="franchise-text">
+          <div class="title"><span id="franchiseTitleTextStandard">Учитывать франшизу</span>
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble wide" id="franchiseExampleStandard"></span>
+            </span>
+          </div>
+          <div class="note" id="franchiseNoteDisplayStandard"></div>
         </div>
       </div>
 
-      <div class="rate-sum-row">
+      <div class="premium-out">
+        <div class="ring-wrap" id="ringWrapStandard">
+          <svg viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-progress" id="ringProgressStandard" cx="32" cy="32" r="28" stroke="url(#ringGrad)"></circle>
+            <circle class="ring-progress-inner hidden" id="ringProgressInnerStandard" cx="32" cy="32" r="28" stroke="url(#ringGradAmber)"></circle>
+          </svg>
+          <div class="ring-center" id="ringCenterStandard"></div>
+        </div>
+        <div class="premium-body" id="premiumBodyStandard">
+          <div class="label">Страховая премия <span class="value-badge hidden" id="valueBadgeStandard">Выгодное покрытие</span></div>
+          <div class="value" id="premiumStandard">— ₸</div>
+          <div class="value-pitch" id="valuePitchStandard"></div>
+          <div class="ring-legend" id="ringLegendStandard"></div>
+        </div>
+      </div>
+
+      <div class="coverage-block">
+        <label class="mini-label" id="coverageMiniLabelStandard">Что покрывает тариф</label>
+        <div class="coverage-chips" id="coverageChipsStandard"></div>
+        <div class="coverage-picker" id="coveragePickerRowStandard">
+          <select id="coveragePickerStandard"></select>
+          <input type="text" id="coverageCustomStandard" class="hidden" placeholder="Свой текст">
+          <button type="button" class="add-point-btn" id="addPointStandard">+ Добавить</button>
+        </div>
+        <div class="coverage-grid hidden" id="coverageGridStandard"></div>
+        <div class="coverage-footer hidden" id="coverageFooterStandard"></div>
+      </div>
+
+      <div class="card-overlay" id="cardOverlayStandard">
+        <div class="calc-loading">
+          <div class="calc-icon">
+            <div class="calc-screen"><span class="calc-dots"><span>•</span><span>•</span><span>•</span></span></div>
+            <div class="calc-buttons">
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="calc-loading-text">Считаем премию…</div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    <div class="vs">vs</div>
+
+<!-- SPECIAL -->
+    <div class="tariff-card glass special">
+      <div class="badge-row"><span class="badge">02</span><span class="title">Особые условия</span><span class="recommend-badge">★ Рекомендуем</span></div>
+
+      <div class="send-toggle-row hidden" id="sendToggleRowSpecial">
+        <label class="switch">
+          <input type="checkbox" id="sendToggleSpecial" checked>
+          <span class="track"></span>
+          <span class="thumb"></span>
+        </label>
+        <span class="send-toggle-label">Отправлять этот тариф клиенту</span>
+      </div>
+
+      <div class="rate-sum-row" id="rateRowSpecial">
         <div class="field">
-          <label for="rateSpecial">Ставка</label>
+          <label for="rateSpecial">Ставка
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Процент от страховой суммы, который берётся как премия. Видна только вам — клиент её не видит и не может изменить.</span>
+            </span>
+          </label>
           <div class="input-shell">
             <input type="number" id="rateSpecial" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
             <span class="suffix">%</span>
           </div>
         </div>
         <div class="field">
-          <label for="sumSpecial">Страховая сумма</label>
+          <label for="sumSpecial">Страховая сумма
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Стоимость груза, которую вы хотите застраховать. От неё считается премия.</span>
+            </span>
+          </label>
           <div class="input-shell">
             <span class="prefix" id="sumSpecialPrefix">₸</span>
             <input type="text" id="sumSpecial" inputmode="decimal" placeholder="0">
@@ -430,23 +837,93 @@
           <div class="sum-warning" id="sumWarningSpecial"></div>
         </div>
       </div>
-
       <div class="card-req-hint" id="reqHintSpecial"></div>
 
+      <div class="franchise-config hidden" id="franchiseConfigSpecial">
+        <div class="field">
+          <label for="franchiseDiscountSpecial">Скидка за франшизу</label>
+          <div class="input-shell">
+            <input type="number" id="franchiseDiscountSpecial" inputmode="decimal" placeholder="0" min="0" max="100" step="1">
+            <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="franchiseTypeSpecial">Тип франшизы</label>
+          <select id="franchiseTypeSpecial" class="franchise-type-select">
+            <option value="unconditional">Безусловная (вычитается)</option>
+            <option value="conditional">Условная (порог)</option>
+          </select>
+        </div>
+      </div>
+      <div class="franchise-note-field hidden" id="franchiseNoteFieldSpecial">
+        <textarea id="franchiseNoteSpecial" rows="2" placeholder="Например: франшиза 150 000 ₸ — при наступлении случая первые 150 000 ₸ ущерба клиент покрывает самостоятельно"></textarea>
+      </div>
+
+      <div class="franchise-row hidden" id="franchiseRowSpecial">
+        <label class="switch">
+          <input type="checkbox" id="franchiseToggleSpecial">
+          <span class="track"></span>
+          <span class="thumb"></span>
+        </label>
+        <div class="franchise-text">
+          <div class="title"><span id="franchiseTitleTextSpecial">Учитывать франшизу</span>
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble wide" id="franchiseExampleSpecial"></span>
+            </span>
+          </div>
+          <div class="note" id="franchiseNoteDisplaySpecial"></div>
+        </div>
+      </div>
+
       <div class="premium-out">
-        <div class="label">Страховая премия</div>
-        <div class="value" id="premiumSpecial">— ₸</div>
-        <div class="premium-sub" id="premiumSubSpecial"></div>
+        <div class="ring-wrap" id="ringWrapSpecial">
+          <svg viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-progress" id="ringProgressSpecial" cx="32" cy="32" r="28" stroke="url(#ringGrad)"></circle>
+            <circle class="ring-progress-inner hidden" id="ringProgressInnerSpecial" cx="32" cy="32" r="28" stroke="url(#ringGradAmber)"></circle>
+          </svg>
+          <div class="ring-center" id="ringCenterSpecial"></div>
+        </div>
+        <div class="premium-body" id="premiumBodySpecial">
+          <div class="label">Страховая премия <span class="value-badge hidden" id="valueBadgeSpecial">Выгодное покрытие</span></div>
+          <div class="value" id="premiumSpecial">— ₸</div>
+          <div class="value-pitch" id="valuePitchSpecial"></div>
+          <div class="ring-legend" id="ringLegendSpecial"></div>
+        </div>
       </div>
 
       <div class="coverage-block">
-        <div class="mini-label">Что покрывает тариф</div>
-        <div class="coverage-list" id="coverageSpecial"></div>
-        <button type="button" class="add-point-btn" id="addPointSpecial">+ Добавить пункт</button>
+        <label class="mini-label" id="coverageMiniLabelSpecial">Что покрывает тариф</label>
+        <div class="coverage-chips" id="coverageChipsSpecial"></div>
+        <div class="coverage-picker" id="coveragePickerRowSpecial">
+          <select id="coveragePickerSpecial"></select>
+          <input type="text" id="coverageCustomSpecial" class="hidden" placeholder="Свой текст">
+          <button type="button" class="add-point-btn" id="addPointSpecial">+ Добавить</button>
+        </div>
+        <div class="coverage-grid hidden" id="coverageGridSpecial"></div>
+        <div class="coverage-footer hidden" id="coverageFooterSpecial"></div>
+      </div>
+
+      <div class="card-overlay" id="cardOverlaySpecial">
+        <div class="calc-loading">
+          <div class="calc-icon">
+            <div class="calc-screen"><span class="calc-dots"><span>•</span><span>•</span><span>•</span></span></div>
+            <div class="calc-buttons">
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="calc-loading-text">Считаем премию…</div>
+        </div>
       </div>
     </div>
 
+    
+
   </section>
+
 
   <div class="share-row" id="shareRow">
     <button class="share-btn" id="shareLinkBtn" disabled>Отправить клиенту</button>
@@ -458,7 +935,66 @@
     <div class="export-hint" id="exportHint">Выполните хотя бы один расчёт, чтобы включить экспорт</div>
   </div>
 
-  <p class="formula-note">Премия = <code>(Ставка % / 100) × Страховая сумма в KZT</code></p>
+  <p class="formula-note">Премия = <code>(Ставка % / 100) × Страховая сумма в KZT</code>, с учётом франшизы — при её включении</p>
+
+  <section class="causes-section">
+    <div class="causes-card glass">
+      <div class="section-label"><span class="dot"></span>Топ причин потери груза</div>
+      <div class="causes-grid">
+        <div class="cause-item"><div class="cause-icon">🚧</div><div class="cause-label">ДТП</div></div>
+        <div class="cause-item"><div class="cause-icon">🔓</div><div class="cause-label">Кража</div></div>
+        <div class="cause-item"><div class="cause-icon">📦</div><div class="cause-label">Погрузка / разгрузка</div></div>
+        <div class="cause-item"><div class="cause-icon">🔥</div><div class="cause-label">Пожар</div></div>
+        <div class="cause-item"><div class="cause-icon">🌊</div><div class="cause-label">Природные бедствия</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cases-section">
+    <div class="cases-card glass">
+      <div class="section-label"><span class="dot"></span>Как это бывает</div>
+      <p class="cases-disclaimer">Иллюстративные примеры — не описание конкретных страховых случаев</p>
+      <div class="cases-grid">
+
+        <div class="case-item">
+          <div class="case-head">
+            <div class="case-icon">🔓</div>
+            <div class="case-title">Ночная стоянка на трассе</div>
+          </div>
+          <div class="case-story">Фура встала на ночёвку у заправки. Утром водитель обнаружил вскрытый тент — часть груза похищена, пока он спал в кабине.</div>
+          <div class="case-outcome">Со страховкой — стоимость похищенного возмещается по условиям полиса</div>
+        </div>
+
+        <div class="case-item">
+          <div class="case-head">
+            <div class="case-icon">⚡</div>
+            <div class="case-title">Гроза на перевалке</div>
+          </div>
+          <div class="case-story">Партию электроники временно оставили на открытой площадке при перегрузке между машинами. Ударила молния — часть техники вышла из строя.</div>
+          <div class="case-outcome">Со страховкой — повреждённая партия покрывается полисом</div>
+        </div>
+
+        <div class="case-item">
+          <div class="case-head">
+            <div class="case-icon">💥</div>
+            <div class="case-title">Возгорание в пути</div>
+          </div>
+          <div class="case-story">Грузовик выехал в среду, а в пятницу вечером на трассе загорелся двигатель. Огонь перекинулся на кузов — груз сгорел полностью.</div>
+          <div class="case-outcome">Со страховкой — полная гибель груза возмещается по полису</div>
+        </div>
+
+        <div class="case-item">
+          <div class="case-head">
+            <div class="case-icon">🌊</div>
+            <div class="case-title">Паводок на складе</div>
+          </div>
+          <div class="case-story">Груз прибыл в срок и ждал получателя на складе временного хранения. Ночью склад подтопило после ливня — часть товара пришла в негодность.</div>
+          <div class="case-outcome">Со страховкой — подмоченный груз покрывается полисом</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
 
   <section class="guide-section" id="managerGuide">
     <div class="guide-card glass">
@@ -467,38 +1003,44 @@
       <details class="guide-item">
         <summary>Как задать тариф</summary>
         <div class="guide-content">
-          <p>В каждой карточке ("Стандартный тариф" и "Особые условия") введите ставку в поле "Ставка" — это процент, который будет применяться к страховой сумме. Тарифы независимы: можно заполнить только один из них, тогда клиент увидит и сможет посчитать только его.</p>
+          <p>В каждой карточке введите ставку — процент, применяемый к страховой сумме. Тарифы независимы: можно заполнить только один, тогда клиент увидит и сможет посчитать только его.</p>
         </div>
       </details>
 
       <details class="guide-item">
-        <summary>Как ввести валюту, курс и сумму</summary>
+        <summary>Как ввести валюту, курсы и сумму</summary>
         <div class="guide-content">
-          <p>Валюта и курс — общие для обеих карточек. Выберите валюту вверху любого блока. Если это не тенге — появится поле для курса, введите его вручную (по официальному курсу Нацбанка, ссылка рядом с полем). Как только курс указан, поле суммы разблокируется.</p>
-          <p>Страховая сумма вводится один раз и синхронизируется между обеими карточками. Премия считается сразу, без отдельной кнопки — просто вводите цифры.</p>
+          <p>Валюта груза и курсы — общие для обеих карточек, задаются один раз в верхнем блоке. Можно заполнить курсы сразу нескольких валют — премия будет показана во всех, где указан курс, одновременно.</p>
+          <p>Страховая сумма вводится один раз и синхронизируется между карточками. Премия считается сразу, без отдельной кнопки.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Как настроить франшизу</summary>
+        <div class="guide-content">
+          <p>Если хотите предложить клиенту скидку за франшизу — укажите процент скидки и опишите её условия (например, какую сумму ущерба клиент покрывает сам). У клиента появится переключатель "Учитывать франшизу" — премия пересчитается сразу при переключении.</p>
         </div>
       </details>
 
       <details class="guide-item">
         <summary>Как заполнить "Что покрывает тариф"</summary>
         <div class="guide-content">
-          <p>Под каждой карточкой — список коротких пунктов вместо сплошного текста. Нажмите "+ Добавить пункт", чтобы добавить условие покрытия (например, "Полная гибель груза при ДТП"). Пункты попадают в PDF и в ссылку для клиента.</p>
+          <p>Добавляйте короткие пункты покрытия — каждый превращается в отдельную карточку с иконкой. Нажмите на квадрат слева от текста, чтобы загрузить свою иконку (изображение с компьютера), или оставьте пустым — подставится стандартная метка.</p>
         </div>
       </details>
 
       <details class="guide-item">
         <summary>Как скачать расчёт в PDF</summary>
         <div class="guide-content">
-          <p>Кнопка "Скачать расчёт в PDF" становится активной, как только посчитан хотя бы один тариф. В открывшемся окне укажите компанию-клиента и по желанию — свои контакты (они попадут в PDF как "Расчёт подготовил"). Файл получится в виде готового коммерческого предложения с логотипом, тарифами и условиями покрытия.</p>
+          <p>Кнопка "Скачать расчёт в PDF" активна, как только посчитан хотя бы один тариф. Укажите компанию-клиента и по желанию свои контакты — получите готовое коммерческое предложение.</p>
         </div>
       </details>
 
       <details class="guide-item">
         <summary>Как отправить калькулятор клиенту</summary>
         <div class="guide-content">
-          <p>Кнопка "Отправить клиенту" становится активной, как только заполнена хотя бы одна ставка. В открывшемся окне укажите название компании клиента и свои контакты — нажмите "Сформировать ссылку" и скопируйте её.</p>
-          <p>В эту ссылку зашиты: ставки тарифов, пункты покрытия и ваши контакты. Клиент по ссылке видит премию сразу, но <strong>не видит и не может изменить ставку</strong> — он только выбирает валюту и вводит сумму.</p>
-          <p><strong>Важно:</strong> ссылка статична — при открытии в ней всегда одни и те же ставка и условия. Если тариф для клиента изменился, сформируйте новую ссылку и отправьте её заново — старая продолжит работать со старыми цифрами.</p>
+          <p>Кнопка "Отправить клиенту" активна, как только заполнена хотя бы одна ставка. Укажите компанию клиента и свои контакты — получите ссылку с зашитыми тарифами и условиями. Клиент видит премию, но не видит и не может изменить ставку.</p>
+          <p><strong>Важно:</strong> ссылка статична. Если условия изменились — сформируйте новую и отправьте её заново.</p>
         </div>
       </details>
     </div>
@@ -509,30 +1051,37 @@
       <div class="section-label"><span class="dot"></span>Как пользоваться калькулятором</div>
 
       <details class="guide-item">
-        <summary>Как выбрать валюту и курс</summary>
+        <summary>Как выбрать валюту и курсы</summary>
         <div class="guide-content">
-          <p>Выберите валюту груза вверху карточки. Если это не тенге — появится поле для курса. Введите актуальный курс вручную (ссылка на курсы Нацбанка — рядом с полем). Курс не сохраняется между визитами, вводите его заново при каждом расчёте.</p>
+          <p>Выберите валюту груза вверху страницы. Введите курсы вручную (ссылка на курсы Нацбанка — рядом) — премия сразу покажется во всех валютах, где указан курс.</p>
         </div>
       </details>
 
       <details class="guide-item">
         <summary>Как ввести страховую сумму</summary>
         <div class="guide-content">
-          <p>Введите сумму в поле "Страховая сумма" — премия рассчитается сразу же, без отдельной кнопки. Если условий несколько, сумма одинаковая для всех — вводить её нужно только один раз.</p>
+          <p>Введите сумму в поле "Страховая сумма" — премия рассчитается сразу, без кнопки.</p>
+        </div>
+      </details>
+
+      <details class="guide-item">
+        <summary>Что такое франшиза</summary>
+        <div class="guide-content">
+          <p>Если для вашего тарифа доступна франшиза — вы увидите переключатель. Включив его, вы получите более низкую премию, но при страховом случае часть ущерба (указана в описании) покрываете самостоятельно.</p>
         </div>
       </details>
 
       <details class="guide-item">
         <summary>Что означает блок "Что покрывает тариф"</summary>
         <div class="guide-content">
-          <p>Это список условий, которые входят в выбранный тариф — что именно покрывает страхование. Список зафиксирован менеджером и не редактируется.</p>
+          <p>Список условий, которые входят в тариф — что именно покрывает страхование. Зафиксирован менеджером.</p>
         </div>
       </details>
 
       <details class="guide-item">
         <summary>Как скачать расчёт в PDF</summary>
         <div class="guide-content">
-          <p>Нажмите "Скачать расчёт в PDF" — потребуется указать только название вашей компании. Готовый файл будет содержать сумму, премию, условия покрытия и контакты менеджера.</p>
+          <p>Нажмите "Скачать расчёт в PDF" — потребуется указать только название вашей компании.</p>
         </div>
       </details>
 
@@ -550,7 +1099,7 @@
   <div class="modal glass">
     <button class="modal-close" id="shareCloseBtn" type="button" aria-label="Закрыть">&times;</button>
     <h3>Ссылка для клиента</h3>
-    <p class="modal-desc" id="shareDesc">Ставки и комментарии будут зафиксированы в ссылке. Клиент сможет выбрать валюту и ввести сумму, но не сможет изменить тариф.</p>
+    <p class="modal-desc" id="shareDesc">Ставки, франшиза и комментарии будут зафиксированы в ссылке. Клиент сможет выбрать валюту и ввести сумму, но не сможет изменить тариф.</p>
 
     <div id="sharePreStep">
       <div class="field">
@@ -564,6 +1113,13 @@
       <div class="field">
         <label for="shareManagerPhone">Ваш телефон</label>
         <div class="input-shell"><input type="tel" id="shareManagerPhone" placeholder="+7 700 000 00 00" autocomplete="off"></div>
+      </div>
+      <div class="field">
+        <label>Какие блоки показывать клиенту</label>
+        <div class="block-toggle-header">
+          <span></span><span>На странице</span><span>В PDF</span>
+        </div>
+        <div class="block-toggle-list" id="blockToggleList"></div>
       </div>
       <div class="modal-actions">
         <button class="btn-secondary" id="shareCancelBtn" type="button">Отмена</button>
@@ -588,18 +1144,14 @@
   <div class="modal glass">
     <button class="modal-close" id="modalCloseBtn" type="button" aria-label="Закрыть">&times;</button>
     <h3>Экспорт в PDF</h3>
-    <p class="modal-desc" id="pdfModalDesc">Укажите компанию, для которой готовится расчёт, и того, кто его подготовил — эти контакты попадут в PDF.</p>
+    <p class="modal-desc" id="pdfModalDesc">Укажите компанию, для которой готовится расчёт.</p>
     <div class="field">
       <label for="companyNameInput">Компания-клиент</label>
       <div class="input-shell"><input type="text" id="companyNameInput" placeholder="ТОО «Компания»" autocomplete="off"></div>
     </div>
-    <div class="field" id="managerNameField">
-      <label for="managerNameInput">Расчёт подготовил (ФИО)</label>
-      <div class="input-shell"><input type="text" id="managerNameInput" placeholder="Иванов Иван" autocomplete="off"></div>
-    </div>
-    <div class="field" id="managerPhoneField">
-      <label for="managerPhoneInput">Телефон менеджера</label>
-      <div class="input-shell"><input type="tel" id="managerPhoneInput" placeholder="+7 700 000 00 00" autocomplete="off"></div>
+    <div class="field hidden" id="pdfTariffPickerField">
+      <label>Какой тариф включить в PDF?</label>
+      <div class="pdf-tariff-picker" id="pdfTariffPicker"></div>
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" id="modalCancelBtn" type="button">Отмена</button>
@@ -611,19 +1163,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
-  const CURRENCIES = [
-    {code:'KZT', symbol:'₸'},
-    {code:'USD', symbol:'$'},
-    {code:'EUR', symbol:'€'},
-    {code:'CNY', symbol:'¥'},
-    {code:'GBP', symbol:'£'},
-    {code:'RUB', symbol:'₽'},
-  ];
-
   // ---- number formatting helpers (space as thousands separator) ----
-  function digitsOnly(raw){
-    return String(raw).replace(/[^\d,]/g,'');
-  }
+  function digitsOnly(raw){ return String(raw).replace(/[^\d,]/g,''); }
   function formatWithSpaces(raw){
     let cleaned = digitsOnly(raw);
     let [intPart, decPart] = cleaned.split(',');
@@ -644,133 +1185,177 @@
       onChange();
     });
   }
-  function formatMoney(value){
-    return formatWithSpaces(String(Math.round(value)));
-  }
-  function formatKZT(value){
-    return formatMoney(value) + ' ₸';
-  }
+  function formatMoney(value){ return formatWithSpaces(String(Math.round(value))); }
   function numberToInputString(value){
     const rounded = Math.round(value * 100) / 100;
     const [intPart, decPart] = rounded.toFixed(2).split('.');
     return decPart === '00' ? formatWithSpaces(intPart) : formatWithSpaces(intPart + ',' + decPart);
   }
-  function formatCurrencyAmount(value, code){
-    if(code === 'KZT') return formatMoney(value) + ' ₸';
-    const symbol = CURRENCIES.find(c=>c.code===code).symbol;
-    return numberToInputString(value) + ' ' + symbol;
+  function formatCurrencyAmount(value){
+    return formatMoney(value) + ' ₸';
   }
 
+  // ---- animated number tween (with fallback for environments lacking rAF) ----
+  const raf = (typeof requestAnimationFrame === 'function')
+    ? requestAnimationFrame
+    : function(cb){ return setTimeout(()=> cb(Date.now()), 16); };
+  const perfNow = (typeof performance !== 'undefined' && performance.now)
+    ? () => performance.now()
+    : () => Date.now();
+
+  function animateNumber(el, fromValue, toValue, formatFn, duration){
+    duration = duration || 450;
+    const start = perfNow();
+    function frame(now){
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const current = fromValue + (toValue - fromValue) * eased;
+      el.textContent = formatFn(current);
+      if(t < 1) raf(frame);
+    }
+    raf(frame);
+  }
+
+  // ---- tooltips (delegated) ----
+  document.querySelectorAll('.tooltip-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const tip = btn.closest('.tooltip');
+      const wasOpen = tip.classList.contains('open');
+      document.querySelectorAll('.tooltip.open').forEach(t => t.classList.remove('open'));
+      if(!wasOpen) tip.classList.add('open');
+    });
+  });
+  document.addEventListener('click', ()=>{
+    document.querySelectorAll('.tooltip.open').forEach(t => t.classList.remove('open'));
+  });
+
+  // ================= SHARED INSURED SUM (single currency: KZT) =================
+  let sharedKZT = null;
+  let allCards = [];
+
+  // ================= CARD FACTORY =================
   const exportPdfBtn = document.getElementById('exportPdfBtn');
   const exportHint   = document.getElementById('exportHint');
   const shareRow      = document.getElementById('shareRow');
   const shareLinkBtn  = document.getElementById('shareLinkBtn');
   const shareHint     = document.getElementById('shareHint');
-  let allCards = [];
 
   function refreshExportButton(){
     const any = allCards.some(c => c.lastResult);
     exportPdfBtn.disabled = !any;
     exportHint.textContent = any ? '' : 'Выполните хотя бы один расчёт, чтобы включить экспорт';
   }
-
   function refreshShareButton(){
-    const any = allCards.some(c => c.hasValidRate());
+    const cardsBySuffix = { Standard: cardStandard, Special: cardSpecial };
+    const any = Object.keys(cardsBySuffix).some(suffix=>{
+      const toggle = document.getElementById('sendToggle'+suffix);
+      return cardsBySuffix[suffix].hasValidRate() && (!toggle || toggle.checked);
+    });
     shareLinkBtn.disabled = !any;
-    shareHint.textContent = any ? '' : 'Укажите хотя бы одну ставку тарифа, чтобы сформировать ссылку';
+    shareHint.textContent = any ? '' : 'Укажите ставку и включите отправку хотя бы для одного пакета';
   }
 
-  // ---- card factory ----
   function setupCard(suffix, label){
     let lastResult = null;
+    let displayedPremiumValue = 0;
 
-    const segmented   = document.getElementById('segmented'+suffix);
-    const fxRow        = document.getElementById('fxRow'+suffix);
-    const fxRateInput  = document.getElementById('fxRate'+suffix);
-    const fxCurrencyCode = document.getElementById('fxCurrencyCode'+suffix);
     const sumInput      = document.getElementById('sum'+suffix);
-    const sumPrefix      = document.getElementById('sum'+suffix+'Prefix');
-    const sumWarning      = document.getElementById('sumWarning'+suffix);
-    const sumShell         = sumInput.closest('.input-shell');
     const rateInput      = document.getElementById('rate'+suffix);
     const rateShell        = rateInput.closest('.input-shell');
     const reqHint          = document.getElementById('reqHint'+suffix);
     const premiumEl         = document.getElementById('premium'+suffix);
-    const premiumSubEl       = document.getElementById('premiumSub'+suffix);
+    const valueBadgeEl        = document.getElementById('valueBadge'+suffix);
+    const valuePitchEl         = document.getElementById('valuePitch'+suffix);
+    const coverageMiniLabelEl   = document.getElementById('coverageMiniLabel'+suffix);
+    const coverageFooterEl       = document.getElementById('coverageFooter'+suffix);
+    const ringLegendEl        = document.getElementById('ringLegend'+suffix);
+    const ringCenterEl         = document.getElementById('ringCenter'+suffix);
+    const ringProgress          = document.getElementById('ringProgress'+suffix);
+    const ringProgressInner      = document.getElementById('ringProgressInner'+suffix);
+    const ringWrap                 = document.getElementById('ringWrap'+suffix);
+    const cardOverlayEl               = document.getElementById('cardOverlay'+suffix);
 
-    CURRENCIES.forEach(c=>{
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'seg-btn';
-      btn.dataset.code = c.code;
-      btn.textContent = c.code;
-      btn.addEventListener('click', ()=> selectCurrencyGlobal(c.code));
-      segmented.appendChild(btn);
-    });
+    const franchiseConfig = document.getElementById('franchiseConfig'+suffix);
+    const franchiseNoteField = document.getElementById('franchiseNoteField'+suffix);
+    const franchiseDiscountInput = document.getElementById('franchiseDiscount'+suffix);
+    const franchiseTypeSelect = document.getElementById('franchiseType'+suffix);
+    const franchiseNoteInput = document.getElementById('franchiseNote'+suffix);
+    const franchiseRow = document.getElementById('franchiseRow'+suffix);
+    const franchiseToggle = document.getElementById('franchiseToggle'+suffix);
+    const franchiseNoteDisplay = document.getElementById('franchiseNoteDisplay'+suffix);
+    const franchiseTitleTextEl = document.getElementById('franchiseTitleText'+suffix);
+    const franchiseExampleEl = document.getElementById('franchiseExample'+suffix);
 
-    function lockSumField(message){
-      sumInput.value = '';
-      sumInput.disabled = true;
-      sumShell.classList.add('disabled');
-      sumWarning.textContent = message;
-    }
+    const RING_R = 28;
+    const RING_C = 2 * Math.PI * RING_R;
+    ringProgress.style.strokeDasharray = String(RING_C);
+    ringProgress.style.strokeDashoffset = String(RING_C);
+    ringProgressInner.style.strokeDasharray = String(RING_C);
+    ringProgressInner.style.strokeDashoffset = String(RING_C);
 
-    function unlockSumField(){
-      sumInput.disabled = false;
-      sumShell.classList.remove('disabled');
-      sumWarning.textContent = '';
-    }
-
-    // Reflect the globally selected currency onto this card's UI
-    function applyCurrency(code){
-      [...segmented.children].forEach(b=>{
-        b.classList.toggle('active', b.dataset.code === code);
-      });
-      const cur = CURRENCIES.find(c=>c.code===code);
-      sumPrefix.textContent = cur.symbol;
-
-      if(code === 'KZT'){
-        fxRow.classList.add('hidden');
-        fxRateInput.value = '';
-      } else {
-        fxRow.classList.remove('hidden');
-        fxCurrencyCode.textContent = code;
-        fxRateInput.value = sharedFx !== null ? String(sharedFx) : '';
-      }
-    }
-
-    // Reflect a globally-entered fx rate onto this card's fx field (skip the field the user is actively typing in)
-    function setFxDisplay(value, sourceInput){
-      if(fxRateInput === sourceInput) return;
-      if(sharedCurrency !== 'KZT'){
-        fxRateInput.value = value !== null ? String(value) : '';
-      }
-    }
-
-    // Redraw this card's sum field from the shared canonical KZT amount
     function applySharedKZT(){
-      const fx = currentFx();
-      if(fx === null){
-        lockSumField('Для расчёта данных, пожалуйста, введите курс валюты');
-        return;
-      }
-      unlockSumField();
       if(sharedKZT !== null){
-        const displayValue = sharedCurrency === 'KZT' ? sharedKZT : sharedKZT / fx;
-        sumInput.value = numberToInputString(displayValue);
+        sumInput.value = numberToInputString(sharedKZT);
       }
+    }
+
+    // Ring = the premium itself (100% of the same circle). When franchise is on, an amber
+    // arc marks what share of that premium the franchise takes off — same scale, directly comparable.
+    function updateRingWithResult(franchiseActiveNow, discountPercent, franchiseAmountText, finalPremiumText){
+      ringProgress.style.strokeDashoffset = '0';
+
+      if(franchiseActiveNow){
+        ringProgressInner.classList.remove('hidden');
+        const innerFraction = Math.min(1, Math.max(0, discountPercent / 100));
+        ringProgressInner.style.strokeDashoffset = String(RING_C * (1 - innerFraction));
+        ringCenterEl.textContent = discountPercent + '%';
+      } else {
+        ringProgressInner.classList.add('hidden');
+        ringCenterEl.textContent = '';
+      }
+
+      ringLegendEl.innerHTML = '';
+      if(franchiseActiveNow){
+        const l1 = document.createElement('div');
+        l1.className = 'ring-legend-item';
+        l1.innerHTML = '<span class="ring-legend-dot outer"></span>Премия к оплате — ' + finalPremiumText;
+        const l2 = document.createElement('div');
+        l2.className = 'ring-legend-item';
+        l2.innerHTML = '<span class="ring-legend-dot inner"></span>Франшиза — ' + franchiseAmountText + ' (' + discountPercent + '% от премии)';
+        ringLegendEl.appendChild(l1);
+        ringLegendEl.appendChild(l2);
+      }
+
+      ringWrap.classList.remove('pulse');
+      void ringWrap.offsetWidth;
+      ringWrap.classList.add('pulse');
+    }
+
+    function resetRing(){
+      ringProgress.style.strokeDashoffset = String(RING_C);
+      ringProgressInner.style.strokeDashoffset = String(RING_C);
+      ringProgressInner.classList.add('hidden');
+      ringCenterEl.textContent = '';
+      ringLegendEl.innerHTML = '';
     }
 
     function resetPremium(){
       premiumEl.textContent = '— ₸';
       premiumEl.classList.remove('ready');
-      premiumSubEl.textContent = '';
+      valueBadgeEl.classList.add('hidden');
+      valuePitchEl.textContent = '';
+      coverageMiniLabelEl.textContent = 'Что покрывает тариф';
+      coverageFooterEl.classList.add('hidden');
+      coverageFooterEl.textContent = '';
+      resetRing();
+      updateFranchiseExample();
+      displayedPremiumValue = 0;
       lastResult = null;
       refreshExportButton();
     }
 
     function check(){
-      if(currentFx() === null) return 'Введите курс валюты к тенге';
       const sum = parseFormatted(sumInput.value);
       const rate = parseFloat(rateInput.value);
       if(!(sum > 0)) return 'Укажите страховую сумму';
@@ -784,37 +1369,136 @@
       return err;
     }
 
+    function franchiseActive(){
+      const discount = parseFloat(franchiseDiscountInput.value);
+      return !isNaN(discount) && discount > 0 && franchiseToggle.checked;
+    }
+    function franchiseDiscountValue(){
+      const discount = parseFloat(franchiseDiscountInput.value);
+      return !isNaN(discount) && discount > 0 ? discount : 0;
+    }
+
+    function updateFranchiseVisibility(){
+      const discount = parseFloat(franchiseDiscountInput.value);
+      const hasFranchise = !isNaN(discount) && discount > 0;
+      franchiseRow.classList.toggle('hidden', !hasFranchise);
+      franchiseNoteDisplay.textContent = franchiseNoteInput.value.trim();
+      updateFranchiseExample();
+    }
+
+    // Builds the "?" tooltip next to the toggle: a worked example using the real
+    // franchise % and (when available) the current insured sum, so the client sees
+    // concretely what the franchise means for a claim, not just an abstract number.
+    function updateFranchiseExample(){
+      const discount = franchiseDiscountValue();
+      if(discount <= 0){
+        franchiseTitleTextEl.textContent = 'Учитывать франшизу';
+        franchiseExampleEl.innerHTML = '';
+        return;
+      }
+      const discountText = String(discount).replace('.', ',');
+      const isConditional = franchiseTypeSelect.value === 'conditional';
+      const typeLabel = isConditional ? 'условная' : 'безусловная';
+      franchiseTitleTextEl.textContent = 'Учитывать франшизу — ' + discountText + '% (' + typeLabel + ')';
+
+      const sum = parseFormatted(sumInput.value);
+      const hasSum = !isNaN(sum) && sum > 0;
+
+      // pick an example damage % clearly above the franchise threshold, so the two
+      // formulas actually give different, comparable numbers (mirrors a real claim)
+      const examplePct = Math.min(discount + 10, 100);
+      const examplePctText = String(examplePct).replace('.', ',');
+
+      const unconditionalPayoutPct = Math.max(0, examplePct - discount);
+      const conditionalPayoutPct = examplePct > discount ? examplePct : 0;
+      const unconditionalTotalLossPct = Math.max(0, 100 - discount);
+      const conditionalTotalLossPct = 100; // total loss is always well above any franchise threshold
+
+      function pctOrAmount(pct){
+        if(hasSum) return numberToInputString(sum * pct / 100) + ' ₸';
+        return pct + '%';
+      }
+
+      const damageLabel = hasSum ? (numberToInputString(sum * examplePct / 100) + ' ₸') : (examplePctText + '% от суммы');
+
+      franchiseExampleEl.innerHTML =
+        '<strong>Франшиза ' + discountText + '% — по повреждению и утрате</strong>' +
+        '<span class="example-line">Безусловная — сумма франшизы всегда вычитается из выплаты.</span>' +
+        '<span class="example-line">Условная — при ущербе ниже франшизы выплаты нет; при ущербе выше — возмещается полностью.</span>' +
+        '<span class="example-line">Пример: ущерб составил ' + examplePctText + '% (' + damageLabel + '). ' +
+          'По безусловной франшизе выплата — ' + pctOrAmount(unconditionalPayoutPct) + '. ' +
+          'По условной — ' + pctOrAmount(conditionalPayoutPct) + '.' +
+        '</span>' +
+        '<span class="example-line">Пример №2 (полная утрата груза): по безусловной франшизе выплата — ' +
+          pctOrAmount(unconditionalTotalLossPct) + '; по условной — ' + pctOrAmount(conditionalTotalLossPct) + '.' +
+        '</span>' +
+        '<span class="example-line">Для этого тарифа выбрана: <strong>' + typeLabel + '</strong> франшиза.</span>';
+    }
+
     function calc(){
       const sum = parseFormatted(sumInput.value);
-      const fx = currentFx();
-      const sumKZT = sum * fx;
+      const sumKZT = sum;
       const rate = parseFloat(rateInput.value);
-      const premium = (rate/100) * sumKZT;
+      const basePremium = (rate/100) * sumKZT;
+      const useFranchise = franchiseActive();
+      const discountPct = franchiseDiscountValue();
+      const premium = useFranchise ? basePremium * (1 - discountPct/100) : basePremium;
+      const franchiseAmountKZT = useFranchise ? (basePremium - premium) : 0;
 
-      if(sharedCurrency === 'KZT'){
-        premiumEl.textContent = formatCurrencyAmount(premium, 'KZT');
-        premiumSubEl.textContent = '';
-      } else {
-        const premiumForeign = premium / fx;
-        premiumEl.textContent = formatCurrencyAmount(premiumForeign, sharedCurrency);
-        premiumSubEl.textContent = '≈ ' + formatKZT(premium);
-      }
+      updateFranchiseExample();
+
+      const fromValue = displayedPremiumValue;
+      animateNumber(premiumEl, fromValue, premium, formatCurrencyAmount, 450);
+      displayedPremiumValue = premium;
       premiumEl.classList.add('ready');
+
+      const sumText = formatCurrencyAmount(sum);
+      const premiumText = formatCurrencyAmount(premium);
+      const ratioPercent = sumKZT > 0 ? (premium / sumKZT) * 100 : 0;
+      const ratioText = ((ratioPercent < 10 ? ratioPercent.toFixed(2) : ratioPercent.toFixed(1)).replace('.', ',')) + '%';
+
+      valueBadgeEl.classList.remove('hidden');
+      valuePitchEl.innerHTML =
+        'Это всего <strong>' + ratioText + '</strong> от стоимости груза. Без страховки вы рискуете всей суммой — ' +
+        sumText + '. Мы защищаем её всего за <strong>' + premiumText + '</strong>.';
+
+      coverageMiniLabelEl.textContent = 'За ' + premiumText + ' вы получаете:';
+      coverageFooterEl.textContent = 'Полная защита груза на ' + sumText;
+      coverageFooterEl.classList.remove('hidden');
 
       lastResult = {
         label: label,
-        currency: sharedCurrency,
         rate: rate,
         sum: sum,
-        fx: fx,
         sumKZT: sumKZT,
-        premium: premium
+        premium: premium,
+        franchiseUsed: useFranchise,
+        franchiseDiscount: useFranchise ? discountPct : 0,
+        franchiseNote: franchiseNoteInput.value.trim()
       };
       refreshExportButton();
+
+      updateRingWithResult(
+        useFranchise,
+        discountPct,
+        formatCurrencyAmount(franchiseAmountKZT),
+        formatCurrencyAmount(premium)
+      );
     }
 
-    // Live recalculation: runs on every relevant input change, no button needed
-    function recalc(){
+    let debounceTimer = null;
+    let revealTimer = null;
+
+    function cancelPendingCalc(){
+      if(debounceTimer){ clearTimeout(debounceTimer); debounceTimer = null; }
+      if(revealTimer){ clearTimeout(revealTimer); revealTimer = null; }
+      cardOverlayEl.classList.remove('visible');
+    }
+
+    // Instant recalculation, no overlay — used for edits that shouldn't feel like
+    // a fresh "calculation" (typing the franchise discount %, turning franchise off).
+    function recalcInstant(){
+      cancelPendingCalc();
       const err = validate();
       if(err){
         resetPremium();
@@ -823,28 +1507,57 @@
       }
     }
 
+    // Shows a short "calculating…" overlay over the whole tariff card, then reveals
+    // the result. Used for every trigger that changes the premium: sum, rate,
+    // currency, fx rate, and turning the franchise toggle ON.
+    function scheduleCalc(){
+      cancelPendingCalc();
+      const err = validate();
+      if(err){
+        resetPremium();
+        return;
+      }
+      debounceTimer = setTimeout(()=>{
+        debounceTimer = null;
+        cardOverlayEl.classList.add('visible');
+        revealTimer = setTimeout(()=>{
+          revealTimer = null;
+          cardOverlayEl.classList.remove('visible');
+          calc();
+        }, 2300);
+      }, 350);
+    }
+
     attachSpacedInput(sumInput, ()=>{
       const val = parseFormatted(sumInput.value);
-      const fx = currentFx();
-      if(!isNaN(val) && fx !== null){
-        sharedKZT = sharedCurrency === 'KZT' ? val : val * fx;
+      if(!isNaN(val)){
+        sharedKZT = val;
       } else if(sumInput.value === ''){
         sharedKZT = null;
       }
       allCards.forEach(c => {
         if(c.sumInput !== sumInput){
           c.applySharedKZT();
-          c.recalc();
+          c.scheduleCalc();
         }
       });
-      recalc();
+      scheduleCalc();
     });
 
-    rateInput.addEventListener('input', ()=>{ recalc(); refreshShareButton(); });
+    rateInput.addEventListener('input', ()=>{ scheduleCalc(); refreshShareButton(); });
 
-    fxRateInput.addEventListener('input', ()=>{
-      const v = parseFloat(fxRateInput.value);
-      setFxRateGlobal(v > 0 ? v : null, fxRateInput);
+    franchiseDiscountInput.addEventListener('input', ()=>{
+      updateFranchiseVisibility();
+      recalcInstant();
+    });
+    franchiseTypeSelect.addEventListener('change', updateFranchiseVisibility);
+    franchiseNoteInput.addEventListener('input', updateFranchiseVisibility);
+    franchiseToggle.addEventListener('change', ()=>{
+      if(franchiseToggle.checked){
+        scheduleCalc();
+      } else {
+        recalcInstant();
+      }
     });
 
     function hasValidRate(){
@@ -852,118 +1565,228 @@
       return !isNaN(r) && r >= 0;
     }
 
-    // Lock the rate field so a client can view but not edit the manager-configured tariff
     function lockRate(rateValue){
       rateInput.value = String(rateValue);
       rateInput.disabled = true;
       rateShell.classList.add('locked');
     }
 
-    // Fully hide the rate field from the client — the value stays set internally for the calculation
     function hideRateField(){
       const rateField = rateInput.closest('.field');
       rateField.classList.add('hidden');
       rateField.parentElement.classList.add('single-field');
     }
 
+    function configureFranchiseFromConfig(fr){
+      if(fr && fr.discount > 0){
+        franchiseDiscountInput.value = String(fr.discount);
+        franchiseTypeSelect.value = fr.type === 'conditional' ? 'conditional' : 'unconditional';
+        franchiseNoteInput.value = fr.note || '';
+        updateFranchiseVisibility();
+      }
+    }
+
+    function hideFranchiseEditor(){
+      franchiseConfig.classList.add('hidden');
+      franchiseNoteField.classList.add('hidden');
+    }
+
     const handle = {
-      sumInput, rateInput, resetPremium, validate, recalc, applySharedKZT, applyCurrency, setFxDisplay,
-      hasValidRate, lockRate, hideRateField,
+      sumInput, rateInput, resetPremium, validate, recalc: scheduleCalc, scheduleCalc, applySharedKZT,
+      hasValidRate, lockRate, hideRateField, configureFranchiseFromConfig, hideFranchiseEditor,
+      get franchiseDiscountInput(){ return franchiseDiscountInput; },
+      get franchiseTypeSelect(){ return franchiseTypeSelect; },
+      get franchiseNoteInput(){ return franchiseNoteInput; },
       get lastResult(){ return lastResult; }
     };
     allCards.push(handle);
     return handle;
   }
 
-  let sharedCurrency = 'KZT';
-  let sharedFx = null;
-  let sharedKZT = null;
-
-  function currentFx(){
-    return sharedCurrency === 'KZT' ? 1 : sharedFx;
-  }
-
-  function selectCurrencyGlobal(code){
-    sharedCurrency = code;
-    sharedFx = null;
-    allCards.forEach(c => c.applyCurrency(code));
-    allCards.forEach(c => c.applySharedKZT());
-    allCards.forEach(c => c.recalc());
-  }
-
-  function setFxRateGlobal(value, sourceInput){
-    sharedFx = value;
-    allCards.forEach(c => c.setFxDisplay(value, sourceInput));
-    allCards.forEach(c => c.applySharedKZT());
-    allCards.forEach(c => c.recalc());
-  }
-
   const cardStandard = setupCard('Standard', 'Стандартный тариф');
   const cardSpecial  = setupCard('Special', 'Особые условия');
-  selectCurrencyGlobal('KZT');
+  allCards.forEach(c => c.recalc());
+  refreshShareButton();
 
-  // ---- coverage points (per-tariff bullet list, feeds the PDF) ----
-  function setupCoverage(suffix, placeholders){
-    const listEl = document.getElementById('coverage'+suffix);
-    const addBtn  = document.getElementById('addPoint'+suffix);
+  // ================= COVERAGE (pick from a catalog, matching icons built in) =================
+  const COVERAGE_CATALOG = [
+    {icon:'🚧', text:'ДТП'},
+    {icon:'🔓', text:'Кража'},
+    {icon:'📦', text:'Погрузка / разгрузка'},
+    {icon:'🔥', text:'Пожар'},
+    {icon:'🌊', text:'Природные бедствия'},
+    {icon:'💥', text:'Полная гибель груза'},
+    {icon:'📉', text:'Частичная порча груза'},
+    {icon:'🚚', text:'Утрата при перевозке'},
+    {icon:'💧', text:'Подмочка груза'},
+  ];
+  const COVERAGE_OTHER_ICON = '📄';
+
+  function setupCoverage(suffix, defaultIndices){
+    const chipsEl = document.getElementById('coverageChips'+suffix);
+    const gridEl = document.getElementById('coverageGrid'+suffix);
+    const pickerRow = document.getElementById('coveragePickerRow'+suffix);
+    const select = document.getElementById('coveragePicker'+suffix);
+    const customInput = document.getElementById('coverageCustom'+suffix);
+    const addBtn = document.getElementById('addPoint'+suffix);
+
+    let items = (defaultIndices || []).map(i => ({ icon: COVERAGE_CATALOG[i].icon, text: COVERAGE_CATALOG[i].text }));
     let readOnlyPoints = null;
 
-    function addItem(placeholderText){
-      const row = document.createElement('div');
-      row.className = 'coverage-item';
+    const placeholderOpt = document.createElement('option');
+    placeholderOpt.value = '';
+    placeholderOpt.textContent = 'Выберите пункт…';
+    select.appendChild(placeholderOpt);
 
-      const bullet = document.createElement('span');
-      bullet.className = 'bullet';
-      bullet.textContent = '•';
+    COVERAGE_CATALOG.forEach((c, idx)=>{
+      const opt = document.createElement('option');
+      opt.value = String(idx);
+      opt.textContent = c.icon + '  ' + c.text;
+      select.appendChild(opt);
+    });
+    const otherOpt = document.createElement('option');
+    otherOpt.value = 'other';
+    otherOpt.textContent = COVERAGE_OTHER_ICON + '  Другое (свой текст)';
+    select.appendChild(otherOpt);
 
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.placeholder = placeholderText || 'Например: полная гибель груза при ДТП';
-      input.value = '';
+    select.addEventListener('change', ()=>{
+      customInput.classList.toggle('hidden', select.value !== 'other');
+      if(select.value === 'other') customInput.focus();
+    });
 
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'coverage-remove';
-      removeBtn.innerHTML = '&times;';
-      removeBtn.setAttribute('aria-label', 'Удалить пункт');
-      removeBtn.addEventListener('click', ()=> row.remove());
-
-      row.append(bullet, input, removeBtn);
-      listEl.appendChild(row);
+    function renderChips(){
+      chipsEl.innerHTML = '';
+      items.forEach((item, idx)=>{
+        const chip = document.createElement('span');
+        chip.className = 'coverage-chip';
+        const emoji = document.createElement('span');
+        emoji.className = 'emoji';
+        emoji.textContent = item.icon;
+        const label = document.createElement('span');
+        label.textContent = item.text;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'coverage-remove';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.setAttribute('aria-label', 'Удалить пункт');
+        removeBtn.addEventListener('click', ()=>{
+          items.splice(idx, 1);
+          renderChips();
+        });
+        chip.append(emoji, label, removeBtn);
+        chipsEl.appendChild(chip);
+      });
     }
 
-    placeholders.forEach(addItem);
-    addBtn.addEventListener('click', ()=> addItem());
+    addBtn.addEventListener('click', ()=>{
+      if(select.value === 'other'){
+        const text = customInput.value.trim();
+        if(!text) return;
+        items.push({ icon: COVERAGE_OTHER_ICON, text: text });
+        customInput.value = '';
+      } else if(select.value !== ''){
+        const cat = COVERAGE_CATALOG[parseInt(select.value, 10)];
+        items.push({ icon: cat.icon, text: cat.text });
+      } else {
+        return;
+      }
+      select.value = '';
+      customInput.classList.add('hidden');
+      renderChips();
+    });
+
+    renderChips();
 
     return {
       getPoints(){
         if(readOnlyPoints !== null) return readOnlyPoints;
-        return [...listEl.querySelectorAll('input')]
-          .map(i => i.value.trim())
-          .filter(Boolean);
+        return items;
       },
       renderReadOnly(points){
         readOnlyPoints = points;
-        const ul = document.createElement('ul');
-        ul.className = 'coverage-readonly';
+        chipsEl.classList.add('hidden');
+        pickerRow.classList.add('hidden');
+        gridEl.classList.remove('hidden');
+        gridEl.innerHTML = '';
         points.forEach(p=>{
-          const li = document.createElement('li');
-          li.textContent = p;
-          ul.appendChild(li);
+          const card = document.createElement('div');
+          card.className = 'coverage-card';
+          const icon = document.createElement('div');
+          icon.className = 'icon';
+          icon.textContent = p.icon || COVERAGE_OTHER_ICON;
+          card.appendChild(icon);
+          const lbl = document.createElement('div');
+          lbl.className = 'label';
+          lbl.textContent = p.text;
+          card.appendChild(lbl);
+          gridEl.appendChild(card);
         });
-        listEl.replaceWith(ul);
-        addBtn.classList.add('hidden');
       }
     };
   }
 
-  const coverageStandard = setupCoverage('Standard', [
-    'Например: полная гибель груза в результате ДТП, пожара или крушения транспортного средства'
-  ]);
-  const coverageSpecial = setupCoverage('Special', [
-    'Например: частичная порча груза',
-    'Например: кража или утрата при погрузочно-разгрузочных работах'
-  ]);
+  const coverageStandard = setupCoverage('Standard', [3, 0, 4, 8, 6]);
+  const coverageSpecial = setupCoverage('Special', [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+
+  // ================= CARGO CATEGORY -> typical risks + recommended package =================
+  const CARGO_CATEGORIES = [
+    {key:'electronics',   icon:'💻', label:'Электроника и техника',            risks:[1,8,0,3],   recommend:'special',
+      reason:'Дорогой и уязвимый груз: чувствителен к влаге и ударам, привлекателен для кражи. «Все риски» покрывает максимум причин повреждения, а не только крупные аварии.'},
+    {key:'construction',  icon:'🧱', label:'Стройматериалы',                   risks:[0,2,5],     recommend:'standard',
+      reason:'Обычно устойчивы к незначительным ударам и не портятся от подмочки так критично — базового пакета, покрывающего крупные аварии и крушение, как правило, достаточно.'},
+    {key:'textile',       icon:'👕', label:'Текстиль и одежда',                risks:[8,1,6],     recommend:'standard',
+      reason:'Легко мнётся и портится от влаги при перевозке, но стоит не так дорого, как электроника — «Частная авария» покрывает основные именованные риски без переплаты за максимальный пакет.'},
+    {key:'furniture',     icon:'🛋️', label:'Мебель',                          risks:[2,0,6],     recommend:'standard',
+      reason:'Объёмная, подвержена сколам и царапинам при погрузке, но полная гибель груза — редкость. «Частная авария» покрывает частые бытовые риски перевозки.'},
+    {key:'auto',          icon:'🔧', label:'Автозапчасти',                     risks:[1,0,3],     recommend:'special',
+      reason:'Привлекательная цель для кражи и часто высокая стоимость единицы товара — оправдано максимальное покрытие «Все риски».'},
+    {key:'fragile',       icon:'🥃', label:'Хрупкие грузы (стекло, керамика)', risks:[2,0,6,5],   recommend:'special',
+      reason:'Повреждается даже при незначительных нарушениях условий перевозки — важно покрытие частичных повреждений, которое даёт только «Все риски».'},
+    {key:'other',         icon:'📦', label:'Прочий универсальный груз',       risks:[0,3,4],     recommend:'standard',
+      reason:'Без выраженной специфики риска «Частная авария» — сбалансированный вариант между базовым покрытием и максимальной защитой.'},
+  ];
+
+  const categorySelect = document.getElementById('categorySelect');
+  const categoryRisks = document.getElementById('categoryRisks');
+  const categoryRisksChips = document.getElementById('categoryRisksChips');
+
+  const categoryPlaceholderOpt = document.createElement('option');
+  categoryPlaceholderOpt.value = '';
+  categoryPlaceholderOpt.textContent = 'Выберите тип груза…';
+  categorySelect.appendChild(categoryPlaceholderOpt);
+  CARGO_CATEGORIES.forEach(cat=>{
+    const opt = document.createElement('option');
+    opt.value = cat.key;
+    opt.textContent = cat.icon + '  ' + cat.label;
+    categorySelect.appendChild(opt);
+  });
+
+  categorySelect.addEventListener('change', ()=>{
+    document.querySelectorAll('.tariff-card').forEach(el => el.classList.remove('recommended'));
+
+    const cat = CARGO_CATEGORIES.find(c => c.key === categorySelect.value);
+    if(!cat){
+      categoryRisks.classList.add('hidden');
+      return;
+    }
+
+    categoryRisksChips.innerHTML = '';
+    cat.risks.forEach(idx=>{
+      const item = COVERAGE_CATALOG[idx];
+      const chip = document.createElement('span');
+      chip.className = 'category-risk-chip';
+      chip.innerHTML = '<span>' + item.icon + '</span>' + item.text;
+      categoryRisksChips.appendChild(chip);
+    });
+    categoryRisks.classList.remove('hidden');
+
+    const targetCard = document.querySelector('.tariff-card.' + cat.recommend);
+    if(targetCard) targetCard.classList.add('recommended');
+
+    const categoryReasonEl = document.getElementById('categoryReason');
+    const packageTitle = targetCard ? targetCard.querySelector('.title').textContent : '';
+    categoryReasonEl.innerHTML = '<strong>Почему «' + packageTitle + '»:</strong> ' + cat.reason;
+  });
 
   // ---- unicode-safe base64 helpers (for encoding the client link config) ----
   function b64EncodeUnicode(str){
@@ -986,6 +1809,11 @@
   const clientConfig = parseClientConfig();
   const isClientMode = !!clientConfig;
 
+  const tariffDefs = [
+    { suffix: 'Standard', card: cardStandard, coverage: coverageStandard, cfgKey: 'std' },
+    { suffix: 'Special',  card: cardSpecial,  coverage: coverageSpecial,  cfgKey: 'spc' },
+  ];
+
   if(isClientMode){
     shareRow.classList.add('hidden');
     document.getElementById('managerGuide').classList.add('hidden');
@@ -995,24 +1823,26 @@
       document.getElementById('pageTitle').textContent = 'Калькулятор расчёта стоимости страхования груза для ' + clientConfig.co;
     }
 
-    if(clientConfig.std){
-      cardStandard.lockRate(clientConfig.std.rate);
-      cardStandard.hideRateField();
-      coverageStandard.renderReadOnly(clientConfig.std.points || []);
-    } else {
-      document.getElementById('segmentedStandard').closest('.tariff-card').classList.add('hidden');
-    }
+    tariffDefs.forEach(def=>{
+      const cfg = clientConfig[def.cfgKey];
+      const cardEl = document.querySelector('.tariff-card.' + def.suffix.toLowerCase());
+      if(cfg){
+        def.card.lockRate(cfg.rate);
+        def.card.hideRateField();
+        def.card.hideFranchiseEditor();
+        def.card.configureFranchiseFromConfig(cfg.franchise);
+        def.coverage.renderReadOnly(cfg.points || []);
+      } else {
+        cardEl.classList.add('hidden');
+      }
+    });
 
-    if(clientConfig.spc){
-      cardSpecial.lockRate(clientConfig.spc.rate);
-      cardSpecial.hideRateField();
-      coverageSpecial.renderReadOnly(clientConfig.spc.points || []);
-    } else {
-      document.getElementById('segmentedSpecial').closest('.tariff-card').classList.add('hidden');
-    }
-
-    if(!clientConfig.std || !clientConfig.spc){
-      document.querySelector('.vs').classList.add('hidden');
+    const visibleFlags = tariffDefs.map(def => !!clientConfig[def.cfgKey]);
+    const vsEls = document.querySelectorAll('.vs');
+    vsEls.forEach((vsEl, i)=>{
+      if(!(visibleFlags[i] && visibleFlags[i+1])) vsEl.classList.add('hidden');
+    });
+    if(visibleFlags.filter(Boolean).length <= 1){
       document.querySelector('.tariffs').classList.add('single');
     }
 
@@ -1024,9 +1854,25 @@
       clientBanner.classList.remove('hidden');
     }
 
-    allCards.forEach(c => c.recalc());
+    const blocksWeb = clientConfig.bw || ['causes', 'cases', 'category', 'guide'];
+    if(!blocksWeb.includes('causes'))   document.querySelector('.causes-section').classList.add('hidden');
+    if(!blocksWeb.includes('cases'))    document.querySelector('.cases-section').classList.add('hidden');
+    if(!blocksWeb.includes('category')) document.querySelector('.category-panel').classList.add('hidden');
+    if(!blocksWeb.includes('guide'))    document.getElementById('clientGuide').classList.add('hidden');
+  } else {
+    tariffDefs.forEach(def=>{
+      document.getElementById('franchiseConfig'+def.suffix).classList.remove('hidden');
+      document.getElementById('franchiseNoteField'+def.suffix).classList.remove('hidden');
+      document.getElementById('sendToggleRow'+def.suffix).classList.remove('hidden');
+      const sendToggle = document.getElementById('sendToggle'+def.suffix);
+      const sendToggleRow = document.getElementById('sendToggleRow'+def.suffix);
+      sendToggle.addEventListener('change', ()=>{
+        sendToggleRow.classList.toggle('off', !sendToggle.checked);
+        refreshShareButton();
+      });
+    });
   }
-  refreshShareButton();
+  allCards.forEach(c => c.recalc());
 
   // ================= PDF EXPORT =================
   const LOGO_B64 = "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";
@@ -1035,32 +1881,65 @@
 
   const pdfOverlay = document.getElementById('pdfOverlay');
   const companyNameInput = document.getElementById('companyNameInput');
-  const managerNameInput = document.getElementById('managerNameInput');
-  const managerPhoneInput = document.getElementById('managerPhoneInput');
   const modalGenerateBtn = document.getElementById('modalGenerateBtn');
   const modalCancelBtn = document.getElementById('modalCancelBtn');
   const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const pdfTariffPickerField = document.getElementById('pdfTariffPickerField');
+  const pdfTariffPicker = document.getElementById('pdfTariffPicker');
+
+  function updateModalGenerateState(){
+    const hasCompany = companyNameInput.value.trim().length > 0;
+    let hasTariffPicked = true;
+    if(isClientMode){
+      hasTariffPicked = !![...pdfTariffPicker.querySelectorAll('input[type=checkbox]')].some(cb => cb.checked && !cb.disabled);
+    }
+    modalGenerateBtn.disabled = !hasCompany || !hasTariffPicked;
+  }
 
   function openModal(){
     if(isClientMode){
-      document.getElementById('managerNameField').classList.add('hidden');
-      document.getElementById('managerPhoneField').classList.add('hidden');
-      document.getElementById('pdfModalDesc').textContent = 'Укажите название компании, для которой готовится расчёт.';
       companyNameInput.value = clientConfig.co || '';
-      managerNameInput.value = clientConfig.m || '';
-      managerPhoneInput.value = clientConfig.p || '';
+
+      pdfTariffPickerField.classList.remove('hidden');
+      pdfTariffPicker.innerHTML = '';
+      tariffDefs.forEach(def=>{
+        if(!clientConfig[def.cfgKey]) return; // tariff not sent to this client at all
+        const hasResult = !!def.card.lastResult;
+        const row = document.createElement('label');
+        row.className = 'pdf-tariff-row' + (hasResult ? '' : ' disabled');
+
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.id = 'pdfInclude' + def.suffix;
+        cb.checked = hasResult;
+        cb.disabled = !hasResult;
+        cb.addEventListener('change', updateModalGenerateState);
+
+        const name = document.createElement('span');
+        name.className = 'name';
+        const cardEl = document.querySelector('.tariff-card.' + def.suffix.toLowerCase());
+        name.textContent = cardEl.querySelector('.title').textContent;
+        if(!hasResult){
+          const hint = document.createElement('span');
+          hint.className = 'hint';
+          hint.textContent = 'сначала посчитайте премию';
+          name.appendChild(document.createElement('br'));
+          name.appendChild(hint);
+        }
+
+        row.appendChild(cb);
+        row.appendChild(name);
+        pdfTariffPicker.appendChild(row);
+      });
     } else {
       companyNameInput.value = '';
-      managerNameInput.value = '';
-      managerPhoneInput.value = '';
+      pdfTariffPickerField.classList.add('hidden');
     }
-    modalGenerateBtn.disabled = companyNameInput.value.trim().length === 0;
+    updateModalGenerateState();
     pdfOverlay.classList.add('open');
     setTimeout(()=> companyNameInput.focus(), 150);
   }
-  function closeModal(){
-    pdfOverlay.classList.remove('open');
-  }
+  function closeModal(){ pdfOverlay.classList.remove('open'); }
 
   exportPdfBtn.addEventListener('click', ()=>{
     if(exportPdfBtn.disabled) return;
@@ -1069,15 +1948,20 @@
   modalCancelBtn.addEventListener('click', closeModal);
   modalCloseBtn.addEventListener('click', closeModal);
   pdfOverlay.addEventListener('click', (e)=>{ if(e.target === pdfOverlay) closeModal(); });
-  companyNameInput.addEventListener('input', ()=>{
-    modalGenerateBtn.disabled = companyNameInput.value.trim().length === 0;
-  });
+  companyNameInput.addEventListener('input', updateModalGenerateState);
   companyNameInput.addEventListener('keydown', (e)=>{
     if(e.key === 'Enter' && !modalGenerateBtn.disabled) generatePdf();
   });
   modalGenerateBtn.addEventListener('click', generatePdf);
 
-  // ================= SHARE LINK (manager configures tariff, sends link to client) =================
+  // ================= SHARE LINK =================
+  const BLOCK_DEFS = [
+    { key:'causes',   label:'Топ причин потери груза',    hasPdf:false },
+    { key:'cases',    label:'Примеры «Как это бывает»',   hasPdf:false },
+    { key:'category', label:'Тип груза и рекомендация',   hasPdf:false },
+    { key:'guide',    label:'Инструкция для клиента',     hasPdf:false },
+  ];
+
   const shareOverlay = document.getElementById('shareOverlay');
   const shareCompanyName = document.getElementById('shareCompanyName');
   const shareManagerName = document.getElementById('shareManagerName');
@@ -1090,20 +1974,58 @@
   const shareLinkOutput = document.getElementById('shareLinkOutput');
   const shareDoneBtn = document.getElementById('shareDoneBtn');
   const shareCopyBtn = document.getElementById('shareCopyBtn');
+  const blockToggleList = document.getElementById('blockToggleList');
+
+  BLOCK_DEFS.forEach(def=>{
+    const row = document.createElement('div');
+    row.className = 'block-toggle-row';
+
+    const name = document.createElement('span');
+    name.className = 'name';
+    name.textContent = def.label;
+    row.appendChild(name);
+
+    const webOpt = document.createElement('span');
+    webOpt.className = 'opt';
+    const webCb = document.createElement('input');
+    webCb.type = 'checkbox';
+    webCb.checked = true;
+    webCb.id = 'blockWeb_' + def.key;
+    webOpt.appendChild(webCb);
+    row.appendChild(webOpt);
+
+    const pdfOpt = document.createElement('span');
+    pdfOpt.className = 'opt';
+    if(def.hasPdf){
+      const pdfCb = document.createElement('input');
+      pdfCb.type = 'checkbox';
+      pdfCb.checked = true;
+      pdfCb.id = 'blockPdf_' + def.key;
+      pdfOpt.appendChild(pdfCb);
+    } else {
+      pdfOpt.classList.add('na');
+      pdfOpt.textContent = '—';
+    }
+    row.appendChild(pdfOpt);
+
+    blockToggleList.appendChild(row);
+  });
 
   function openShareModal(){
     shareCompanyName.value = '';
     shareManagerName.value = '';
     shareManagerPhone.value = '';
+    BLOCK_DEFS.forEach(def=>{
+      document.getElementById('blockWeb_'+def.key).checked = true;
+      if(def.hasPdf) document.getElementById('blockPdf_'+def.key).checked = true;
+    });
     shareGenerateBtn.disabled = true;
     sharePreStep.classList.remove('hidden');
     sharePostStep.classList.add('hidden');
     shareOverlay.classList.add('open');
     setTimeout(()=> shareCompanyName.focus(), 150);
   }
-  function closeShareModal(){
-    shareOverlay.classList.remove('open');
-  }
+  function closeShareModal(){ shareOverlay.classList.remove('open'); }
 
   shareLinkBtn.addEventListener('click', ()=>{
     if(shareLinkBtn.disabled) return;
@@ -1117,18 +2039,33 @@
     shareGenerateBtn.disabled = shareCompanyName.value.trim().length === 0;
   });
 
+  function buildTariffConfig(card, coverage){
+    const cfg = { rate: parseFloat(card.rateInput.value), points: coverage.getPoints() };
+    const discount = parseFloat(card.franchiseDiscountInput.value);
+    if(!isNaN(discount) && discount > 0){
+      cfg.franchise = {
+        discount: discount,
+        note: card.franchiseNoteInput.value.trim(),
+        type: card.franchiseTypeSelect.value
+      };
+    }
+    return cfg;
+  }
+
   shareGenerateBtn.addEventListener('click', ()=>{
     if(shareGenerateBtn.disabled) return;
     const cfg = {
       co: shareCompanyName.value.trim(),
       m: shareManagerName.value.trim(),
-      p: shareManagerPhone.value.trim()
+      p: shareManagerPhone.value.trim(),
+      bw: BLOCK_DEFS.filter(def => document.getElementById('blockWeb_'+def.key).checked).map(def => def.key),
+      bp: BLOCK_DEFS.filter(def => def.hasPdf && document.getElementById('blockPdf_'+def.key).checked).map(def => def.key)
     };
-    if(cardStandard.hasValidRate()){
-      cfg.std = { rate: parseFloat(cardStandard.rateInput.value), points: coverageStandard.getPoints() };
+    if(cardStandard.hasValidRate() && document.getElementById('sendToggleStandard').checked){
+      cfg.std = buildTariffConfig(cardStandard, coverageStandard);
     }
-    if(cardSpecial.hasValidRate()){
-      cfg.spc = { rate: parseFloat(cardSpecial.rateInput.value), points: coverageSpecial.getPoints() };
+    if(cardSpecial.hasValidRate() && document.getElementById('sendToggleSpecial').checked){
+      cfg.spc = buildTariffConfig(cardSpecial, coverageSpecial);
     }
     const encoded = b64EncodeUnicode(JSON.stringify(cfg));
     const url = location.origin + location.pathname + '#cfg=' + encoded;
@@ -1160,8 +2097,6 @@
   function generatePdf(){
     const companyName = companyNameInput.value.trim();
     if(!companyName) return;
-    const preparedByName = managerNameInput.value.trim();
-    const preparedByPhone = managerPhoneInput.value.trim();
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit:'pt', format:'a4' });
@@ -1172,13 +2107,10 @@
     const marginX = 44;
     const dateStr = new Date().toLocaleDateString('ru-RU');
 
-    // ---- header band ----
-    doc.setFillColor(244,248,255);
+    doc.setFillColor(239,249,240);
     doc.rect(0, 0, pageWidth, 132, 'F');
 
-    try{
-      doc.addImage(LOGO_B64, 'PNG', marginX, 34, 177, 177*197/1280);
-    }catch(e){}
+    try{ doc.addImage(LOGO_B64, 'PNG', marginX, 34, 177, 177*197/1280); }catch(e){}
 
     doc.setFont('DejaVu','bold');
     doc.setFontSize(18);
@@ -1188,19 +2120,18 @@
     doc.setFont('DejaVu','normal');
     doc.setFontSize(10.5);
     doc.setTextColor(120,120,128);
-    doc.text('Коммерческое предложение по страхованию груза', pageWidth-marginX, 70, {align:'right'});
+    doc.text('Предварительный расчёт', pageWidth-marginX, 70, {align:'right'});
 
     doc.setFontSize(9.5);
     doc.setTextColor(150,150,158);
     doc.text('от ' + dateStr, pageWidth-marginX, 88, {align:'right'});
 
-    doc.setDrawColor(0,113,227);
+    doc.setDrawColor(57,181,74);
     doc.setLineWidth(2);
     doc.line(0, 132, pageWidth, 132);
 
     let y = 168;
 
-    // ---- client block ----
     doc.setFont('DejaVu','normal');
     doc.setFontSize(9.5);
     doc.setTextColor(150,150,158);
@@ -1229,14 +2160,22 @@
       doc.setFontSize(9.5);
       let coverageLines = [];
       points.forEach(p=>{
-        const lines = doc.splitTextToSize('•  ' + p, innerW);
-        coverageLines = coverageLines.concat(lines);
+        const lines = doc.splitTextToSize('•  ' + p.text, innerW);
+        coverageLines.push({lines});
       });
+      let coverageLineCount = 0;
+      coverageLines.forEach(cl => coverageLineCount += cl.lines.length);
 
-      const premiumOffset = 138;               // distance from box top to premium baseline (with pad=24)
-      const coverageExtra = coverageLines.length ? (52 + (coverageLines.length-1)*13) : 0;
+      let franchiseLines = [];
+      if(result.franchiseUsed && result.franchiseNote){
+        franchiseLines = doc.splitTextToSize(result.franchiseNote, innerW);
+      }
+
+      const premiumOffset = 138;
+      const coverageExtra = coverageLines.length ? (28 + coverageLineCount*13 + (coverageLines.length)*3) : 0;
+      const franchiseExtra = franchiseLines.length ? (22 + franchiseLines.length*12) : 0;
       const bottomPad = 30;
-      const boxH = premiumOffset + coverageExtra + bottomPad;
+      const boxH = premiumOffset + coverageExtra + franchiseExtra + bottomPad;
 
       if(y + boxH > pageHeight - 70){
         doc.addPage();
@@ -1269,24 +2208,23 @@
       doc.setFont('DejaVu','normal');
       doc.setFontSize(9.5);
       doc.setTextColor(130,130,138);
-      doc.text(isClientMode ? 'ВАЛЮТА' : 'ВАЛЮТА / СТАВКА', marginX+pad, iy);
+      if(!isClientMode) doc.text('СТАВКА', marginX+pad, iy);
       doc.text('СТРАХОВАЯ СУММА', col2, iy);
 
       iy += 18;
       doc.setFont('DejaVu','bold');
       doc.setFontSize(13);
       doc.setTextColor(40,40,44);
-      const rateColText = isClientMode
-        ? result.currency
-        : result.currency + '  ·  ' + String(result.rate).replace('.', ',') + ' %';
-      doc.text(rateColText, marginX+pad, iy);
-      doc.text(formatMoney(result.sum) + ' ' + result.currency, col2, iy);
+      if(!isClientMode){
+        doc.text(String(result.rate).replace('.', ',') + ' %', marginX+pad, iy);
+      }
+      doc.text(formatMoney(result.sum) + ' ₸', col2, iy);
 
       iy += 28;
       doc.setFont('DejaVu','normal');
       doc.setFontSize(9.5);
       doc.setTextColor(130,130,138);
-      doc.text('СТРАХОВАЯ ПРЕМИЯ', marginX+pad, iy);
+      doc.text('СТРАХОВАЯ ПРЕМИЯ' + (result.franchiseUsed ? ' (С ФРАНШИЗОЙ)' : ''), marginX+pad, iy);
 
       iy += 24;
       doc.setFont('DejaVu','bold');
@@ -1294,8 +2232,19 @@
       doc.setTextColor(accent[0],accent[1],accent[2]);
       doc.text(formatMoney(result.premium) + ' ₸', marginX+pad, iy);
 
+      if(franchiseLines.length){
+        iy += 18;
+        doc.setFont('DejaVu','normal');
+        doc.setFontSize(9);
+        doc.setTextColor(120,120,128);
+        franchiseLines.forEach(line=>{
+          doc.text(line, marginX+pad, iy);
+          iy += 12;
+        });
+      }
+
       if(coverageLines.length){
-        iy += 20;
+        iy += 18;
         doc.setDrawColor(borderTint[0],borderTint[1],borderTint[2]);
         doc.setLineWidth(0.75);
         doc.line(marginX+pad, iy, pageWidth-marginX-pad, iy);
@@ -1307,37 +2256,49 @@
         iy += 15;
         doc.setFontSize(10);
         doc.setTextColor(60,60,66);
-        coverageLines.forEach(line=>{
-          doc.text(line, marginX+pad, iy);
-          iy += 13;
+        coverageLines.forEach(cl=>{
+          cl.lines.forEach(line=>{
+            doc.text(line, marginX+pad, iy);
+            iy += 13;
+          });
+          iy += 3;
         });
       }
 
       y += boxH + 18;
     }
 
-    block(cardStandard.lastResult, coverageStandard.getPoints(), [0,113,227], '01', [240,246,255], [210,228,250]);
-    block(cardSpecial.lastResult, coverageSpecial.getPoints(), [31,169,113], '02', [237,250,244], [200,232,218]);
+    function tariffIncluded(suffix){
+      if(!isClientMode) return true;
+      const cb = document.getElementById('pdfInclude'+suffix);
+      return !!(cb && cb.checked);
+    }
 
-    y += 4;
-    doc.setDrawColor(230,230,234);
-    doc.setLineWidth(1);
-    doc.line(marginX, y, pageWidth-marginX, y);
-    y += 24;
+    if(tariffIncluded('Standard')) block(cardStandard.lastResult, coverageStandard.getPoints(), [57,181,74], '01', [238,249,239], [196,225,201]);
+    if(tariffIncluded('Special'))  block(cardSpecial.lastResult,  coverageSpecial.getPoints(),  [57,181,74], '02', [238,249,239], [196,225,201]);
 
-    if(preparedByName || preparedByPhone){
-      doc.setFont('DejaVu','normal');
-      doc.setFontSize(9.5);
-      doc.setTextColor(150,150,158);
-      doc.text('РАСЧЁТ ПОДГОТОВИЛ', marginX, y);
-      y += 17;
-      doc.setFont('DejaVu','bold');
-      doc.setFontSize(12.5);
-      doc.setTextColor(40,40,44);
-      let line = preparedByName || '';
-      if(preparedByPhone) line += (line ? '   ·   ' : '') + preparedByPhone;
-      doc.text(line, marginX, y);
-      y += 24;
+    // ---- optional extra sections, only in client-mode PDFs, only if the manager included them ----
+    const blocksPdf = isClientMode ? (clientConfig.bp || []) : [];
+
+    function ensureSpace(neededHeight){
+      if(y + neededHeight > pageHeight - 70){
+        doc.addPage();
+        y = 56;
+      }
+    }
+
+    if(isClientMode){
+      const cargoComment = document.getElementById('cargoComment').value.trim();
+      if(cargoComment){
+        const commentLines = doc.splitTextToSize(cargoComment, pageWidth - marginX*2);
+        ensureSpace(30 + commentLines.length*12);
+        doc.setFont('DejaVu','bold'); doc.setFontSize(11); doc.setTextColor(29,29,31);
+        doc.text('Комментарий к грузу', marginX, y);
+        y += 16;
+        doc.setFont('DejaVu','normal'); doc.setFontSize(9.5); doc.setTextColor(80,80,86);
+        commentLines.forEach(line=>{ doc.text(line, marginX, y); y += 12; });
+        y += 10;
+      }
     }
 
     y += 4;
@@ -1345,6 +2306,11 @@
       doc.addPage();
       y = 56;
     }
+
+    doc.setDrawColor(230,230,234);
+    doc.setLineWidth(1);
+    doc.line(marginX, y, pageWidth-marginX, y);
+    y += 24;
 
     doc.setFont('DejaVu','normal');
     doc.setFontSize(9);
@@ -1358,7 +2324,7 @@
     y += 24;
     doc.setFont('DejaVu','bold');
     doc.setFontSize(10.5);
-    doc.setTextColor(0,113,227);
+    doc.setTextColor(57,181,74);
     doc.text('Желаем Вам отличного дня!', marginX, y);
 
     const safeName = companyName.replace(/[\\/:*?"<>|]/g,'').trim().replace(/\s+/g,'_') || 'company';
