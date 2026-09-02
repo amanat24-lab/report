@@ -78,8 +78,12 @@
   .stat .num{font-size:24px;font-weight:700;font-family:var(--mono);}
   .stat .lbl{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-top:2px;}
 
-  #summaryRoot section.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
-  #summaryRoot .card-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+  #summaryRoot .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  #summaryRoot .card-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;user-select:none;}
+  #summaryRoot .card-head::-webkit-details-marker{display:none;}
+  #summaryRoot .card:not([open]) .card-head{border-bottom:none;}
+  #summaryRoot .card-chevron{display:inline-block;color:var(--ink-faint);font-size:11px;transition:transform .15s ease;flex-shrink:0;}
+  #summaryRoot .card[open] .card-chevron{transform:rotate(90deg);}
   #summaryRoot .card-head .idx{font-family:var(--mono);font-size:12px;color:var(--ink-faint);}
   #summaryRoot .card-head h2{font-size:16px;margin:0;font-weight:700;}
   #summaryRoot .card-body{padding:16px 20px 20px;}
@@ -665,10 +669,33 @@ function fmtDate(d){
   const parts = d.split('-');
   return parts.length===3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : d;
 }
+function fmtNum(n){
+  const num = Number(n);
+  if(isNaN(num) || n===''||n==null) return n;
+  return num.toLocaleString('ru-RU');
+}
 function esc(s){
   return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function nl2br(s){ return esc(s).replace(/\n/g,'<br>'); }
+
+// Единая свёрнуто/развёрнуто карточка для сводки — используется и в
+// "по разделам", и в "по менеджерам", и в рейтинге, чтобы длинные
+// таблицы (например, "Обработанные лиды") можно было спрятать одним
+// кликом, а не листать простынёй.
+function createCard(idxLabel, titleHtml){
+  const card = document.createElement('details');
+  card.className = 'card';
+  card.open = true;
+  const head = document.createElement('summary');
+  head.className = 'card-head';
+  head.innerHTML = `<span class="card-chevron">▸</span>${idxLabel ? `<span class="idx">${idxLabel}</span>` : ''}<h2>${titleHtml}</h2>`;
+  card.appendChild(head);
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  card.appendChild(body);
+  return {card, head, body};
+}
 
 /* ---------------------------------------------------------------
    ИНДЕКС РЕЗУЛЬТАТИВНОСТИ
@@ -677,9 +704,8 @@ function nl2br(s){ return esc(s).replace(/\n/g,'<br>'); }
    нет, считаем сами по стандартным KPI/весам как запасной вариант.
 --------------------------------------------------------------- */
 const FALLBACK_INDEX_DEFS = {
-  contacts_search: {kpi:10, weight:1},
-  calls: {kpi:10, weight:2},
-  meetings: {kpi:5, weight:3}
+  calls: {kpi:15, weight:2},
+  meetings: {kpi:2, weight:3}
 };
 function idxColorClass(percent){
   if(percent>=85) return 'good';
@@ -729,17 +755,12 @@ function buildLeaderboard(reports){
 function renderLeaderboard(reports){
   const data = buildLeaderboard(reports);
   if(!data.length) return null;
-  const card = document.createElement('section'); card.className='card';
-  const head = document.createElement('div'); head.className='card-head';
-  head.innerHTML = `<h2>Индекс результативности недели — по менеджерам</h2>`;
-  card.appendChild(head);
-  const body = document.createElement('div'); body.className='card-body';
+  const {card, body} = createCard('', 'Индекс результативности недели — по менеджерам');
   const table = document.createElement('table'); table.className='sumtable';
   let rows = data.map((d,i)=>`<tr><td><span class="rank-num">${i+1}</span></td><td class="mgr-name">${esc(d.manager)}</td><td>${idxBadge(d.avg)}</td><td style="color:var(--ink-faint);">${d.count} ${d.count===1?'отчёт':'отчёта(ов)'}</td></tr>`).join('');
   table.innerHTML = `<tr><th></th><th>Менеджер</th><th>Индекс (среднее за период)</th><th>Отчётов учтено</th></tr>${rows}`;
   body.appendChild(table);
-  body.appendChild(el2('div',{style:'font-size:12px;color:var(--ink-faint);margin-top:10px;'}, 'Индекс считается по показателям раздела «Выполненные мероприятия» относительно KPI, с весом по приоритету: встречи важнее звонков, звонки важнее поиска контактов. Если отчётов за период несколько — берётся среднее.'));
-  card.appendChild(body);
+  body.appendChild(el2('div',{style:'font-size:12px;color:var(--ink-faint);margin-top:10px;'}, 'Индекс считается по показателям раздела «Выполненные мероприятия» относительно их KPI, с весом по приоритету между показателями. Если отчётов за период несколько — берётся среднее.'));
   return card;
 }
 function el2(tag, attrs, txt){
@@ -785,12 +806,7 @@ function renderBySection(reports, managers){
   let idx = 0;
   Object.values(registry).forEach(reg=>{
     idx++;
-    const card = document.createElement('section');
-    card.className = 'card';
-    const head = document.createElement('div'); head.className='card-head';
-    head.innerHTML = `<span class="idx">${String(idx).padStart(2,'0')}</span><h2>${esc(reg.title)}</h2>`;
-    card.appendChild(head);
-    const body = document.createElement('div'); body.className='card-body';
+    const {card, body} = createCard(String(idx).padStart(2,'0'), esc(reg.title));
 
     // Один и тот же id раздела мог в старых отчётах иметь другую структуру
     // (например, "Обработанные лиды" раньше было одним полем, теперь — таблица).
@@ -810,7 +826,6 @@ function renderBySection(reports, managers){
     } else if(reg.type==='okr'){
       body.appendChild(renderOkrSectionSummary(reg, reports));
     }
-    card.appendChild(body);
     container.appendChild(card);
   });
   return container;
@@ -881,6 +896,7 @@ function renderFieldsSectionSummary(reg, reports){
   if(allNumeric){
     const table = document.createElement('table'); table.className='sumtable';
     const hasIndex = reg.id === 'activities_done' || reports.some(r=>{ const s=sectionOf(r,reg.id); return s && s.index; });
+    const useThousands = reg.id === 'weekly_numbers';
     let thead = '<tr><th>Менеджер</th>' + fieldIds.map(fid=>`<th>${esc(reg.columns[fid].label)}</th>`).join('') + (hasIndex?'<th>Индекс</th>':'') + '</tr>';
     const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
     let body = '';
@@ -892,14 +908,14 @@ function renderFieldsSectionSummary(reg, reports){
         const f = sec && sec.fields.find(x=>x.id===fid);
         const v = f ? Number(f.value)||0 : 0;
         totals[fid]+=v;
-        body += `<td>${f? esc(f.value||0):'—'}</td>`;
+        body += `<td>${f ? esc(useThousands ? fmtNum(f.value||0) : (f.value||0)) : '—'}</td>`;
       });
       if(hasIndex){
         body += `<td>${idxBadge(sec ? getReportIndex(r) : null)}</td>`;
       }
       body += '</tr>';
     });
-    let totalRow = `<tr class="total-row"><td>Итого</td>` + fieldIds.map(fid=>`<td>${totals[fid]}</td>`).join('') + (hasIndex?'<td></td>':'') + `</tr>`;
+    let totalRow = `<tr class="total-row"><td>Итого</td>` + fieldIds.map(fid=>`<td>${useThousands ? fmtNum(totals[fid]) : totals[fid]}</td>`).join('') + (hasIndex?'<td></td>':'') + `</tr>`;
     table.innerHTML = thead + body + totalRow;
     return table;
   }
@@ -1100,12 +1116,8 @@ function renderByManager(reports, managers){
   sorted.forEach((mgr, idx)=>{
     const mgrReports = reports.filter(r=>(r.meta.manager||'Без имени')===mgr)
       .sort((a,b)=>(a.meta.filledDate||'').localeCompare(b.meta.filledDate||''));
-    const card = document.createElement('section'); card.className='card';
-    const head = document.createElement('div'); head.className='card-head';
     const datesLabel = mgrReports.map(r=>fmtDate(r.meta.filledDate)).join(', ');
-    head.innerHTML = `<span class="idx">${String(idx+1).padStart(2,'0')}</span><h2>${esc(mgr)} <span style="font-weight:400;font-size:12.5px;color:var(--ink-faint);">· ${esc(datesLabel)}</span></h2>`;
-    card.appendChild(head);
-    const body = document.createElement('div'); body.className='card-body';
+    const {card, body} = createCard(String(idx+1).padStart(2,'0'), `${esc(mgr)} <span style="font-weight:400;font-size:12.5px;color:var(--ink-faint);">· ${esc(datesLabel)}</span>`);
 
     mgrReports.forEach(r=>{
       const sub = document.createElement('div');
@@ -1121,7 +1133,6 @@ function renderByManager(reports, managers){
       body.appendChild(sub);
     });
 
-    card.appendChild(body);
     container.appendChild(card);
   });
   return container;
@@ -1132,7 +1143,8 @@ function renderSingleSectionContent(sec){
   if(sec.type==='fields'){
     const table = document.createElement('table'); table.className='sumtable';
     table.innerHTML = sec.fields.map(f=>{
-      const val = f.type==='rating' && f.value ? f.value+'/5' : (f.value||'—');
+      let val = f.type==='rating' && f.value ? f.value+'/5' : (f.value||'—');
+      if(sec.id==='weekly_numbers' && f.type==='number' && f.value){ val = fmtNum(f.value); }
       return `<tr><td style="width:32%;color:var(--ink-soft);font-weight:600;">${esc(f.label)}</td><td>${nl2br(val)}</td></tr>`;
     }).join('');
     if(sec.index){
