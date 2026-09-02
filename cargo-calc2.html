@@ -154,48 +154,6 @@ padding-bottom:50px}
   .fx-link:hover{text-decoration:underline;}
   .fx-hint{font-size:11.5px; color:var(--ink-faint); text-align:center;}
 
-  /* ---------- cargo category picker ---------- */
-  .category-panel{padding:22px 24px;}
-  .category-select-row{display:flex; justify-content:center;}
-  .category-select-row select{
-    width:100%; max-width:420px; border:1px solid var(--line); border-radius:12px;
-    padding:11px 14px; font-size:14px; font-family:inherit; color:var(--ink);
-    background:#fff; outline:none; cursor:pointer;
-  }
-  .category-select-row select:focus{border-color:var(--blue); box-shadow:0 0 0 4px rgba(10,132,255,0.14);}
-  .category-risks{
-    margin-top:14px; text-align:center;
-  }
-  .category-risks-label{font-size:11.5px; color:var(--ink-faint); margin-bottom:8px;}
-  .category-risks-chips{display:flex; flex-wrap:wrap; gap:6px; justify-content:center;}
-  .category-risk-chip{
-    display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--ink-soft);
-    background:rgba(118,118,128,0.1); padding:5px 10px; border-radius:999px;
-  }
-  .recommend-badge{
-    display:none; align-items:center; gap:4px; font-size:9.5px; font-weight:700; text-transform:uppercase;
-    letter-spacing:0.02em; color:#fff; background:linear-gradient(135deg,#ff9f0a,#ff6b35);
-    padding:3px 9px; border-radius:999px; white-space:nowrap;
-  }
-  .tariff-card.recommended .recommend-badge{display:inline-flex;}
-  .tariff-card.recommended{box-shadow:0 0 0 2px rgba(255,159,10,0.55), var(--shadow-glass);}
-  .category-reason{
-    margin-top:12px; font-size:12.5px; color:var(--ink-soft); line-height:1.55; text-align:left;
-    background:rgba(255,159,10,0.08); border:1px solid rgba(255,159,10,0.25); border-radius:12px;
-    padding:11px 13px;
-  }
-  .category-reason strong{color:var(--ink);}
-  .cargo-comment-field{margin-top:16px; text-align:left;}
-  .cargo-comment-field label{display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:8px;}
-  .cargo-comment-field textarea{
-    width:100%; resize:vertical; min-height:52px; border:1px solid var(--line);
-    border-radius:var(--radius-sm); background:#fff; font-family:inherit; font-size:13px;
-    color:var(--ink); padding:10px 12px; line-height:1.45; outline:none;
-    transition:border-color .2s ease, box-shadow .2s ease;
-  }
-  .cargo-comment-field textarea:focus{border-color:var(--blue); box-shadow:0 0 0 4px rgba(10,132,255,0.12);}
-  .cargo-comment-field textarea::placeholder{color:var(--ink-faint);}
-
   .block-toggle-header{
     display:flex; align-items:center; gap:10px; padding:0 10px; margin-bottom:6px;
   }
@@ -650,32 +608,11 @@ padding-bottom:50px}
 
   <div class="client-banner hidden" id="clientBanner"></div>
 
-  <section class="category-panel glass">
-    <div class="section-label"><span class="dot"></span>Тип груза
-      <span class="tooltip">
-        <button type="button" class="tooltip-btn">?</button>
-        <span class="tooltip-bubble">Выберите категорию, чтобы увидеть характерные риски для такого груза и рекомендованный пакет покрытия.</span>
-      </span>
-    </div>
-    <div class="category-select-row">
-      <select id="categorySelect"></select>
-    </div>
-    <div class="category-risks hidden" id="categoryRisks">
-      <div class="category-risks-label">Характерные риски для этой категории</div>
-      <div class="category-risks-chips" id="categoryRisksChips"></div>
-      <div class="category-reason" id="categoryReason"></div>
-    </div>
-    <div class="cargo-comment-field">
-      <label for="cargoComment">Комментарий к грузу (необязательно)</label>
-      <textarea id="cargoComment" rows="2" placeholder="Например: груз хрупкий, нужна дополнительная упаковка"></textarea>
-    </div>
-  </section>
-
   <section class="tariffs">
 
 <!-- BASIC -->
     <div class="tariff-card glass basic">
-      <div class="badge-row"><span class="badge">01</span><span class="title">Без ответственности, кроме крушения</span><span class="recommend-badge">★ Рекомендуем</span></div>
+      <div class="badge-row"><span class="badge">01</span><span class="title">Без ответственности, кроме крушения</span></div>
 
       <div class="package-desc">Возмещается только полная утрата груза в результате крушения или столкновения транспортных средств, пожара, взрыва либо стихийного бедствия. Частичные повреждения без крушения транспорта по этому пакету не покрываются.</div>
 
@@ -690,18 +627,6 @@ padding-bottom:50px}
 
       <div class="rate-sum-row" id="rateRowBasic">
         <div class="field">
-          <label for="rateBasic">Ставка
-            <span class="tooltip">
-              <button type="button" class="tooltip-btn">?</button>
-              <span class="tooltip-bubble">Процент от страховой суммы, который берётся как премия. Видна только вам — клиент её не видит и не может изменить.</span>
-            </span>
-          </label>
-          <div class="input-shell">
-            <input type="number" id="rateBasic" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
-            <span class="suffix">%</span>
-          </div>
-        </div>
-        <div class="field">
           <label for="sumBasic">Страховая сумма
             <span class="tooltip">
               <button type="button" class="tooltip-btn">?</button>
@@ -714,23 +639,28 @@ padding-bottom:50px}
           </div>
           <div class="sum-warning" id="sumWarningBasic"></div>
         </div>
+        <div class="field">
+          <label for="rateBasic">Страховой тариф
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Процент от страховой суммы, который берётся как премия. Видна только вам — клиент её не видит и не может изменить.</span>
+            </span>
+          </label>
+          <div class="input-shell">
+            <input type="number" id="rateBasic" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
+            <span class="suffix">%</span>
+          </div>
+        </div>
       </div>
       <div class="card-req-hint" id="reqHintBasic"></div>
 
       <div class="franchise-config hidden" id="franchiseConfigBasic">
         <div class="field">
-          <label for="franchiseDiscountBasic">Скидка за франшизу</label>
+          <label for="franchiseDiscountBasic">Размер франшизы</label>
           <div class="input-shell">
             <input type="number" id="franchiseDiscountBasic" inputmode="decimal" placeholder="0" min="0" max="100" step="1">
             <span class="suffix">%</span>
           </div>
-        </div>
-        <div class="field">
-          <label for="franchiseTypeBasic">Тип франшизы</label>
-          <select id="franchiseTypeBasic" class="franchise-type-select">
-            <option value="unconditional">Безусловная (вычитается)</option>
-            <option value="conditional">Условная (порог)</option>
-          </select>
         </div>
       </div>
       <div class="franchise-note-field hidden" id="franchiseNoteFieldBasic">
@@ -772,7 +702,7 @@ padding-bottom:50px}
       </div>
 
       <div class="coverage-block">
-        <label class="mini-label" id="coverageMiniLabelBasic">Что покрывает тариф</label>
+        <label class="mini-label" id="coverageMiniLabelBasic">Договор страхования покрывает:</label>
         <div class="coverage-chips" id="coverageChipsBasic"></div>
         <div class="coverage-picker" id="coveragePickerRowBasic">
           <select id="coveragePickerBasic"></select>
@@ -804,7 +734,7 @@ padding-bottom:50px}
 
 <!-- STANDARD -->
     <div class="tariff-card glass standard">
-      <div class="badge-row"><span class="badge">02</span><span class="title">Частная авария</span><span class="recommend-badge">★ Рекомендуем</span></div>
+      <div class="badge-row"><span class="badge">02</span><span class="title">Частная авария</span></div>
 
       <div class="package-desc">Покрывается конкретный перечень поимённых рисков: пожар, молния, буря, крушение или столкновение транспорта, посадка на мель, взрыв, повреждение льдом, подмочка забортной водой, пропажа судна или самолёта без вести и другие случаи по договору, включая расходы по общей аварии.</div>
 
@@ -819,18 +749,6 @@ padding-bottom:50px}
 
       <div class="rate-sum-row" id="rateRowStandard">
         <div class="field">
-          <label for="rateStandard">Ставка
-            <span class="tooltip">
-              <button type="button" class="tooltip-btn">?</button>
-              <span class="tooltip-bubble">Процент от страховой суммы, который берётся как премия. Видна только вам — клиент её не видит и не может изменить.</span>
-            </span>
-          </label>
-          <div class="input-shell">
-            <input type="number" id="rateStandard" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
-            <span class="suffix">%</span>
-          </div>
-        </div>
-        <div class="field">
           <label for="sumStandard">Страховая сумма
             <span class="tooltip">
               <button type="button" class="tooltip-btn">?</button>
@@ -843,23 +761,28 @@ padding-bottom:50px}
           </div>
           <div class="sum-warning" id="sumWarningStandard"></div>
         </div>
+        <div class="field">
+          <label for="rateStandard">Страховой тариф
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Процент от страховой суммы, который берётся как премия. Видна только вам — клиент её не видит и не может изменить.</span>
+            </span>
+          </label>
+          <div class="input-shell">
+            <input type="number" id="rateStandard" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
+            <span class="suffix">%</span>
+          </div>
+        </div>
       </div>
       <div class="card-req-hint" id="reqHintStandard"></div>
 
       <div class="franchise-config hidden" id="franchiseConfigStandard">
         <div class="field">
-          <label for="franchiseDiscountStandard">Скидка за франшизу</label>
+          <label for="franchiseDiscountStandard">Размер франшизы</label>
           <div class="input-shell">
             <input type="number" id="franchiseDiscountStandard" inputmode="decimal" placeholder="0" min="0" max="100" step="1">
             <span class="suffix">%</span>
           </div>
-        </div>
-        <div class="field">
-          <label for="franchiseTypeStandard">Тип франшизы</label>
-          <select id="franchiseTypeStandard" class="franchise-type-select">
-            <option value="unconditional">Безусловная (вычитается)</option>
-            <option value="conditional">Условная (порог)</option>
-          </select>
         </div>
       </div>
       <div class="franchise-note-field hidden" id="franchiseNoteFieldStandard">
@@ -901,7 +824,7 @@ padding-bottom:50px}
       </div>
 
       <div class="coverage-block">
-        <label class="mini-label" id="coverageMiniLabelStandard">Что покрывает тариф</label>
+        <label class="mini-label" id="coverageMiniLabelStandard">Договор страхования покрывает:</label>
         <div class="coverage-chips" id="coverageChipsStandard"></div>
         <div class="coverage-picker" id="coveragePickerRowStandard">
           <select id="coveragePickerStandard"></select>
@@ -933,7 +856,7 @@ padding-bottom:50px}
 
 <!-- SPECIAL -->
     <div class="tariff-card glass special">
-      <div class="badge-row"><span class="badge">03</span><span class="title">Все риски</span><span class="recommend-badge">★ Рекомендуем</span></div>
+      <div class="badge-row"><span class="badge">03</span><span class="title">Все риски</span></div>
 
       <div class="package-desc">Покрывается повреждение или утрата груза по любой причине, кроме прямо перечисленных в договоре исключений. Включает расходы по общей аварии, расходы на предотвращение или уменьшение убытков, а также период погрузки, выгрузки и временного хранения груза.</div>
 
@@ -948,18 +871,6 @@ padding-bottom:50px}
 
       <div class="rate-sum-row" id="rateRowSpecial">
         <div class="field">
-          <label for="rateSpecial">Ставка
-            <span class="tooltip">
-              <button type="button" class="tooltip-btn">?</button>
-              <span class="tooltip-bubble">Процент от страховой суммы, который берётся как премия. Видна только вам — клиент её не видит и не может изменить.</span>
-            </span>
-          </label>
-          <div class="input-shell">
-            <input type="number" id="rateSpecial" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
-            <span class="suffix">%</span>
-          </div>
-        </div>
-        <div class="field">
           <label for="sumSpecial">Страховая сумма
             <span class="tooltip">
               <button type="button" class="tooltip-btn">?</button>
@@ -972,23 +883,28 @@ padding-bottom:50px}
           </div>
           <div class="sum-warning" id="sumWarningSpecial"></div>
         </div>
+        <div class="field">
+          <label for="rateSpecial">Страховой тариф
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Процент от страховой суммы, который берётся как премия. Видна только вам — клиент её не видит и не может изменить.</span>
+            </span>
+          </label>
+          <div class="input-shell">
+            <input type="number" id="rateSpecial" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
+            <span class="suffix">%</span>
+          </div>
+        </div>
       </div>
       <div class="card-req-hint" id="reqHintSpecial"></div>
 
       <div class="franchise-config hidden" id="franchiseConfigSpecial">
         <div class="field">
-          <label for="franchiseDiscountSpecial">Скидка за франшизу</label>
+          <label for="franchiseDiscountSpecial">Размер франшизы</label>
           <div class="input-shell">
             <input type="number" id="franchiseDiscountSpecial" inputmode="decimal" placeholder="0" min="0" max="100" step="1">
             <span class="suffix">%</span>
           </div>
-        </div>
-        <div class="field">
-          <label for="franchiseTypeSpecial">Тип франшизы</label>
-          <select id="franchiseTypeSpecial" class="franchise-type-select">
-            <option value="unconditional">Безусловная (вычитается)</option>
-            <option value="conditional">Условная (порог)</option>
-          </select>
         </div>
       </div>
       <div class="franchise-note-field hidden" id="franchiseNoteFieldSpecial">
@@ -1030,7 +946,7 @@ padding-bottom:50px}
       </div>
 
       <div class="coverage-block">
-        <label class="mini-label" id="coverageMiniLabelSpecial">Что покрывает тариф</label>
+        <label class="mini-label" id="coverageMiniLabelSpecial">Договор страхования покрывает:</label>
         <div class="coverage-chips" id="coverageChipsSpecial"></div>
         <div class="coverage-picker" id="coveragePickerRowSpecial">
           <select id="coveragePickerSpecial"></select>
@@ -1159,7 +1075,7 @@ padding-bottom:50px}
       </details>
 
       <details class="guide-item">
-        <summary>Как заполнить "Что покрывает тариф"</summary>
+        <summary>Как заполнить "Договор страхования покрывает"</summary>
         <div class="guide-content">
           <p>Добавляйте короткие пункты покрытия — каждый превращается в отдельную карточку с иконкой. Нажмите на квадрат слева от текста, чтобы загрузить свою иконку (изображение с компьютера), или оставьте пустым — подставится стандартная метка.</p>
         </div>
@@ -1208,7 +1124,7 @@ padding-bottom:50px}
       </details>
 
       <details class="guide-item">
-        <summary>Что означает блок "Что покрывает тариф"</summary>
+        <summary>Что означает блок "Договор страхования покрывает"</summary>
         <div class="guide-content">
           <p>Список условий, которые входят в тариф — что именно покрывает страхование. Зафиксирован менеджером.</p>
         </div>
@@ -1415,7 +1331,6 @@ padding-bottom:50px}
     const franchiseConfig = document.getElementById('franchiseConfig'+suffix);
     const franchiseNoteField = document.getElementById('franchiseNoteField'+suffix);
     const franchiseDiscountInput = document.getElementById('franchiseDiscount'+suffix);
-    const franchiseTypeSelect = document.getElementById('franchiseType'+suffix);
     const franchiseNoteInput = document.getElementById('franchiseNote'+suffix);
     const franchiseRow = document.getElementById('franchiseRow'+suffix);
     const franchiseToggle = document.getElementById('franchiseToggle'+suffix);
@@ -1481,7 +1396,7 @@ padding-bottom:50px}
       premiumEl.classList.remove('ready');
       valueBadgeEl.classList.add('hidden');
       valuePitchEl.textContent = '';
-      coverageMiniLabelEl.textContent = 'Что покрывает тариф';
+      coverageMiniLabelEl.textContent = 'Договор страхования покрывает:';
       coverageFooterEl.classList.add('hidden');
       coverageFooterEl.textContent = '';
       resetRing();
@@ -1525,6 +1440,7 @@ padding-bottom:50px}
     // Builds the "?" tooltip next to the toggle: a worked example using the real
     // franchise % and (when available) the current insured sum, so the client sees
     // concretely what the franchise means for a claim, not just an abstract number.
+    // Franchise on cargo is always unconditional (deducted from the payout every time).
     function updateFranchiseExample(){
       const discount = franchiseDiscountValue();
       if(discount <= 0){
@@ -1533,22 +1449,16 @@ padding-bottom:50px}
         return;
       }
       const discountText = String(discount).replace('.', ',');
-      const isConditional = franchiseTypeSelect.value === 'conditional';
-      const typeLabel = isConditional ? 'условная' : 'безусловная';
-      franchiseTitleTextEl.textContent = 'Учитывать франшизу — ' + discountText + '% (' + typeLabel + ')';
+      franchiseTitleTextEl.textContent = 'Учитывать франшизу — ' + discountText + '%';
 
       const sum = parseFormatted(sumInput.value);
       const hasSum = !isNaN(sum) && sum > 0;
 
-      // pick an example damage % clearly above the franchise threshold, so the two
-      // formulas actually give different, comparable numbers (mirrors a real claim)
+      // pick an example damage % clearly above the franchise, so the deduction is visible
       const examplePct = Math.min(discount + 10, 100);
       const examplePctText = String(examplePct).replace('.', ',');
-
-      const unconditionalPayoutPct = Math.max(0, examplePct - discount);
-      const conditionalPayoutPct = examplePct > discount ? examplePct : 0;
-      const unconditionalTotalLossPct = Math.max(0, 100 - discount);
-      const conditionalTotalLossPct = 100; // total loss is always well above any franchise threshold
+      const payoutPct = Math.max(0, examplePct - discount);
+      const totalLossPayoutPct = Math.max(0, 100 - discount);
 
       function pctOrAmount(pct){
         if(hasSum) return numberToInputString(sum * pct / 100) + ' ₸';
@@ -1559,16 +1469,13 @@ padding-bottom:50px}
 
       franchiseExampleEl.innerHTML =
         '<strong>Франшиза ' + discountText + '% — по повреждению и утрате</strong>' +
-        '<span class="example-line">Безусловная — сумма франшизы всегда вычитается из выплаты.</span>' +
-        '<span class="example-line">Условная — при ущербе ниже франшизы выплаты нет; при ущербе выше — возмещается полностью.</span>' +
+        '<span class="example-line">Сумма франшизы всегда вычитается из выплаты.</span>' +
         '<span class="example-line">Пример: ущерб составил ' + examplePctText + '% (' + damageLabel + '). ' +
-          'По безусловной франшизе выплата — ' + pctOrAmount(unconditionalPayoutPct) + '. ' +
-          'По условной — ' + pctOrAmount(conditionalPayoutPct) + '.' +
+          'Франшиза ' + discountText + '% вычитается — страховая компания возместит ' + pctOrAmount(payoutPct) + '.' +
         '</span>' +
-        '<span class="example-line">Пример №2 (полная утрата груза): по безусловной франшизе выплата — ' +
-          pctOrAmount(unconditionalTotalLossPct) + '; по условной — ' + pctOrAmount(conditionalTotalLossPct) + '.' +
-        '</span>' +
-        '<span class="example-line">Для этого тарифа выбрана: <strong>' + typeLabel + '</strong> франшиза.</span>';
+        '<span class="example-line">Пример №2 (полная утрата груза): выплата составит ' +
+          pctOrAmount(totalLossPayoutPct) + ' (за вычетом франшизы).' +
+        '</span>';
     }
 
     function calc(){
@@ -1686,7 +1593,6 @@ padding-bottom:50px}
       updateFranchiseVisibility();
       recalcInstant();
     });
-    franchiseTypeSelect.addEventListener('change', updateFranchiseVisibility);
     franchiseNoteInput.addEventListener('input', updateFranchiseVisibility);
     franchiseToggle.addEventListener('change', ()=>{
       if(franchiseToggle.checked){
@@ -1716,7 +1622,6 @@ padding-bottom:50px}
     function configureFranchiseFromConfig(fr){
       if(fr && fr.discount > 0){
         franchiseDiscountInput.value = String(fr.discount);
-        franchiseTypeSelect.value = fr.type === 'conditional' ? 'conditional' : 'unconditional';
         franchiseNoteInput.value = fr.note || '';
         updateFranchiseVisibility();
       }
@@ -1731,7 +1636,6 @@ padding-bottom:50px}
       sumInput, rateInput, resetPremium, validate, recalc: scheduleCalc, scheduleCalc, applySharedKZT,
       hasValidRate, lockRate, hideRateField, configureFranchiseFromConfig, hideFranchiseEditor,
       get franchiseDiscountInput(){ return franchiseDiscountInput; },
-      get franchiseTypeSelect(){ return franchiseTypeSelect; },
       get franchiseNoteInput(){ return franchiseNoteInput; },
       get lastResult(){ return lastResult; }
     };
@@ -1866,66 +1770,6 @@ padding-bottom:50px}
   const coverageStandard = setupCoverage('Standard', [3, 0, 4, 8, 6]);
   const coverageSpecial = setupCoverage('Special', [0, 1, 2, 3, 4, 5, 6, 7, 8]);
 
-  // ================= CARGO CATEGORY -> typical risks + recommended package =================
-  const CARGO_CATEGORIES = [
-    {key:'electronics',   icon:'💻', label:'Электроника и техника',            risks:[1,8,0,3],   recommend:'special',
-      reason:'Дорогой и уязвимый груз: чувствителен к влаге и ударам, привлекателен для кражи. «Все риски» покрывает максимум причин повреждения, а не только крупные аварии.'},
-    {key:'construction',  icon:'🧱', label:'Стройматериалы',                   risks:[0,2,5],     recommend:'basic',
-      reason:'Обычно устойчивы к незначительным ударам и не портятся от подмочки так критично — базового пакета, покрывающего крупные аварии и крушение, как правило, достаточно.'},
-    {key:'textile',       icon:'👕', label:'Текстиль и одежда',                risks:[8,1,6],     recommend:'standard',
-      reason:'Легко мнётся и портится от влаги при перевозке, но стоит не так дорого, как электроника — «Частная авария» покрывает основные именованные риски без переплаты за максимальный пакет.'},
-    {key:'furniture',     icon:'🛋️', label:'Мебель',                          risks:[2,0,6],     recommend:'standard',
-      reason:'Объёмная, подвержена сколам и царапинам при погрузке, но полная гибель груза — редкость. «Частная авария» покрывает частые бытовые риски перевозки.'},
-    {key:'auto',          icon:'🔧', label:'Автозапчасти',                     risks:[1,0,3],     recommend:'special',
-      reason:'Привлекательная цель для кражи и часто высокая стоимость единицы товара — оправдано максимальное покрытие «Все риски».'},
-    {key:'fragile',       icon:'🥃', label:'Хрупкие грузы (стекло, керамика)', risks:[2,0,6,5],   recommend:'special',
-      reason:'Повреждается даже при незначительных нарушениях условий перевозки — важно покрытие частичных повреждений, которое даёт только «Все риски».'},
-    {key:'other',         icon:'📦', label:'Прочий универсальный груз',       risks:[0,3,4],     recommend:'standard',
-      reason:'Без выраженной специфики риска «Частная авария» — сбалансированный вариант между базовым покрытием и максимальной защитой.'},
-  ];
-
-  const categorySelect = document.getElementById('categorySelect');
-  const categoryRisks = document.getElementById('categoryRisks');
-  const categoryRisksChips = document.getElementById('categoryRisksChips');
-
-  const categoryPlaceholderOpt = document.createElement('option');
-  categoryPlaceholderOpt.value = '';
-  categoryPlaceholderOpt.textContent = 'Выберите тип груза…';
-  categorySelect.appendChild(categoryPlaceholderOpt);
-  CARGO_CATEGORIES.forEach(cat=>{
-    const opt = document.createElement('option');
-    opt.value = cat.key;
-    opt.textContent = cat.icon + '  ' + cat.label;
-    categorySelect.appendChild(opt);
-  });
-
-  categorySelect.addEventListener('change', ()=>{
-    document.querySelectorAll('.tariff-card').forEach(el => el.classList.remove('recommended'));
-
-    const cat = CARGO_CATEGORIES.find(c => c.key === categorySelect.value);
-    if(!cat){
-      categoryRisks.classList.add('hidden');
-      return;
-    }
-
-    categoryRisksChips.innerHTML = '';
-    cat.risks.forEach(idx=>{
-      const item = COVERAGE_CATALOG[idx];
-      const chip = document.createElement('span');
-      chip.className = 'category-risk-chip';
-      chip.innerHTML = '<span>' + item.icon + '</span>' + item.text;
-      categoryRisksChips.appendChild(chip);
-    });
-    categoryRisks.classList.remove('hidden');
-
-    const targetCard = document.querySelector('.tariff-card.' + cat.recommend);
-    if(targetCard) targetCard.classList.add('recommended');
-
-    const categoryReasonEl = document.getElementById('categoryReason');
-    const packageTitle = targetCard ? targetCard.querySelector('.title').textContent : '';
-    categoryReasonEl.innerHTML = '<strong>Почему «' + packageTitle + '»:</strong> ' + cat.reason;
-  });
-
   // ---- unicode-safe base64 helpers (for encoding the client link config) ----
   function b64EncodeUnicode(str){
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p)=>String.fromCharCode('0x'+p)));
@@ -1993,10 +1837,9 @@ padding-bottom:50px}
       clientBanner.classList.remove('hidden');
     }
 
-    const blocksWeb = clientConfig.bw || ['causes', 'cases', 'category', 'guide'];
+    const blocksWeb = clientConfig.bw || ['causes', 'cases', 'guide'];
     if(!blocksWeb.includes('causes'))   document.querySelector('.causes-section').classList.add('hidden');
     if(!blocksWeb.includes('cases'))    document.querySelector('.cases-section').classList.add('hidden');
-    if(!blocksWeb.includes('category')) document.querySelector('.category-panel').classList.add('hidden');
     if(!blocksWeb.includes('guide'))    document.getElementById('clientGuide').classList.add('hidden');
   } else {
     tariffDefs.forEach(def=>{
@@ -2097,7 +1940,6 @@ padding-bottom:50px}
   const BLOCK_DEFS = [
     { key:'causes',   label:'Топ причин потери груза',    hasPdf:false },
     { key:'cases',    label:'Примеры «Как это бывает»',   hasPdf:false },
-    { key:'category', label:'Тип груза и рекомендация',   hasPdf:false },
     { key:'guide',    label:'Инструкция для клиента',     hasPdf:false },
   ];
 
@@ -2184,8 +2026,7 @@ padding-bottom:50px}
     if(!isNaN(discount) && discount > 0){
       cfg.franchise = {
         discount: discount,
-        note: card.franchiseNoteInput.value.trim(),
-        type: card.franchiseTypeSelect.value
+        note: card.franchiseNoteInput.value.trim()
       };
     }
     return cfg;
@@ -2427,20 +2268,6 @@ padding-bottom:50px}
       if(y + neededHeight > pageHeight - 70){
         doc.addPage();
         y = 56;
-      }
-    }
-
-    if(isClientMode){
-      const cargoComment = document.getElementById('cargoComment').value.trim();
-      if(cargoComment){
-        const commentLines = doc.splitTextToSize(cargoComment, pageWidth - marginX*2);
-        ensureSpace(30 + commentLines.length*12);
-        doc.setFont('DejaVu','bold'); doc.setFontSize(11); doc.setTextColor(29,29,31);
-        doc.text('Комментарий к грузу', marginX, y);
-        y += 16;
-        doc.setFont('DejaVu','normal'); doc.setFontSize(9.5); doc.setTextColor(80,80,86);
-        commentLines.forEach(line=>{ doc.text(line, marginX, y); y += 12; });
-        y += 10;
       }
     }
 
