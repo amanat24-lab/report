@@ -771,6 +771,17 @@ function el2(tag, attrs, txt){
 }
 
 /* ---- collect a registry of all section/field ids seen across reports ---- */
+// Названия некоторых полей менялись между версиями опросника — старые
+// уже собранные отчёты хранят ту формулировку, что была на момент
+// заполнения. Здесь приводим отображение в сводке к единому, текущему
+// варианту, не трогая сами исходные файлы отчётов.
+const LABEL_OVERRIDES = {
+  existing_agents_work: 'Работа с существующими клиентами'
+};
+function canonicalLabel(fieldId, rawLabel){
+  return LABEL_OVERRIDES[fieldId] || rawLabel;
+}
+
 function collectSectionRegistry(reports){
   const registry = {}; // id -> {title, type, columns:{id:label}, fieldsOrder:[]}
   reports.forEach(r=>{
@@ -783,13 +794,13 @@ function collectSectionRegistry(reports){
       if(sec.type==='fields'){
         sec.fields.forEach(f=>{
           if(!reg.fieldOrder.includes(f.id)) reg.fieldOrder.push(f.id);
-          reg.columns[f.id] = {label:f.label, type:f.type};
+          reg.columns[f.id] = {label:canonicalLabel(f.id, f.label), type:f.type};
         });
       }
       if(sec.type==='table' || sec.type==='fixedlist'){
         (sec.columns||[]).forEach(c=>{
           if(!reg.colOrder.includes(c.id)) reg.colOrder.push(c.id);
-          reg.columns[c.id] = {label:c.label, type:c.type};
+          reg.columns[c.id] = {label:canonicalLabel(c.id, c.label), type:c.type};
         });
       }
     });
@@ -928,7 +939,7 @@ function renderFieldsSectionSummary(reg, reports){
     if(!sec) return;
     const lines = sec.fields.map(f=>{
       const val = f.type==='rating' && f.value ? f.value+'/5' : (f.value||'—');
-      return `<b>${esc(f.label)}:</b> ${nl2br(val)}`;
+      return `<b>${esc(canonicalLabel(f.id, f.label))}:</b> ${nl2br(val)}`;
     }).join('<br>');
     const item = document.createElement('div'); item.className='item';
     item.innerHTML = `<div class="who">${esc(r.meta.manager)} <span style="font-weight:400;color:var(--ink-faint);">· ${fmtDate(r.meta.filledDate)}</span></div><div class="txt">${lines}</div>`;
@@ -1145,7 +1156,7 @@ function renderSingleSectionContent(sec){
     table.innerHTML = sec.fields.map(f=>{
       let val = f.type==='rating' && f.value ? f.value+'/5' : (f.value||'—');
       if(sec.id==='weekly_numbers' && f.type==='number' && f.value){ val = fmtNum(f.value); }
-      return `<tr><td style="width:32%;color:var(--ink-soft);font-weight:600;">${esc(f.label)}</td><td>${nl2br(val)}</td></tr>`;
+      return `<tr><td style="width:32%;color:var(--ink-soft);font-weight:600;">${esc(canonicalLabel(f.id, f.label))}</td><td>${nl2br(val)}</td></tr>`;
     }).join('');
     if(sec.index){
       table.innerHTML += `<tr class="total-row"><td>${esc(sec.index.label)}</td><td>${idxBadge(sec.index.percent)}</td></tr>`;
@@ -1156,7 +1167,7 @@ function renderSingleSectionContent(sec){
       wrap.innerHTML = '<div style="font-size:13px;color:var(--ink-faint);font-style:italic;">Нет данных</div>';
     } else {
       const table = document.createElement('table'); table.className='sumtable';
-      let thead = '<tr>'+sec.columns.map(c=>`<th>${esc(c.label)}</th>`).join('')+'</tr>';
+      let thead = '<tr>'+sec.columns.map(c=>`<th>${esc(canonicalLabel(c.id, c.label))}</th>`).join('')+'</tr>';
       let body = sec.rows.map(row=>'<tr>'+sec.columns.map(c=>{
         const val = row[c.id];
         if(val==='Низкий'||val==='Средний'||val==='Высокий'){
