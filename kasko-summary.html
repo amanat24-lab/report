@@ -78,11 +78,32 @@
   .stat .num{font-size:24px;font-weight:700;font-family:var(--mono);}
   .stat .lbl{font-size:11.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;margin-top:2px;}
 
-  #summaryRoot section.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
-  #summaryRoot .card-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+  #summaryRoot .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:18px;overflow:hidden;}
+  #summaryRoot .card-head{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;cursor:pointer;list-style:none;user-select:none;}
+  #summaryRoot .card-head::-webkit-details-marker{display:none;}
+  #summaryRoot .card:not([open]) .card-head{border-bottom:none;}
+  #summaryRoot .card-chevron{display:inline-block;color:var(--ink-faint);font-size:11px;transition:transform .15s ease;flex-shrink:0;}
+  #summaryRoot .card[open] .card-chevron{transform:rotate(90deg);}
   #summaryRoot .card-head .idx{font-family:var(--mono);font-size:12px;color:var(--ink-faint);}
   #summaryRoot .card-head h2{font-size:16px;margin:0;font-weight:700;}
   #summaryRoot .card-body{padding:16px 20px 20px;}
+
+  .summary-nav{
+    position:sticky; top:0; z-index:30;
+    background:rgba(255,255,255,.92); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+    padding:10px 4px; margin:0 0 18px;
+    display:flex; gap:8px; overflow-x:auto;
+    box-shadow:0 4px 14px rgba(20,30,25,.05);
+  }
+  .summary-nav::-webkit-scrollbar{height:5px;}
+  .nav-pill{
+    flex-shrink:0; font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:20px;
+    background:var(--bg); border:1px solid var(--line-strong); color:var(--ink-soft);
+    text-decoration:none; white-space:nowrap; max-width:220px; overflow:hidden; text-overflow:ellipsis;
+    transition:.12s ease;
+  }
+  .nav-pill:hover{border-color:var(--accent); color:var(--accent-dark); background:var(--accent-soft);}
 
   table.sumtable{width:100%;border-collapse:collapse;font-size:13.5px;}
   table.sumtable th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-soft);font-weight:700;padding:6px 10px;border-bottom:1px solid var(--line-strong);background:var(--bg);}
@@ -226,6 +247,8 @@
   </div>
 
   <div class="stat-row" id="statRow" style="display:none;"></div>
+
+  <div class="summary-nav no-print" id="summaryNav" style="display:none;"></div>
 
   <div id="summaryRoot"></div>
 </div>
@@ -622,6 +645,7 @@ function buildSummary(){
 
   if(!reports.length){
     statRow.style.display = 'none';
+    document.getElementById('summaryNav').style.display = 'none';
     summaryRoot.innerHTML = `<div class="empty-state"><div class="big">Нет отчётов, подходящих под фильтр</div>Загрузите файлы или измените диапазон дат / выбранных менеджеров.</div>`;
     document.getElementById('btnDownload').disabled = true;
     document.getElementById('btnPrint').disabled = true;
@@ -647,9 +671,41 @@ function buildSummary(){
     renderBySection(reports, managers)
   );
 
+  buildSummaryNav();
+
   document.getElementById('btnDownload').disabled = false;
   document.getElementById('btnPrint').disabled = false;
 }
+
+// Закреплённое меню навигации — по одной кнопке на каждый видимый блок
+// сводки (карточка раздела/менеджера, рейтинг, отдельный отчёт в режиме
+// "Полные отчёты"). Клик — раскрывает блок (если он свёрнут) и
+// прокручивает к нему.
+function buildSummaryNav(){
+  const navEl = document.getElementById('summaryNav');
+  const root = document.getElementById('summaryRoot');
+  const items = [...root.querySelectorAll('.card, .acc-item')];
+  if(!items.length){ navEl.style.display = 'none'; navEl.innerHTML = ''; return; }
+  navEl.style.display = 'flex';
+  navEl.innerHTML = items.map((el, i)=>{
+    const id = 'navtarget-' + i;
+    el.id = id;
+    const headEl = el.querySelector('summary');
+    let label = headEl ? headEl.textContent.trim() : ('Блок ' + (i+1));
+    label = label.replace(/^▸\s*/, '').trim();
+    return `<a href="#${id}" class="nav-pill" data-target="${id}">${esc(label)}</a>`;
+  }).join('');
+}
+document.getElementById('summaryNav').addEventListener('click', (e)=>{
+  const a = e.target.closest('a.nav-pill');
+  if(!a) return;
+  e.preventDefault();
+  const el = document.getElementById(a.dataset.target);
+  if(el){
+    el.open = true;
+    if(el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+});
 
 function statCard(value, label, isText){
   return `<div class="stat"><div class="num" style="${isText?'font-size:14px;':''}">${value}</div><div class="lbl">${label}</div></div>`;
@@ -664,10 +720,33 @@ function fmtDate(d){
   const parts = d.split('-');
   return parts.length===3 ? `${parts[2]}.${parts[1]}.${parts[0]}` : d;
 }
+function fmtNum(n){
+  const num = Number(n);
+  if(isNaN(num) || n===''||n==null) return n;
+  return num.toLocaleString('ru-RU');
+}
 function esc(s){
   return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function nl2br(s){ return esc(s).replace(/\n/g,'<br>'); }
+
+// Единая свёрнуто/развёрнуто карточка для сводки — используется и в
+// "по разделам", и в "по менеджерам", и в рейтинге, чтобы длинные
+// таблицы (например, "Обработанные лиды") можно было спрятать одним
+// кликом, а не листать простынёй.
+function createCard(idxLabel, titleHtml){
+  const card = document.createElement('details');
+  card.className = 'card';
+  card.open = false;
+  const head = document.createElement('summary');
+  head.className = 'card-head';
+  head.innerHTML = `<span class="card-chevron">▸</span>${idxLabel ? `<span class="idx">${idxLabel}</span>` : ''}<h2>${titleHtml}</h2>`;
+  card.appendChild(head);
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  card.appendChild(body);
+  return {card, head, body};
+}
 
 /* ---------------------------------------------------------------
    ИНДЕКС РЕЗУЛЬТАТИВНОСТИ
@@ -728,17 +807,12 @@ function buildLeaderboard(reports){
 function renderLeaderboard(reports){
   const data = buildLeaderboard(reports);
   if(!data.length) return null;
-  const card = document.createElement('section'); card.className='card';
-  const head = document.createElement('div'); head.className='card-head';
-  head.innerHTML = `<h2>Индекс результативности недели — по менеджерам</h2>`;
-  card.appendChild(head);
-  const body = document.createElement('div'); body.className='card-body';
+  const {card, body} = createCard('', 'Индекс результативности недели — по менеджерам');
   const table = document.createElement('table'); table.className='sumtable';
   let rows = data.map((d,i)=>`<tr><td><span class="rank-num">${i+1}</span></td><td class="mgr-name">${esc(d.manager)}</td><td>${idxBadge(d.avg)}</td><td style="color:var(--ink-faint);">${d.count} ${d.count===1?'отчёт':'отчёта(ов)'}</td></tr>`).join('');
   table.innerHTML = `<tr><th></th><th>Менеджер</th><th>Индекс (среднее за период)</th><th>Отчётов учтено</th></tr>${rows}`;
   body.appendChild(table);
-  body.appendChild(el2('div',{style:'font-size:12px;color:var(--ink-faint);margin-top:10px;'}, 'Индекс считается по показателям раздела «Выполненные мероприятия» относительно KPI, с весом по приоритету: встречи важнее звонков, звонки важнее поиска контактов. Если отчётов за период несколько — берётся среднее.'));
-  card.appendChild(body);
+  body.appendChild(el2('div',{style:'font-size:12px;color:var(--ink-faint);margin-top:10px;'}, 'Индекс считается по показателям раздела «Выполненные мероприятия» относительно их KPI, с весом по приоритету между показателями. Если отчётов за период несколько — берётся среднее.'));
   return card;
 }
 function el2(tag, attrs, txt){
@@ -749,6 +823,17 @@ function el2(tag, attrs, txt){
 }
 
 /* ---- collect a registry of all section/field ids seen across reports ---- */
+// Названия некоторых полей менялись между версиями опросника — старые
+// уже собранные отчёты хранят ту формулировку, что была на момент
+// заполнения. Здесь приводим отображение в сводке к единому, текущему
+// варианту, не трогая сами исходные файлы отчётов.
+const LABEL_OVERRIDES = {
+  existing_agents_work: 'Работа с существующими клиентами'
+};
+function canonicalLabel(fieldId, rawLabel){
+  return LABEL_OVERRIDES[fieldId] || rawLabel;
+}
+
 function collectSectionRegistry(reports){
   const registry = {}; // id -> {title, type, columns:{id:label}, fieldsOrder:[]}
   reports.forEach(r=>{
@@ -761,13 +846,13 @@ function collectSectionRegistry(reports){
       if(sec.type==='fields'){
         sec.fields.forEach(f=>{
           if(!reg.fieldOrder.includes(f.id)) reg.fieldOrder.push(f.id);
-          reg.columns[f.id] = {label:f.label, type:f.type};
+          reg.columns[f.id] = {label:canonicalLabel(f.id, f.label), type:f.type};
         });
       }
       if(sec.type==='table' || sec.type==='fixedlist'){
         (sec.columns||[]).forEach(c=>{
           if(!reg.colOrder.includes(c.id)) reg.colOrder.push(c.id);
-          reg.columns[c.id] = {label:c.label, type:c.type};
+          reg.columns[c.id] = {label:canonicalLabel(c.id, c.label), type:c.type};
         });
       }
     });
@@ -784,12 +869,7 @@ function renderBySection(reports, managers){
   let idx = 0;
   Object.values(registry).forEach(reg=>{
     idx++;
-    const card = document.createElement('section');
-    card.className = 'card';
-    const head = document.createElement('div'); head.className='card-head';
-    head.innerHTML = `<span class="idx">${String(idx).padStart(2,'0')}</span><h2>${esc(reg.title)}</h2>`;
-    card.appendChild(head);
-    const body = document.createElement('div'); body.className='card-body';
+    const {card, body} = createCard(String(idx).padStart(2,'0'), esc(reg.title));
 
     // Один и тот же id раздела мог в старых отчётах иметь другую структуру
     // (например, "Обработанные лиды" раньше было одним полем, теперь — таблица).
@@ -809,7 +889,6 @@ function renderBySection(reports, managers){
     } else if(reg.type==='okr'){
       body.appendChild(renderOkrSectionSummary(reg, reports));
     }
-    card.appendChild(body);
     container.appendChild(card);
   });
   return container;
@@ -880,6 +959,7 @@ function renderFieldsSectionSummary(reg, reports){
   if(allNumeric){
     const table = document.createElement('table'); table.className='sumtable';
     const hasIndex = reg.id === 'activities_done' || reports.some(r=>{ const s=sectionOf(r,reg.id); return s && s.index; });
+    const useThousands = reg.id === 'weekly_numbers';
     let thead = '<tr><th>Менеджер</th>' + fieldIds.map(fid=>`<th>${esc(reg.columns[fid].label)}</th>`).join('') + (hasIndex?'<th>Индекс</th>':'') + '</tr>';
     const rowsSorted = reports.slice().sort((a,b)=>(a.meta.manager||'').localeCompare(b.meta.manager||'','ru'));
     let body = '';
@@ -891,14 +971,14 @@ function renderFieldsSectionSummary(reg, reports){
         const f = sec && sec.fields.find(x=>x.id===fid);
         const v = f ? Number(f.value)||0 : 0;
         totals[fid]+=v;
-        body += `<td>${f? esc(f.value||0):'—'}</td>`;
+        body += `<td>${f ? esc(useThousands ? fmtNum(f.value||0) : (f.value||0)) : '—'}</td>`;
       });
       if(hasIndex){
         body += `<td>${idxBadge(sec ? getReportIndex(r) : null)}</td>`;
       }
       body += '</tr>';
     });
-    let totalRow = `<tr class="total-row"><td>Итого</td>` + fieldIds.map(fid=>`<td>${totals[fid]}</td>`).join('') + (hasIndex?'<td></td>':'') + `</tr>`;
+    let totalRow = `<tr class="total-row"><td>Итого</td>` + fieldIds.map(fid=>`<td>${useThousands ? fmtNum(totals[fid]) : totals[fid]}</td>`).join('') + (hasIndex?'<td></td>':'') + `</tr>`;
     table.innerHTML = thead + body + totalRow;
     return table;
   }
@@ -911,7 +991,7 @@ function renderFieldsSectionSummary(reg, reports){
     if(!sec) return;
     const lines = sec.fields.map(f=>{
       const val = f.type==='rating' && f.value ? f.value+'/5' : (f.value||'—');
-      return `<b>${esc(f.label)}:</b> ${nl2br(val)}`;
+      return `<b>${esc(canonicalLabel(f.id, f.label))}:</b> ${nl2br(val)}`;
     }).join('<br>');
     const item = document.createElement('div'); item.className='item';
     item.innerHTML = `<div class="who">${esc(r.meta.manager)} <span style="font-weight:400;color:var(--ink-faint);">· ${fmtDate(r.meta.filledDate)}</span></div><div class="txt">${lines}</div>`;
@@ -1099,12 +1179,8 @@ function renderByManager(reports, managers){
   sorted.forEach((mgr, idx)=>{
     const mgrReports = reports.filter(r=>(r.meta.manager||'Без имени')===mgr)
       .sort((a,b)=>(a.meta.filledDate||'').localeCompare(b.meta.filledDate||''));
-    const card = document.createElement('section'); card.className='card';
-    const head = document.createElement('div'); head.className='card-head';
     const datesLabel = mgrReports.map(r=>fmtDate(r.meta.filledDate)).join(', ');
-    head.innerHTML = `<span class="idx">${String(idx+1).padStart(2,'0')}</span><h2>${esc(mgr)} <span style="font-weight:400;font-size:12.5px;color:var(--ink-faint);">· ${esc(datesLabel)}</span></h2>`;
-    card.appendChild(head);
-    const body = document.createElement('div'); body.className='card-body';
+    const {card, body} = createCard(String(idx+1).padStart(2,'0'), `${esc(mgr)} <span style="font-weight:400;font-size:12.5px;color:var(--ink-faint);">· ${esc(datesLabel)}</span>`);
 
     mgrReports.forEach(r=>{
       const sub = document.createElement('div');
@@ -1120,7 +1196,6 @@ function renderByManager(reports, managers){
       body.appendChild(sub);
     });
 
-    card.appendChild(body);
     container.appendChild(card);
   });
   return container;
@@ -1131,8 +1206,9 @@ function renderSingleSectionContent(sec){
   if(sec.type==='fields'){
     const table = document.createElement('table'); table.className='sumtable';
     table.innerHTML = sec.fields.map(f=>{
-      const val = f.type==='rating' && f.value ? f.value+'/5' : (f.value||'—');
-      return `<tr><td style="width:32%;color:var(--ink-soft);font-weight:600;">${esc(f.label)}</td><td>${nl2br(val)}</td></tr>`;
+      let val = f.type==='rating' && f.value ? f.value+'/5' : (f.value||'—');
+      if(sec.id==='weekly_numbers' && f.type==='number' && f.value){ val = fmtNum(f.value); }
+      return `<tr><td style="width:32%;color:var(--ink-soft);font-weight:600;">${esc(canonicalLabel(f.id, f.label))}</td><td>${nl2br(val)}</td></tr>`;
     }).join('');
     if(sec.index){
       table.innerHTML += `<tr class="total-row"><td>${esc(sec.index.label)}</td><td>${idxBadge(sec.index.percent)}</td></tr>`;
@@ -1143,7 +1219,7 @@ function renderSingleSectionContent(sec){
       wrap.innerHTML = '<div style="font-size:13px;color:var(--ink-faint);font-style:italic;">Нет данных</div>';
     } else {
       const table = document.createElement('table'); table.className='sumtable';
-      let thead = '<tr>'+sec.columns.map(c=>`<th>${esc(c.label)}</th>`).join('')+'</tr>';
+      let thead = '<tr>'+sec.columns.map(c=>`<th>${esc(canonicalLabel(c.id, c.label))}</th>`).join('')+'</tr>';
       let body = sec.rows.map(row=>'<tr>'+sec.columns.map(c=>{
         const val = row[c.id];
         if(val==='Низкий'||val==='Средний'||val==='Высокий'){
