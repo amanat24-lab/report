@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Расчёт дохода агента</title>
+<style>
+  :root{
+    --bg:#F5F5F7;
+    --card:#FFFFFF;
+    --ink:#1D1D1F;
+    --ink-soft:#6E6E73;
+    --ink-faint:#AEAEB2;
+    --divider:#E5E5EA;
+    --blue:#0071E3;
+    --blue-dark:#0058B0;
+    --blue-soft:#EAF3FE;
+    --purple:#8E44E0;
+    --purple-soft:#F3EAFC;
+    --orange:#FF8A00;
+    --orange-soft:#FFF3E3;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 2px 10px rgba(0,0,0,0.04);
+    --shadow-md: 0 8px 30px rgba(0,0,0,0.07);
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --glass-bg: rgba(255,255,255,0.55);
+    --glass-bg-strong: rgba(255,255,255,0.68);
+    --glass-border: rgba(255,255,255,0.65);
+    --glass-shadow: 0 8px 32px rgba(31,38,60,0.10), 0 1px 1px rgba(31,38,60,0.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top, #F0F1F5 0%, #E4E6EC 100%);
+    color:var(--ink);
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Inter, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:0 0 100px 0;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* ---------------- Ambient liquid background ---------------- */
+  .liquid-bg{
+    position:fixed;
+    inset:0;
+    z-index:-1;
+    overflow:hidden;
+    pointer-events:none;
+  }
+  .liquid-bg span{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(70px);
+    opacity:0.55;
+    will-change:transform;
+  }
+  .blob-1{
+    width:480px;height:480px;
+    background:radial-gradient(circle, #C79BF2 0%, rgba(199,155,242,0) 70%);
+    top:-140px; left:-120px;
+    animation:drift1 22s ease-in-out infinite alternate;
+  }
+  .blob-2{
+    width:520px;height:520px;
+    background:radial-gradient(circle, #7FC2FF 0%, rgba(127,194,255,0) 70%);
+    top:120px; right:-160px;
+    animation:drift2 26s ease-in-out infinite alternate;
+  }
+  .blob-3{
+    width:460px;height:460px;
+    background:radial-gradient(circle, #FFC98A 0%, rgba(255,201,138,0) 70%);
+    bottom:-160px; left:10%;
+    animation:drift3 24s ease-in-out infinite alternate;
+  }
+  .blob-4{
+    width:360px;height:360px;
+    background:radial-gradient(circle, #9BE8D8 0%, rgba(155,232,216,0) 70%);
+    bottom:120px; right:8%;
+    animation:drift1 30s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes drift1{
+    0%{transform:translate(0,0) scale(1);}
+    100%{transform:translate(40px,60px) scale(1.08);}
+  }
+  @keyframes drift2{
+    0%{transform:translate(0,0) scale(1);}
+    100%{transform:translate(-50px,40px) scale(1.1);}
+  }
+  @keyframes drift3{
+    0%{transform:translate(0,0) scale(1);}
+    100%{transform:translate(30px,-40px) scale(1.06);}
+  }
+
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px; position:relative;}
+
+  /* ---------------- Heading ---------------- */
+  .simple-head{
+    padding:56px 0 0 0;
+    text-align:center;
+  }
+  .simple-head h1{
+    font-size:clamp(22px,2.6vw,28px);
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+    margin:0 0 8px 0;
+  }
+  .simple-head p{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    max-width:480px;
+    margin:0 auto;
+    line-height:1.5;
+  }
+
+  /* ---------------- Tabs ---------------- */
+  .tabbar{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin:34px 0 0 0;
+  }
+  .tabbtn{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--glass-bg);
+    backdrop-filter:blur(16px) saturate(180%);
+    -webkit-backdrop-filter:blur(16px) saturate(180%);
+    border:1px solid var(--glass-border);
+    box-shadow:var(--glass-shadow);
+    border-radius:999px;
+    padding:10px 18px;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .tabbtn .tdot{width:7px;height:7px;border-radius:999px;background:currentColor;}
+  .tabbtn.active{border-color:transparent;}
+  .tabbtn.active.tier-high{background:rgba(142,68,224,0.18); color:#6A24BE; box-shadow:0 0 0 1.5px rgba(142,68,224,0.55) inset, var(--glass-shadow);}
+  .tabbtn.active.tier-mid{background:rgba(0,113,227,0.16); color:var(--blue-dark); box-shadow:0 0 0 1.5px rgba(0,113,227,0.55) inset, var(--glass-shadow);}
+  .tabbtn.active.tier-volume{background:rgba(255,138,0,0.18); color:#B96A00; box-shadow:0 0 0 1.5px rgba(255,138,0,0.55) inset, var(--glass-shadow);}
+  .tabbtn:not(.active):hover{color:var(--ink); background:var(--glass-bg-strong);}
+
+  /* ---------------- Panel ---------------- */
+  .panel{display:none; margin-top:26px;}
+  .panel.active{display:block;}
+
+  .pcard{
+    background:var(--glass-bg);
+    backdrop-filter:blur(24px) saturate(180%);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    border:1px solid var(--glass-border);
+    border-radius:var(--radius-lg);
+    padding:34px 30px;
+    box-shadow:var(--glass-shadow);
+    position:relative;
+    overflow:hidden;
+  }
+  .pcard::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:1px;
+    background:linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.9) 50%, transparent 100%);
+  }
+  .pcard::after{
+    content:"";
+    position:absolute;
+    top:-60%; left:-20%;
+    width:140%; height:120%;
+    background:linear-gradient(115deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 30%);
+    pointer-events:none;
+    transform:rotate(-8deg);
+  }
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:600;
+    padding:6px 12px;
+    border-radius:999px;
+    width:fit-content;
+    margin-bottom:14px;
+  }
+  .badge.tier-high{background:var(--purple-soft); color:var(--purple);}
+  .badge.tier-mid{background:var(--blue-soft); color:var(--blue);}
+  .badge.tier-volume{background:var(--orange-soft); color:var(--orange);}
+  .badge .dot{width:6px;height:6px;border-radius:999px;background:currentColor;}
+
+  .pcard h2{
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin:0 0 4px 0;
+  }
+  .pcard .psub{
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0 0 26px 0;
+    line-height:1.5;
+  }
+
+  .field-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:16px 0;
+    border-top:1px solid rgba(31,38,60,0.10);
+  }
+  .field-row:first-of-type{border-top:none;}
+  .field-row label{
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--ink);
+  }
+  .field-row .field-hint{
+    display:block;
+    font-size:11.5px;
+    color:var(--ink-faint);
+    margin-top:2px;
+    font-weight:400;
+  }
+  .num-input-wrap{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    background:rgba(255,255,255,0.45);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.7);
+    border-radius:12px;
+    padding:9px 14px;
+    box-shadow:inset 0 1px 2px rgba(31,38,60,0.04);
+  }
+  .num-input-wrap input{
+    width:110px;
+    text-align:right;
+    border:none;
+    background:transparent;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .num-input-wrap input:focus{outline:none;}
+  .num-input-wrap .unit{font-size:13px;color:var(--ink-faint);font-weight:500;}
+
+  .readout-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 20px;
+    background:rgba(255,255,255,0.4);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,0.65);
+    border-radius:14px;
+    margin-top:4px;
+    box-shadow:inset 0 1px 2px rgba(31,38,60,0.04);
+  }
+  .readout-row .rlabel{
+    font-size:14px;
+    color:var(--ink-soft);
+    font-weight:500;
+  }
+  .readout-row .rval{
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    color:var(--ink);
+  }
+
+  /* ---------------- Slider ---------------- */
+  .slider-block{padding:18px 0 6px 0; border-top:1px solid rgba(31,38,60,0.10); margin-top:4px;}
+  .slider-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .slider-head label{font-size:14.5px; font-weight:500; color:var(--ink);}
+  .slider-head .av-pct{
+    font-size:20px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  input[type=range]{
+    -webkit-appearance:none;
+    width:100%;
+    height:8px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.5);
+    border:1px solid rgba(255,255,255,0.7);
+    box-shadow:inset 0 1px 3px rgba(31,38,60,0.10);
+    outline:none;
+    margin:6px 0;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:26px;height:26px;
+    border-radius:999px;
+    background:radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.55) 35%, rgba(255,255,255,0.85) 100%);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,0.9);
+    box-shadow:0 4px 10px rgba(0,0,0,0.20), inset 0 1px 1px rgba(255,255,255,0.9);
+    cursor:pointer;
+    margin-top:-10px;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:26px;height:26px;
+    border-radius:999px;
+    background:radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.55) 35%, rgba(255,255,255,0.85) 100%);
+    border:1px solid rgba(255,255,255,0.9);
+    box-shadow:0 4px 10px rgba(0,0,0,0.20), inset 0 1px 1px rgba(255,255,255,0.9);
+    cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;}
+  input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:rgba(255,255,255,0.5);}
+  .slider-scale{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--ink-faint);
+    margin-top:4px;
+  }
+
+  /* ---------------- Hero result ---------------- */
+  .result-hero{
+    margin-top:22px;
+    background:linear-gradient(155deg, #0B0B0D 0%, #1C1C1F 55%, #201A2C 100%);
+    border-radius:var(--radius-md);
+    padding:40px 30px;
+    text-align:center;
+    color:#fff;
+    box-shadow:var(--shadow-md);
+    position:relative;
+    overflow:hidden;
+  }
+  .result-hero::before{
+    content:"";
+    position:absolute;
+    width:340px;height:340px;
+    background:radial-gradient(circle, rgba(0,113,227,0.35) 0%, rgba(0,113,227,0) 70%);
+    top:-140px; right:-100px;
+    pointer-events:none;
+  }
+  .result-hero::after{
+    content:"";
+    position:absolute;
+    width:280px;height:280px;
+    background:radial-gradient(circle, rgba(142,68,224,0.30) 0%, rgba(142,68,224,0) 70%);
+    bottom:-130px; left:-90px;
+    pointer-events:none;
+  }
+  .tier-volume .result-hero::after{background:radial-gradient(circle, rgba(255,138,0,0.28) 0%, rgba(255,138,0,0) 70%);}
+  .result-hero .rk{
+    font-size:13px;
+    font-weight:600;
+    color:#9F9FA6;
+    letter-spacing:.02em;
+    margin:0 0 10px 0;
+    position:relative;
+  }
+  .result-hero .rval{
+    font-size:clamp(34px,6vw,52px);
+    font-weight:700;
+    letter-spacing:-0.02em;
+    margin:0;
+    position:relative;
+    background:linear-gradient(180deg,#FFFFFF 0%, #C9C9CE 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .result-hero .rval .cur{font-size:0.44em; color:#8FE0C4; -webkit-text-fill-color:#8FE0C4;}
+  .result-hero .rnote{
+    font-size:12.5px;
+    color:#8E8E93;
+    margin:12px 0 0 0;
+    position:relative;
+  }
+
+  footer.note{
+    margin-top:44px;
+    font-size:12.5px;
+    color:var(--ink-faint);
+    line-height:1.6;
+    text-align:center;
+  }
+
+  @media(max-width:600px){
+    .simple-head{padding:40px 0 0 0;}
+    .pcard{padding:26px 20px;}
+    .field-row{flex-direction:row;}
+  }
+</style>
+</head>
+<body>
+<div class="liquid-bg">
+  <span class="blob-1"></span>
+  <span class="blob-2"></span>
+  <span class="blob-3"></span>
+  <span class="blob-4"></span>
+</div>
+<div class="wrap">
+
+  <section class="simple-head">
+    <h1>Расчёт дохода агента</h1>
+    <p>Выберите свой сегмент, укажите количество проданных полисов и настройте АВ — калькулятор сразу покажет ваш заработок.</p>
+  </section>
+
+  <div class="tabbar" id="tabbar"></div>
+
+  <div id="panels"></div>
+
+  <footer class="note">
+    Средний чек предзаполнен по сегменту и может быть скорректирован. АВ (агентское вознаграждение) — это и есть ваш заработок с проданных полисов; его размер можно регулировать ползунком от 1% до 50%.
+  </footer>
+</div>
+
+<script>
+(function(){
+  const fmt = new Intl.NumberFormat('ru-RU', {maximumFractionDigits:0});
+
+  const segments = [
+    {
+      id:'high', tier:'tier-high', tierLabel:'Высокий доход',
+      title:'Визовые центры',
+      subtitle:'Трудоустройство и учёба за рубежом',
+      check:70000, policies:10, av:30
+    },
+    {
+      id:'mid', tier:'tier-mid', tierLabel:'Средний доход',
+      title:'Визовые центры',
+      subtitle:'Краткосрочные туры в визовые страны',
+      check:20810, policies:10, av:30
+    },
+    {
+      id:'volume', tier:'tier-volume', tierLabel:'Объёмный сегмент',
+      title:'Турагенты',
+      subtitle:'Краткосрочные туры по всему миру',
+      check:7000, policies:10, av:30
+    },
+  ];
+
+  const tabbar = document.getElementById('tabbar');
+  const panels = document.getElementById('panels');
+
+  segments.forEach((s, i)=>{
+    // Tab button
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'tabbtn ' + s.tier + (i===0 ? ' active' : '');
+    tab.dataset.target = s.id;
+    tab.innerHTML = `<span class="tdot"></span>${s.title} · ${s.tierLabel}`;
+    tab.addEventListener('click', ()=>switchTab(s.id));
+    tabbar.appendChild(tab);
+
+    // Panel
+    const panel = document.createElement('div');
+    panel.className = 'panel ' + s.tier + (i===0 ? ' active' : '');
+    panel.id = 'panel-' + s.id;
+    panel.innerHTML = `
+      <div class="pcard">
+        <span class="badge ${s.tier}"><span class="dot"></span>${s.tierLabel}</span>
+        <h2>${s.title}</h2>
+        <p class="psub">${s.subtitle}</p>
+
+        <div class="field-row">
+          <div>
+            <label>Средний чек</label>
+            <span class="field-hint">Можно изменить под свой рынок</span>
+          </div>
+          <div class="num-input-wrap">
+            <input type="number" id="check-${s.id}" value="${s.check}" min="0" step="500">
+            <span class="unit">₸</span>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div>
+            <label>Продано полисов</label>
+            <span class="field-hint">За выбранный период</span>
+          </div>
+          <div class="num-input-wrap">
+            <input type="number" id="policies-${s.id}" value="${s.policies}" min="0" step="1">
+            <span class="unit">шт</span>
+          </div>
+        </div>
+
+        <div class="readout-row">
+          <span class="rlabel">Страховая премия</span>
+          <span class="rval" id="premium-${s.id}">—</span>
+        </div>
+
+        <div class="slider-block">
+          <div class="slider-head">
+            <label>АВ (агентское вознаграждение)</label>
+            <span class="av-pct" id="av-pct-${s.id}">${s.av}%</span>
+          </div>
+          <input type="range" id="av-${s.id}" min="1" max="50" step="1" value="${s.av}">
+          <div class="slider-scale"><span>1%</span><span>50%</span></div>
+        </div>
+      </div>
+
+      <div class="result-hero ${s.tier}">
+        <p class="rk">Ваш доход (АВ)</p>
+        <p class="rval" id="result-${s.id}">0<span class="cur"> ₸</span></p>
+        <p class="rnote">Премия × АВ — это и есть ваша комиссия с продаж</p>
+      </div>
+    `;
+    panels.appendChild(panel);
+
+    // Bind inputs
+    const checkInput = panel.querySelector(`#check-${s.id}`);
+    const policiesInput = panel.querySelector(`#policies-${s.id}`);
+    const avInput = panel.querySelector(`#av-${s.id}`);
+
+    function recalc(){
+      const check = parseFloat(checkInput.value) || 0;
+      const policies = parseFloat(policiesInput.value) || 0;
+      const av = parseFloat(avInput.value) || 0;
+
+      const premium = check * policies;
+      const avAmount = premium * (av/100);
+
+      panel.querySelector(`#premium-${s.id}`).textContent = fmt.format(premium) + ' ₸';
+      panel.querySelector(`#av-pct-${s.id}`).textContent = av + '%';
+      panel.querySelector(`#result-${s.id}`).innerHTML = fmt.format(avAmount) + '<span class="cur"> ₸</span>';
+    }
+
+    checkInput.addEventListener('input', recalc);
+    policiesInput.addEventListener('input', recalc);
+    avInput.addEventListener('input', recalc);
+    recalc();
+  });
+
+  function switchTab(id){
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.toggle('active', b.dataset.target===id));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+id));
+  }
+})();
+</script>
+</body>
+</html>
