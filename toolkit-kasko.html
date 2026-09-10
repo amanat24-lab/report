@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тулкит КАСКО — Amanat</title>
+<style>
+  :root {
+    --accent: #2ea043;
+    --accent-dark: #1c7a30;
+    --ink: #10190f;
+    --muted: #57635a;
+    --glass-bg: rgba(255,255,255,0.46);
+    --glass-bg-strong: rgba(255,255,255,0.62);
+    --glass-border: rgba(255,255,255,0.65);
+    --glass-edge: rgba(16,24,18,0.07);
+    --shadow-soft: 0 1px 1px rgba(255,255,255,0.7) inset, 0 0 0 1px rgba(255,255,255,0.35) inset;
+    --shadow-deep: 0 18px 40px -18px rgba(16,30,18,0.35), 0 4px 14px -4px rgba(16,30,18,0.14);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #eef4ee;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* soft blurred colour blobs behind everything, for true glass to read against */
+  .blob { position: fixed; border-radius: 50%; filter: blur(70px); z-index: 0; pointer-events: none; }
+  .blob-1 { width: 620px; height: 620px; top: -220px; left: -160px; background: radial-gradient(circle, #8fe0a4 0%, #8fe0a400 70%); }
+  .blob-2 { width: 560px; height: 560px; top: -120px; right: -220px; background: radial-gradient(circle, #9ec9ff 0%, #9ec9ff00 70%); }
+  .blob-3 { width: 700px; height: 700px; bottom: -280px; left: 30%; background: radial-gradient(circle, #ffd98f 0%, #ffd98f00 70%); }
+  .blob-4 { width: 480px; height: 480px; bottom: 10%; right: -180px; background: radial-gradient(circle, #b6f0c4 0%, #b6f0c400 70%); }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+  @media (min-width: 1200px) { .wrap { padding: 0 350px; max-width: none; } }
+
+  /* NAV — frosted glass bar */
+  nav.sticky-nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(255,255,255,0.55);
+    border-bottom: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset, 0 8px 24px -12px rgba(16,30,18,0.18);
+  }
+  .nav-inner {
+    max-width: 980px; margin: 0 auto; padding: 13px 24px;
+    display: flex; align-items: center; gap: 6px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  @media (min-width: 1200px) { .nav-inner { max-width: none; padding: 13px 350px; } }
+  .nav-inner::-webkit-scrollbar { display: none; }
+  .nav-logo { height: 20px; flex: 0 0 auto; margin-right: 12px; }
+  .nav-inner a {
+    color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600;
+    white-space: nowrap; padding: 7px 13px; border-radius: 999px; transition: background .18s, color .18s, box-shadow .18s;
+  }
+  .nav-inner a:hover, .nav-inner a:focus-visible {
+    background: rgba(255,255,255,0.85); color: var(--accent-dark);
+    box-shadow: var(--shadow-soft), 0 3px 10px -4px rgba(16,30,18,0.2);
+  }
+
+  /* HERO */
+  header.hero { padding: 68px 0 44px; }
+  .hero-logo { height: 34px; margin-bottom: 30px; filter: drop-shadow(0 2px 6px rgba(16,30,18,0.12)); }
+  h1.title { font-size: 42px; line-height: 1.14; margin: 0 0 14px; letter-spacing: -0.015em; font-weight: 700; }
+  .subtitle { font-size: 18px; color: var(--muted); max-width: 640px; margin: 0 0 24px; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .pill {
+    background: var(--glass-bg-strong);
+    border: 1px solid var(--glass-border);
+    padding: 8px 15px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--muted);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    box-shadow: var(--shadow-soft), 0 6px 16px -8px rgba(16,30,18,0.2);
+  }
+
+  section { padding: 50px 0; }
+  h2.section-title { font-size: 27px; margin: 0 0 8px; font-weight: 700; letter-spacing: -0.01em; }
+  p.section-lead { color: var(--muted); font-size: 16px; margin: 0 0 30px; max-width: 640px; }
+
+  /* GLASS CARD — the core liquid-glass surface used everywhere */
+  .card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 22px;
+    padding: 24px 26px;
+    backdrop-filter: blur(22px) saturate(180%);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: var(--shadow-soft), var(--shadow-deep);
+    position: relative;
+  }
+  .card::before {
+    content: ""; position: absolute; inset: 0; border-radius: 22px; padding: 1px;
+    background: linear-gradient(160deg, rgba(255,255,255,0.9), rgba(255,255,255,0) 40%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .clause {
+    display: inline-block; font-size: 11px; font-weight: 700; font-family: "SF Mono", Menlo, Consolas, monospace;
+    color: var(--accent-dark); background: rgba(46,160,67,0.14);
+    border: 1px solid rgba(46,160,67,0.22);
+    padding: 2px 8px; border-radius: 8px; letter-spacing: 0.01em; margin-left: 6px; vertical-align: middle;
+  }
+  .clause.muted { color: #7a6a3a; background: rgba(217,119,6,0.13); border-color: rgba(217,119,6,0.2); }
+  .clause.bad { color: #b91c1c; background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.18); }
+
+  /* RISK GRID */
+  .risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media (max-width: 680px) { .risk-grid { grid-template-columns: 1fr; } }
+  .risk-item {
+    background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 18px;
+    padding: 16px 18px; display: flex; gap: 13px; align-items: flex-start;
+    backdrop-filter: blur(18px) saturate(170%); -webkit-backdrop-filter: blur(18px) saturate(170%);
+    box-shadow: var(--shadow-soft), 0 10px 26px -14px rgba(16,30,18,0.28);
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .risk-item:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft), 0 16px 34px -14px rgba(16,30,18,0.34); }
+  .risk-item.standout { border-color: rgba(46,160,67,0.4); background: rgba(46,160,67,0.13); }
+  .risk-num {
+    flex: 0 0 auto; width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,0.75); color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    box-shadow: var(--shadow-soft), 0 3px 8px -2px rgba(16,30,18,0.2);
+  }
+  .risk-item.standout .risk-num { background: linear-gradient(160deg, #3fbf5b, #1c7a30); color: #fff; box-shadow: 0 3px 10px -2px rgba(28,122,48,0.5); }
+  .risk-text { font-size: 14.5px; }
+  .risk-text b { font-weight: 650; }
+  .risk-tag {
+    display: inline-block; margin-top: 7px; font-size: 11px; font-weight: 700;
+    color: #fff; background: linear-gradient(135deg, #3fbf5b, #1c7a30);
+    padding: 3px 9px; border-radius: 999px; letter-spacing: 0.01em;
+    box-shadow: 0 3px 8px -2px rgba(28,122,48,0.5);
+  }
+
+  .risk-types { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 30px; }
+  @media (max-width: 680px) { .risk-types { grid-template-columns: 1fr; } }
+  .risk-type-card h3 { margin: 0 0 8px; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+  .risk-type-card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+  /* EXCLUSIONS */
+  .exclusion-list { display: flex; flex-direction: column; gap: 11px; }
+  .exclusion-item {
+    background: rgba(255,255,255,0.4); border: 1px solid rgba(220,38,38,0.2);
+    border-radius: 16px; padding: 14px 17px; font-size: 14.5px; display: flex; gap: 11px;
+    backdrop-filter: blur(18px) saturate(170%); -webkit-backdrop-filter: blur(18px) saturate(170%);
+    box-shadow: var(--shadow-soft), 0 10px 24px -16px rgba(220,38,38,0.3);
+  }
+  .exclusion-item .x {
+    color: #fff; font-weight: 700; flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(160deg, #ef4444, #b91c1c); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; box-shadow: 0 3px 8px -2px rgba(185,28,28,0.5);
+  }
+
+  /* CONDITIONS */
+  .cond-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 680px) { .cond-grid { grid-template-columns: 1fr; } }
+  .cond-card .cond-num { font-size: 23px; font-weight: 700; color: var(--accent-dark); letter-spacing: -0.01em; }
+  .cond-card .cond-label { font-size: 13.5px; color: var(--muted); margin-top: 3px; font-weight: 600; }
+  .cond-card .cond-detail { font-size: 13.5px; margin-top: 11px; color: var(--ink); }
+  code.formula {
+    display: block; margin-top: 13px; background: rgba(16,24,18,0.06);
+    padding: 12px 15px; border-radius: 12px; font-size: 12.5px; font-family: "SF Mono", Menlo, monospace;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.5) inset;
+  }
+
+  /* SELLING POINTS */
+  .sp-list { display: flex; flex-direction: column; gap: 15px; }
+  .sp-item {
+    display: flex; gap: 15px; align-items: flex-start;
+    background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; padding: 18px 20px;
+    backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--shadow-soft), var(--shadow-deep);
+  }
+  .sp-icon {
+    flex: 0 0 auto; width: 42px; height: 42px; border-radius: 13px;
+    background: linear-gradient(155deg, #3fbf5b, #1c7a30);
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px;
+    box-shadow: 0 6px 16px -4px rgba(28,122,48,0.55), 0 1px 0 rgba(255,255,255,0.4) inset;
+  }
+  .sp-text b { display: block; margin-bottom: 4px; font-size: 15px; }
+  .sp-text span { color: var(--muted); font-size: 14px; }
+
+  /* FAQ */
+  .faq-item {
+    border: 1px solid var(--glass-border); border-radius: 18px; overflow: hidden; margin-bottom: 12px;
+    background: var(--glass-bg); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--shadow-soft), 0 12px 30px -18px rgba(16,30,18,0.3);
+  }
+  .faq-q {
+    padding: 16px 19px; cursor: pointer; font-weight: 650; font-size: 15px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    list-style: none;
+  }
+  .faq-q::-webkit-details-marker { display: none; }
+  .faq-q .chev {
+    transition: transform .2s; color: #fff; flex: 0 0 auto;
+    width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(155deg, #3fbf5b, #1c7a30);
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+    box-shadow: 0 3px 8px -2px rgba(28,122,48,0.5);
+  }
+  details[open] .faq-q .chev { transform: rotate(45deg); }
+  .faq-a { padding: 0 19px 18px; color: var(--muted); font-size: 14.5px; }
+  .faq-a b { color: var(--ink); }
+
+  footer { padding: 44px 0 64px; color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 680px) {
+    header.hero { padding: 44px 0 30px; }
+    h1.title { font-size: 30px; }
+    .subtitle { font-size: 16px; }
+    section { padding: 36px 0; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<div class="blob blob-4"></div>
+
+<nav class="sticky-nav">
+  <div class="nav-inner">
+    <img class="nav-logo" src="data:image/png;base64,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" alt="amanat">
+    <a href="#covers">Покрывает</a>
+    <a href="#excludes">Не покрывает</a>
+    <a href="#conditions">Условия</a>
+    <a href="#pitch">Фишки</a>
+    <a href="#faq">Возражения</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header class="hero">
+    <img class="hero-logo" src="data:image/png;base64,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" alt="amanat">
+    <h1 class="title">Тулкит по КАСКО для менеджеров</h1>
+    <p class="subtitle">Шпаргалка по продукту на основе Правил добровольного страхования автомобильного транспорта КАСКО (для физлиц, покупающих авто в кредит), издание №3 от 23.02.2023. Рядом с каждым пунктом — ссылка на пункт Правил.</p>
+    <div class="hero-meta">
+      <span class="pill">16 покрываемых факторов — п.12</span>
+      <span class="pill">Выплата за 5–10 раб. дней — п.41</span>
+      <span class="pill">Осмотр авто за 3 раб. дня — п.34(2)</span>
+    </div>
+  </header>
+
+  <section id="covers">
+    <h2 class="section-title">Что покрывается</h2>
+    <p class="section-lead">Исчерпывающий перечень внешних факторов — <span class="clause">п.12</span>. Список закрытый — значит, всё что в нём есть, можно смело обещать клиенту. Отдельно отмечены пункты, которых обычно нет у конкурентов.</p>
+
+    <div class="risk-grid">
+      <div class="risk-item"><div class="risk-num">1</div><div class="risk-text">ДТП<span class="clause">п.12(1)</span></div></div>
+      <div class="risk-item"><div class="risk-num">2</div><div class="risk-text">Пожар, взрыв, самовозгорание<span class="clause">п.12(2)</span></div></div>
+      <div class="risk-item"><div class="risk-num">3</div><div class="risk-text">Стихийные бедствия: оползень, буря, ураган, наводнение, град, ливень, снежная лавина, молния, извержение вулкана<span class="clause">п.12(3)</span></div></div>
+      <div class="risk-item"><div class="risk-num">4</div><div class="risk-text">Землетрясение<span class="clause">п.12(4)</span></div></div>
+      <div class="risk-item"><div class="risk-num">5</div><div class="risk-text">Противоправные действия третьих лиц в отношении авто<span class="clause">п.12(5)</span></div></div>
+      <div class="risk-item standout"><div class="risk-num">6</div><div class="risk-text"><b>Кража колеса, зеркала или аксессуара отдельно</b> — колпаки, эмблемы, рейлинги, молдинги, дворники<span class="clause">п.12(6)</span><span class="risk-tag">Фишка</span></div></div>
+      <div class="risk-item"><div class="risk-num">7</div><div class="risk-text">Угон автомобиля<span class="clause">п.12(7)</span></div></div>
+      <div class="risk-item"><div class="risk-num">8</div><div class="risk-text">Теракты и противоправные действия третьих лиц по политическим/религиозным мотивам<span class="clause">п.12(8)</span></div></div>
+      <div class="risk-item standout"><div class="risk-num">9</div><div class="risk-text"><b>Порыв ветра от 13 м/с</b> — конкретный измеримый порог<span class="clause">п.12(9)</span><span class="risk-tag">Фишка</span></div></div>
+      <div class="risk-item standout"><div class="risk-num">10</div><div class="risk-text">Падение инородных предметов (снег, лёд, град, камни, ветки, обломки) <b>и случайное падение самого застрахованного лица на авто</b><span class="clause">п.12(10)</span><span class="risk-tag">Фишка</span></div></div>
+      <div class="risk-item"><div class="risk-num">11</div><div class="risk-text">Затопление от паводка, града, ливня<span class="clause">п.12(11)</span></div></div>
+      <div class="risk-item"><div class="risk-num">12</div><div class="risk-text">Затопление от прорыва канализационных труб/отопления на дороге или парковке<span class="clause">п.12(12)</span></div></div>
+      <div class="risk-item standout"><div class="risk-num">13</div><div class="risk-text"><b>Проникновение животных в подкапотное пространство</b><span class="clause">п.12(13)</span><span class="risk-tag">Фишка</span></div></div>
+      <div class="risk-item standout"><div class="risk-num">14</div><div class="risk-text">Отдельное повреждение или утрата оптики (стёкла, фары, фонари, зеркала) — без повреждения других деталей, если до договора видимых повреждений на ней не было<span class="clause">п.12(14)</span><span class="risk-tag">Фишка</span></div></div>
+      <div class="risk-item"><div class="risk-num">15</div><div class="risk-text">Перевозка авто другим спецтранспортом (например, эвакуатором)<span class="clause">п.12(15)</span></div></div>
+      <div class="risk-item"><div class="risk-num">16</div><div class="risk-text">Повреждение или утрата двигателя от попадания предметов/воды — только при затоплении или прорыве труб; проезд через брод/реку/озеро сюда <b>не</b> относится<span class="clause">п.12(16)</span></div></div>
+    </div>
+
+    <div class="risk-types">
+      <div class="card risk-type-card">
+        <h3>🔧 Риск «Повреждение» <span class="clause">п.13</span></h3>
+        <p>Восстановление автомобиля после воздействия любого из 16 факторов возможно и экономически целесообразно.</p>
+      </div>
+      <div class="card risk-type-card">
+        <h3>🚨 Риск «Утрата» <span class="clause">п.14</span></h3>
+        <p>Угон автомобиля, либо повреждение, при котором сумма восстановительных работ превышает 70% реальной рыночной стоимости — ремонт уже нецелесообразен.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="excludes">
+    <h2 class="section-title">Что НЕ покрывается</h2>
+    <p class="section-lead">Стоит проговаривать до подписания договора — так меньше споров при наступлении случая.</p>
+    <div class="exclusion-list">
+      <div class="exclusion-item"><span class="x">✕</span><span><b>Дополнительное оборудование не страхуется вообще</b> — диски, элементы тюнинга, сигнализация, улучшенная оптика/аудио, защита картера и т.п.<span class="clause bad">п.6, п.3(2)</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Государственный регистрационный номерной знак — не относится ни к авто, ни к допоборудованию<span class="clause bad">п.3(2)</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Противоправные имущественные интересы страхователя<span class="clause bad">п.7</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Несчастные случаи с водителем и/или пассажирами<span class="clause bad">п.16(4)</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Утеря или кража личных вещей и документов<span class="clause bad">п.16(5)</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Расходы на утилизацию непригодного (утраченного) авто<span class="clause bad">п.44(1)</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Юридические издержки — копии, нотариус, экспертиза, адвокат, переводчик<span class="clause bad">п.44(2)</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Расходы на улучшение, модернизацию и тюнинг, а также стоимость модернизированных деталей<span class="clause bad">п.44(3)</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Моральный вред, неустойка, упущенная выгода, утрата товарной стоимости, ущерб от механической поломки или заводского брака<span class="clause bad">п.44(4)</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Штрафы, пени и административные санкции, наложенные на страхователя<span class="clause bad">п.44(5)</span></span></div>
+      <div class="exclusion-item"><span class="x">✕</span><span>Основания для отказа в выплате — нарушение условий договора, случай вне перечня 16 факторов, либо основания по ГК РК<span class="clause bad">п.17</span></span></div>
+    </div>
+  </section>
+
+  <section id="conditions">
+    <h2 class="section-title">Условия и лимиты</h2>
+    <p class="section-lead">Ключевые цифры, которые чаще всего спрашивает клиент — с точной ссылкой на пункт Правил.</p>
+    <div class="cond-grid">
+      <div class="card cond-card">
+        <div class="cond-num">5 дней <span class="clause">п.41</span></div>
+        <div class="cond-label">Срок выплаты</div>
+        <div class="cond-detail">С момента получения последнего документа. Если выплата от 5 000 000 тенге — срок увеличивается до 10 рабочих дней.</div>
+      </div>
+      <div class="card cond-card">
+        <div class="cond-num">3 дня <span class="clause">п.34(2)</span></div>
+        <div class="cond-label">Осмотр авто</div>
+        <div class="cond-detail">Страховщик обязан осмотреть пострадавший автомобиль в течение 3 рабочих дней с момента сообщения о случае.</div>
+      </div>
+      <div class="card cond-card">
+        <div class="cond-num">10 / 3 дня <span class="clause">п.37(1),(2)</span></div>
+        <div class="cond-label">Срок уведомления</div>
+        <div class="cond-detail">10 рабочих дней — по общим случаям, 3 рабочих дня — при угоне или пожаре. Устное сообщение — на номер +7 705 306 00 00, с письменным подтверждением в тот же срок.</div>
+      </div>
+      <div class="card cond-card">
+        <div class="cond-num">500 км <span class="clause">п.53</span></div>
+        <div class="cond-label">Лимит пробега после ремонта</div>
+        <div class="cond-detail">Если пробег превысил 500 км с момента завершения ремонта, скрытые дефекты уже не покрываются.</div>
+      </div>
+      <div class="card cond-card">
+        <div class="cond-num">≤ действ. ст-ти <span class="clause">п.8, п.9</span></div>
+        <div class="cond-label">Страховая сумма</div>
+        <div class="cond-detail">Не может превышать действительную (рыночную) стоимость авто на дату заключения договора; размер — по соглашению сторон.</div>
+      </div>
+      <div class="card cond-card">
+        <div class="cond-num">Учитывается <span class="clause">п.16(1)</span></div>
+        <div class="cond-label">Амортизация</div>
+        <div class="cond-detail">При расчёте суммы ущерба амортизация учитывается всегда — это прямо прописано как особое условие договора.</div>
+      </div>
+      <div class="card cond-card">
+        <div class="cond-num">По соглашению <span class="clause">п.11</span></div>
+        <div class="cond-label">Франшиза</div>
+        <div class="cond-detail">Вид (условная/безусловная) и размер устанавливаются в договоре страхования индивидуально.</div>
+      </div>
+      <div class="card cond-card">
+        <div class="cond-num">10% / 30% <span class="clause">п.58</span></div>
+        <div class="cond-label">Возврат премии при досрочном расторжении</div>
+        <div class="cond-detail">10% удерживается, если расторжение связано с исполнением обязательств перед займодателем; 30% — если не связано.</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px;">
+      <b>Формула при неполном страховании <span class="clause">п.46</span></b> (если страховая сумма ниже рыночной стоимости авто):
+      <code class="formula">Q = T × (S / W) − F&nbsp;&nbsp;&nbsp;где Q — выплата, T — фактический ущерб, S — страховая сумма, W — рыночная стоимость, F — франшиза</code>
+    </div>
+  </section>
+
+  <section id="pitch">
+    <h2 class="section-title">Фишки для продаж</h2>
+    <p class="section-lead">То, чем можно зацепить клиента в разговоре.</p>
+    <div class="sp-list">
+      <div class="sp-item">
+        <div class="sp-icon">⚡</div>
+        <div class="sp-text"><b>Быстрая выплата <span class="clause">п.41</span></b><span>5 рабочих дней с момента подачи последнего документа — и лишь до 10 дней для крупных выплат от 5 млн тенге. Конкретные сроки называть не страшно.</span></div>
+      </div>
+      <div class="sp-item">
+        <div class="sp-icon">🔍</div>
+        <div class="sp-text"><b>Осмотр за 3 дня <span class="clause">п.34(2)</span></b><span>Страховщик обязан осмотреть авто в течение 3 рабочих дней после сообщения о случае — клиент не будет ждать неделями.</span></div>
+      </div>
+      <div class="sp-item">
+        <div class="sp-icon">📋</div>
+        <div class="sp-text"><b>Без беготни по справкам в трёх случаях <span class="clause">п.40, п.37(3а,б,в)</span></b><span>Повреждение оптики без прочих повреждений, падение посторонних предметов, животные в подкапотном пространстве — документы из госорганов не обязательны.</span></div>
+      </div>
+      <div class="sp-item">
+        <div class="sp-icon">🛡️</div>
+        <div class="sp-text"><b>Франшиза может не применяться <span class="clause">п.45</span></b><span>Если виновник ДТП — третье лицо с действующим ОСАГО, безусловная франшиза при повреждении авто не удерживается.</span></div>
+      </div>
+      <div class="sp-item">
+        <div class="sp-icon">📞</div>
+        <div class="sp-text"><b>Прямой номер для экстренных случаев <span class="clause">п.37(1)</span></b><span>+7 705 306 00 00 — клиент может сообщить о случае сразу, не разбираясь в процедурах.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <h2 class="section-title">Возражения и ответы</h2>
+    <p class="section-lead">Готовые формулировки на частые вопросы клиентов.</p>
+
+    <details class="faq-item">
+      <summary class="faq-q">А допоборудование застраховано? <span class="chev">+</span></summary>
+      <div class="faq-a">Нет — по этим Правилам допоборудование (диски, тюнинг, сигнализация и т.п.) на страхование не принимается <b class="clause">п.6</b>. Лучше сразу проговорить с клиентом, чтобы не было сюрприза при выплате.</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-q">Меня подрежут — почему я плачу франшизу? <span class="chev">+</span></summary>
+      <div class="faq-a">Если виновник ДТП — третье лицо с действующим полисом ОСАГО, безусловная франшиза не применяется <b class="clause">п.45</b>. Есть нюанс: если франшиза больше суммы ущерба по ОСАГО, страховщик удержит разницу.</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-q">Что если машину угнали? <span class="chev">+</span></summary>
+      <div class="faq-a">Нужно письменно уведомить страховщика в течение 3 рабочих дней <b class="clause">п.37(2)</b>, предоставить оригинал свидетельства о регистрации (или документ о собственности) и, если есть, оригиналы ключей <b class="clause">п.37(8)</b>. Возможен абандон — передача прав на авто страховщику с получением полной рыночной стоимости за вычетом франшизы и амортизации <b class="clause">п.33(8)</b>. Клиент вправе и отказаться от абандона, но тогда остаточная стоимость авто удерживается <b class="clause">п.33(9)</b>.</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-q">Учитывается ли износ при выплате? <span class="chev">+</span></summary>
+      <div class="faq-a">Да, амортизация учитывается всегда, если иное прямо не прописано в конкретном договоре — это одно из особых условий Правил <b class="clause">п.16(1)</b>.</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-q">Сколько ждать деньги после случая? <span class="chev">+</span></summary>
+      <div class="faq-a">5 рабочих дней с момента предоставления последнего документа. Если сумма выплаты от 5 000 000 тенге — до 10 рабочих дней <b class="clause">п.41</b>.</div>
+    </details>
+    <details class="faq-item">
+      <summary class="faq-q">А если я проехал через брод и залило двигатель? <span class="chev">+</span></summary>
+      <div class="faq-a">Такой случай не покрывается. Повреждение двигателя от воды покрывается только при затоплении из-за паводка/града/ливня или прорыва труб — но не при проезде через брод, реку или озеро <b class="clause">п.12(16)</b>.</div>
+    </details>
+  </section>
+
+  <footer>
+    Тулкит подготовлен на основе Правил добровольного страхования автомобильного транспорта КАСКО (для физических лиц, приобретающих автомобиль в кредит через банки второго уровня и/или кредитные организации), издание №3 от 23.02.2023 г. Только для внутреннего использования менеджерами.
+  </footer>
+
+</div>
+
+</body>
+</html>
