@@ -31,9 +31,7 @@
       inset 0 1px 0 rgba(255,255,255,0.9),
       inset 0 -1px 0 rgba(15,20,40,0.05);
   }
-.guide-section{
-  padding-bottom:50px}
-  
+
   *{box-sizing:border-box;}
   html,body{height:100%;}
   html{overflow-x:hidden;}
@@ -69,6 +67,7 @@
   .logo-img{height:48px; width:auto; display:block;}
   h1{font-size:clamp(28px,4.4vw,40px); font-weight:700; letter-spacing:-0.02em; margin:0; text-align:center; color:var(--ink);}
   .sub{margin:10px auto 0; max-width:520px; color:var(--ink-soft); font-size:15px; line-height:1.5; text-align:center;}
+  .page-footnote{margin:34px auto 0; max-width:560px; color:var(--ink-faint); font-size:11px; line-height:1.5; text-align:center;}
 
   .glass{
     background:
@@ -215,7 +214,7 @@
   }
   .tariffs .tariff-card{flex:1 1 0; min-width:0;}
   .tariffs.single{justify-content:center;}
-  .tariffs.single .tariff-card{flex:0 1 460px;}
+  .tariffs.single .tariff-card{flex:0 1 760px;}
   .vs{flex:0 0 auto; align-self:center; font-size:11px; font-weight:700; letter-spacing:0.1em; color:var(--ink-faint); text-transform:uppercase;}
   .package-desc{
     font-size:12px; color:var(--ink-soft); line-height:1.55; text-align:left;
@@ -279,6 +278,8 @@
   }
   .franchise-row .switch input:checked + .track{background:var(--green);}
   .franchise-row .switch input:checked ~ .thumb{transform:translateX(17px);}
+  .franchise-row .switch.locked{opacity:0.6;}
+  .franchise-row .switch.locked input{cursor:not-allowed;}
   .franchise-text{flex:1; min-width:0;}
   .franchise-text .title{font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:2px;}
   .franchise-text .note{font-size:11.5px; color:var(--ink-soft); line-height:1.4;}
@@ -288,7 +289,7 @@
     padding:13px 15px;
   }
   .franchise-example:empty{display:none;}
-  .franchise-example strong{color:var(--ink); font-weight:700;}
+  .franchise-example strong{color:var(--ink); font-weight:700; font-size:14px;}
   .franchise-example .example-line{display:block; margin-top:7px;}
   .franchise-example .example-line:first-child{margin-top:0;}
 
@@ -442,6 +443,20 @@
     background:linear-gradient(155deg, rgba(255,255,255,0.6), rgba(255,255,255,0.15)), rgba(57,181,74,0.14);
   }
   .coverage-card .label{font-size:11px; color:var(--ink-soft); line-height:1.3; word-break:break-word;}
+
+  .coverage-list{display:flex; flex-direction:column; gap:10px; width:100%;}
+  .coverage-list-item{
+    display:flex; align-items:flex-start; gap:10px; padding:10px 12px;
+    background:rgba(255,255,255,0.5); border:1px solid var(--line); border-radius:14px;
+  }
+  .coverage-list-icon{
+    width:32px; height:32px; border-radius:10px; flex-shrink:0; font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(155deg, rgba(255,255,255,0.6), rgba(255,255,255,0.15)), rgba(57,181,74,0.14);
+  }
+  .coverage-list-text{flex:1; min-width:0;}
+  .coverage-list-text .title{font-size:12.5px; font-weight:600; color:var(--ink); line-height:1.35;}
+  .coverage-list-text .desc{font-size:11px; color:var(--ink-soft); line-height:1.4; margin-top:2px;}
 
   /* ---------- share / export ---------- */
   .hidden{display:none !important;}
@@ -638,12 +653,51 @@
       </div>
       <div class="card-req-hint" id="reqHintStandard"></div>
 
+      <div class="franchise-config hidden" id="limitConfigStandard">
+        <div class="field">
+          <label for="limitStandard">Страховой лимит
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Максимальная страховая сумма, которую клиент может ввести без согласования с вами. Клиент видит это поле, но не может его менять.</span>
+            </span>
+          </label>
+          <div class="input-shell">
+            <span class="prefix">₸</span>
+            <input type="text" id="limitStandard" inputmode="decimal" placeholder="Без ограничения">
+          </div>
+        </div>
+      </div>
+
+      <div class="premium-out">
+        <div class="ring-wrap" id="ringWrapStandard">
+          <svg viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-progress" id="ringProgressStandard" cx="32" cy="32" r="28" stroke="url(#ringGrad)"></circle>
+            <circle class="ring-progress-inner hidden" id="ringProgressInnerStandard" cx="32" cy="32" r="28" stroke="url(#ringGradAmber)"></circle>
+          </svg>
+          <div class="ring-center" id="ringCenterStandard"></div>
+        </div>
+        <div class="premium-body" id="premiumBodyStandard">
+          <div class="label">Страховая премия <span class="value-badge hidden" id="valueBadgeStandard">Выгодное покрытие</span></div>
+          <div class="value" id="premiumStandard">— ₸</div>
+          <div class="value-pitch" id="valuePitchStandard"></div>
+          <div class="ring-legend" id="ringLegendStandard"></div>
+        </div>
+      </div>
+
       <div class="franchise-config hidden" id="franchiseConfigStandard">
         <div class="field">
           <label for="franchiseDiscountStandard">Размер франшизы</label>
           <div class="input-shell">
             <input type="number" id="franchiseDiscountStandard" inputmode="decimal" placeholder="0" min="0" max="100" step="1">
             <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="franchiseAmountStandard">Франшиза в тенге</label>
+          <div class="input-shell locked">
+            <span class="prefix">₸</span>
+            <input type="text" id="franchiseAmountStandard" inputmode="decimal" placeholder="0" readonly tabindex="-1">
           </div>
         </div>
       </div>
@@ -666,23 +720,6 @@
         <div class="franchise-example" id="franchiseExampleStandard"></div>
       </div>
 
-      <div class="premium-out">
-        <div class="ring-wrap" id="ringWrapStandard">
-          <svg viewBox="0 0 64 64">
-            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
-            <circle class="ring-progress" id="ringProgressStandard" cx="32" cy="32" r="28" stroke="url(#ringGrad)"></circle>
-            <circle class="ring-progress-inner hidden" id="ringProgressInnerStandard" cx="32" cy="32" r="28" stroke="url(#ringGradAmber)"></circle>
-          </svg>
-          <div class="ring-center" id="ringCenterStandard"></div>
-        </div>
-        <div class="premium-body" id="premiumBodyStandard">
-          <div class="label">Страховая премия <span class="value-badge hidden" id="valueBadgeStandard">Выгодное покрытие</span></div>
-          <div class="value" id="premiumStandard">— ₸</div>
-          <div class="value-pitch" id="valuePitchStandard"></div>
-          <div class="ring-legend" id="ringLegendStandard"></div>
-        </div>
-      </div>
-
       <div class="coverage-block">
         <label class="mini-label" id="coverageMiniLabelStandard">Договор страхования покрывает:</label>
         <div class="coverage-chips" id="coverageChipsStandard"></div>
@@ -691,7 +728,7 @@
           <input type="text" id="coverageCustomStandard" class="hidden" placeholder="Свой текст">
           <button type="button" class="add-point-btn" id="addPointStandard">+ Добавить</button>
         </div>
-        <div class="coverage-grid hidden" id="coverageGridStandard"></div>
+        <div class="coverage-list hidden" id="coverageGridStandard"></div>
         <div class="coverage-footer hidden" id="coverageFooterStandard"></div>
       </div>
 
@@ -756,12 +793,51 @@
       </div>
       <div class="card-req-hint" id="reqHintSpecial"></div>
 
+      <div class="franchise-config hidden" id="limitConfigSpecial">
+        <div class="field">
+          <label for="limitSpecial">Страховой лимит
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Максимальная страховая сумма, которую клиент может ввести без согласования с вами. Клиент видит это поле, но не может его менять.</span>
+            </span>
+          </label>
+          <div class="input-shell">
+            <span class="prefix">₸</span>
+            <input type="text" id="limitSpecial" inputmode="decimal" placeholder="Без ограничения">
+          </div>
+        </div>
+      </div>
+
+      <div class="premium-out">
+        <div class="ring-wrap" id="ringWrapSpecial">
+          <svg viewBox="0 0 64 64">
+            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
+            <circle class="ring-progress" id="ringProgressSpecial" cx="32" cy="32" r="28" stroke="url(#ringGrad)"></circle>
+            <circle class="ring-progress-inner hidden" id="ringProgressInnerSpecial" cx="32" cy="32" r="28" stroke="url(#ringGradAmber)"></circle>
+          </svg>
+          <div class="ring-center" id="ringCenterSpecial"></div>
+        </div>
+        <div class="premium-body" id="premiumBodySpecial">
+          <div class="label">Страховая премия <span class="value-badge hidden" id="valueBadgeSpecial">Выгодное покрытие</span></div>
+          <div class="value" id="premiumSpecial">— ₸</div>
+          <div class="value-pitch" id="valuePitchSpecial"></div>
+          <div class="ring-legend" id="ringLegendSpecial"></div>
+        </div>
+      </div>
+
       <div class="franchise-config hidden" id="franchiseConfigSpecial">
         <div class="field">
           <label for="franchiseDiscountSpecial">Размер франшизы</label>
           <div class="input-shell">
             <input type="number" id="franchiseDiscountSpecial" inputmode="decimal" placeholder="0" min="0" max="100" step="1">
             <span class="suffix">%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="franchiseAmountSpecial">Франшиза в тенге</label>
+          <div class="input-shell locked">
+            <span class="prefix">₸</span>
+            <input type="text" id="franchiseAmountSpecial" inputmode="decimal" placeholder="0" readonly tabindex="-1">
           </div>
         </div>
       </div>
@@ -784,23 +860,6 @@
         <div class="franchise-example" id="franchiseExampleSpecial"></div>
       </div>
 
-      <div class="premium-out">
-        <div class="ring-wrap" id="ringWrapSpecial">
-          <svg viewBox="0 0 64 64">
-            <circle class="ring-track" cx="32" cy="32" r="28"></circle>
-            <circle class="ring-progress" id="ringProgressSpecial" cx="32" cy="32" r="28" stroke="url(#ringGrad)"></circle>
-            <circle class="ring-progress-inner hidden" id="ringProgressInnerSpecial" cx="32" cy="32" r="28" stroke="url(#ringGradAmber)"></circle>
-          </svg>
-          <div class="ring-center" id="ringCenterSpecial"></div>
-        </div>
-        <div class="premium-body" id="premiumBodySpecial">
-          <div class="label">Страховая премия <span class="value-badge hidden" id="valueBadgeSpecial">Выгодное покрытие</span></div>
-          <div class="value" id="premiumSpecial">— ₸</div>
-          <div class="value-pitch" id="valuePitchSpecial"></div>
-          <div class="ring-legend" id="ringLegendSpecial"></div>
-        </div>
-      </div>
-
       <div class="coverage-block">
         <label class="mini-label" id="coverageMiniLabelSpecial">Договор страхования покрывает:</label>
         <div class="coverage-chips" id="coverageChipsSpecial"></div>
@@ -809,7 +868,7 @@
           <input type="text" id="coverageCustomSpecial" class="hidden" placeholder="Свой текст">
           <button type="button" class="add-point-btn" id="addPointSpecial">+ Добавить</button>
         </div>
-        <div class="coverage-grid hidden" id="coverageGridSpecial"></div>
+        <div class="coverage-list hidden" id="coverageGridSpecial"></div>
         <div class="coverage-footer hidden" id="coverageFooterSpecial"></div>
       </div>
 
@@ -853,7 +912,7 @@
         <div class="cause-item"><div class="cause-icon">🔓</div><div class="cause-label">Кража</div></div>
         <div class="cause-item"><div class="cause-icon">📦</div><div class="cause-label">Погрузка / разгрузка</div></div>
         <div class="cause-item"><div class="cause-icon">🔥</div><div class="cause-label">Пожар</div></div>
-        <div class="cause-item"><div class="cause-icon">🌊</div><div class="cause-label">Природные бедствия</div></div>
+        <div class="cause-item"><div class="cause-icon">🌊</div><div class="cause-label">Стихийные бедствия</div></div>
       </div>
     </div>
   </section>
@@ -955,6 +1014,8 @@
       </details>
     </div>
   </section>
+
+  <footer class="page-footnote">Предварительные расчёты, выполненные в этом калькуляторе, также доступны страховой компании.</footer>
 </div>
 
 <div class="modal-overlay" id="shareOverlay">
@@ -1019,14 +1080,30 @@
       <button class="btn-secondary" id="modalCancelBtn" type="button">Отмена</button>
       <button class="btn-primary" id="modalGenerateBtn" type="button" disabled>Скачать PDF</button>
     </div>
-    <button class="btn-secondary" id="modalGenerateImgBtn" type="button" disabled style="width:100%; margin-top:10px;">Скачать PDF (в дизайне сайта, бета)</button>
   </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
+  // Google Apps Script Web App endpoint — receives client-downloaded PDFs and
+  // saves them into the shared Google Drive folder. Manager-side downloads
+  // (testing tariffs before sending a link) are never uploaded — only PDFs a
+  // client generates on their own client-mode calculator page.
+  const PDF_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbw23GghOvYjM0Xz4o-6Lpb5TiYzlEpKfMtEuAKmqKtH8ajspIuoHJkDBzU0Fvj6MnJl/exec';
+
+  function uploadPdfToDrive(base64, fileName){
+    try{
+      fetch(PDF_UPLOAD_URL, {
+        method: 'POST',
+        mode: 'no-cors', // fire-and-forget: Apps Script doesn't send CORS headers,
+                          // and we don't need to read the response back.
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids a CORS preflight
+        body: JSON.stringify({ fileName: fileName, pdfBase64: base64 })
+      }).catch(function(){ /* silent — never block the client's download on this */ });
+    }catch(e){ /* silent */ }
+  }
+
   // ---- number formatting helpers (space as thousands separator) ----
   function digitsOnly(raw){ return String(raw).replace(/[^\d,]/g,''); }
   function formatWithSpaces(raw){
@@ -1140,9 +1217,14 @@
     const ringWrap                 = document.getElementById('ringWrap'+suffix);
     const cardOverlayEl               = document.getElementById('cardOverlay'+suffix);
 
+    const sumWarningEl = document.getElementById('sumWarning'+suffix);
+    const limitConfig = document.getElementById('limitConfig'+suffix);
+    const limitInput = document.getElementById('limit'+suffix);
+
     const franchiseConfig = document.getElementById('franchiseConfig'+suffix);
     const franchiseNoteField = document.getElementById('franchiseNoteField'+suffix);
     const franchiseDiscountInput = document.getElementById('franchiseDiscount'+suffix);
+    const franchiseAmountInput = document.getElementById('franchiseAmount'+suffix);
     const franchiseNoteInput = document.getElementById('franchiseNote'+suffix);
     const franchiseRow = document.getElementById('franchiseRow'+suffix);
     const franchiseToggle = document.getElementById('franchiseToggle'+suffix);
@@ -1160,6 +1242,7 @@
     function applySharedKZT(){
       if(sharedKZT !== null){
         sumInput.value = numberToInputString(sharedKZT);
+        updateFranchiseAmountField();
       }
     }
 
@@ -1201,17 +1284,31 @@
       refreshExportButton();
     }
 
+    function limitValue(){
+      const v = parseFormatted(limitInput.value);
+      return !isNaN(v) && v > 0 ? v : 0;
+    }
+
     function check(){
       const sum = parseFormatted(sumInput.value);
       const rate = parseFloat(rateInput.value);
       if(!(sum > 0)) return 'Укажите страховую сумму';
       if(isNaN(rate) || rate < 0) return 'Укажите ставку тарифа';
+      const limit = limitValue();
+      if(limit > 0 && sum > limit) return 'Сумма свыше ' + formatCurrencyAmount(limit) + ' требует согласования с менеджером';
       return null;
     }
 
     function validate(){
       const err = check();
       reqHint.textContent = err || '';
+      const sum = parseFormatted(sumInput.value);
+      const limit = limitValue();
+      if(sumWarningEl){
+        sumWarningEl.textContent = (limit > 0 && sum > limit)
+          ? 'Сумма свыше ' + formatCurrencyAmount(limit) + ' требует согласования с менеджером'
+          : '';
+      }
       return err;
     }
 
@@ -1224,11 +1321,23 @@
       return !isNaN(discount) && discount > 0 ? discount : 0;
     }
 
+    function updateFranchiseAmountField(){
+      if(!franchiseAmountInput) return;
+      const discount = parseFloat(franchiseDiscountInput.value);
+      const sum = parseFormatted(sumInput.value);
+      if(!isNaN(discount) && discount > 0 && !isNaN(sum) && sum > 0){
+        franchiseAmountInput.value = numberToInputString(sum * discount / 100);
+      } else {
+        franchiseAmountInput.value = '';
+      }
+    }
+
     function updateFranchiseVisibility(){
       const discount = parseFloat(franchiseDiscountInput.value);
       const hasFranchise = !isNaN(discount) && discount > 0;
       franchiseRow.classList.toggle('hidden', !hasFranchise);
       franchiseNoteDisplay.textContent = franchiseNoteInput.value.trim();
+      updateFranchiseAmountField();
       updateFranchiseExample();
     }
 
@@ -1268,26 +1377,13 @@
       const franchiseAmount = sum * discount / 100;
       const damageAmount = sum * examplePct / 100;
       const payout = Math.max(0, damageAmount - franchiseAmount);
-      const premium = (!isNaN(rate) && rate >= 0) ? (rate/100) * sum : 0;
-
-      let multiplierLine = '';
-      if(premium > 0 && payout > 0){
-        const multiplier = payout / premium;
-        const multiplierText = multiplier >= 10
-          ? formatWithSpaces(String(Math.round(multiplier)))
-          : multiplier.toFixed(1).replace('.', ',');
-        multiplierLine =
-          '<span class="example-line">Это в <strong>[' + multiplierText + ' раз]</strong> больше вашей страховой премии — <strong>[' +
-          formatCurrencyAmount(premium) + ']</strong>.</span>';
-      }
 
       franchiseExampleEl.innerHTML =
-        '<strong>Франшиза — [' + discountText + '%] страховой суммы = [' + formatCurrencyAmount(franchiseAmount) + ']</strong>' +
-        '<span class="example-line">В случае повреждения груза на <strong>[' + examplePctText + '%]</strong> страховая компания возместит вам ' +
-          '<strong>[' + formatCurrencyAmount(damageAmount) + ']</strong> − <strong>[' + formatCurrencyAmount(franchiseAmount) + ']</strong> (франшиза) = ' +
-          '<strong>[' + formatCurrencyAmount(payout) + ']</strong>.' +
-        '</span>' +
-        multiplierLine;
+        '<span class="example-line">Если груз повредится на <strong>' + examplePctText + '%</strong> ' +
+          '(ущерб — <strong>' + formatCurrencyAmount(damageAmount) + '</strong>), страховая компания выплатит вам ' +
+          '<strong>' + formatCurrencyAmount(payout) + '</strong>. Разница, <strong>' + formatCurrencyAmount(franchiseAmount) + '</strong>, ' +
+          '— это франшиза, которую вы покрываете сами.' +
+        '</span>';
     }
 
     function calc(){
@@ -1313,8 +1409,7 @@
 
       valueBadgeEl.classList.remove('hidden');
       valuePitchEl.innerHTML =
-        'Стоимость страхования вашего груза в <strong>' + multiplierText + ' раз</strong> дешевле, чем сам груз. ' +
-        'Премия — <strong>' + premiumText + '</strong> против ' + sumText + ', которые вы рискуете потерять без полиса.';
+        'Стоимость страхования вашего груза в <strong>' + multiplierText + ' раз</strong> дешевле, чем сам груз.';
 
       coverageMiniLabelEl.textContent = 'За ' + premiumText + ' вы получаете защиту от следующих рисков:';
       coverageFooterEl.textContent = 'Полная защита груза на ' + sumText;
@@ -1384,6 +1479,7 @@
       } else if(sumInput.value === ''){
         sharedKZT = null;
       }
+      updateFranchiseAmountField();
       allCards.forEach(c => {
         if(c.sumInput !== sumInput){
           c.applySharedKZT();
@@ -1394,6 +1490,8 @@
     });
 
     rateInput.addEventListener('input', ()=>{ scheduleCalc(); refreshShareButton(); });
+
+    attachSpacedInput(limitInput, ()=>{ scheduleCalc(); });
 
     franchiseDiscountInput.addEventListener('input', ()=>{
       updateFranchiseVisibility();
@@ -1424,19 +1522,50 @@
         franchiseDiscountInput.value = String(fr.discount);
         franchiseNoteInput.value = fr.note || '';
         updateFranchiseVisibility();
+        // The client can't toggle the franchise on/off — it's fixed by the contract,
+        // the manager just configured its size. Keep it checked internally, but hide
+        // the switch entirely so the client never sees it as something optional.
+        franchiseToggle.checked = true;
+        franchiseToggle.disabled = true;
+        const switchEl = franchiseToggle.closest('.switch');
+        if(switchEl) switchEl.classList.add('hidden');
+
+        // Show the franchise size (% and tenge) to the client too, but read-only —
+        // they can see what it is, they just can't change it.
+        franchiseConfig.classList.remove('hidden');
+        franchiseDiscountInput.disabled = true;
+        const discountShell = franchiseDiscountInput.closest('.input-shell');
+        if(discountShell) discountShell.classList.add('locked');
       }
     }
 
     function hideFranchiseEditor(){
-      franchiseConfig.classList.add('hidden');
+      // The manager's free-text franchise note stays manager-only.
       franchiseNoteField.classList.add('hidden');
+    }
+
+    function configureLimitFromConfig(limit){
+      if(limit > 0){
+        limitInput.value = numberToInputString(limit);
+        // Shown to the client too, but read-only — it's the manager's cap, not theirs to edit.
+        limitConfig.classList.remove('hidden');
+        limitInput.disabled = true;
+        const limitShell = limitInput.closest('.input-shell');
+        if(limitShell) limitShell.classList.add('locked');
+      }
+    }
+
+    function hideLimitEditor(){
+      limitConfig.classList.add('hidden');
     }
 
     const handle = {
       sumInput, rateInput, resetPremium, validate, recalc: scheduleCalc, scheduleCalc, applySharedKZT,
       hasValidRate, lockRate, hideRateField, configureFranchiseFromConfig, hideFranchiseEditor,
+      configureLimitFromConfig, hideLimitEditor, limitValue,
       get franchiseDiscountInput(){ return franchiseDiscountInput; },
       get franchiseNoteInput(){ return franchiseNoteInput; },
+      get limitInput(){ return limitInput; },
       get lastResult(){ return lastResult; }
     };
     allCards.push(handle);
@@ -1454,11 +1583,19 @@
     {icon:'🔓', text:'Кража'},
     {icon:'📦', text:'Погрузка / разгрузка'},
     {icon:'🔥', text:'Пожар'},
-    {icon:'🌊', text:'Природные бедствия'},
+    {icon:'🌊', text:'Стихийные бедствия'},
     {icon:'💥', text:'Полная гибель груза'},
     {icon:'📉', text:'Частичная порча груза'},
     {icon:'🚚', text:'Утрата при перевозке'},
     {icon:'💧', text:'Подмочка груза'},
+    {icon:'🔥', text:'Огонь и стихийные бедствия', desc:'Пожар, молния, буря, вихрь, другие стихийные бедствия'},
+    {icon:'🚛', text:'Транспортные происшествия', desc:'Крушение или столкновение транспортных средств между собой, удар о неподвижные/плавучие предметы, посадка судна на мель, провал мостов, повреждение судна льдом, подмочка груза забортной водой'},
+    {icon:'💥', text:'Взрыв', desc:'Убытки от взрыва на транспортном средстве'},
+    {icon:'🧯', text:'Меры по спасению и тушению пожара', desc:'Убытки от мер, принятых для спасания груза или тушения пожара'},
+    {icon:'🛟', text:'Пропажа транспортного средства без вести', desc:'Пропажа судна или самолёта без вести'},
+    {icon:'⚓', text:'Погрузка и выгрузка (только водный транспорт)', desc:'Повреждение/утрата при погрузке на судно, укладке, выгрузке с судна, приёме судном топлива'},
+    {icon:'⚖️', text:'Общая авария', desc:'Выбрасывание груза за борт для общего спасения, повреждение судна и груза при спасательных мерах, тушение пожара на судне, снятие с мели, вынужденный заход в порт'},
+    {icon:'🧾', text:'Расходы на предотвращение убытков', desc:'Необходимые и целесообразные расходы страхователя на предотвращение/уменьшение убытков (по указанию страховщика, в фактическом размере)'},
   ];
   const COVERAGE_OTHER_ICON = '📄';
 
@@ -1470,7 +1607,7 @@
     const customInput = document.getElementById('coverageCustom'+suffix);
     const addBtn = document.getElementById('addPoint'+suffix);
 
-    let items = (defaultIndices || []).map(i => ({ icon: COVERAGE_CATALOG[i].icon, text: COVERAGE_CATALOG[i].text }));
+    let items = (defaultIndices || []).map(i => ({ icon: COVERAGE_CATALOG[i].icon, text: COVERAGE_CATALOG[i].text, desc: COVERAGE_CATALOG[i].desc }));
     let readOnlyPoints = null;
 
     const placeholderOpt = document.createElement('option');
@@ -1526,7 +1663,7 @@
         customInput.value = '';
       } else if(select.value !== ''){
         const cat = COVERAGE_CATALOG[parseInt(select.value, 10)];
-        items.push({ icon: cat.icon, text: cat.text });
+        items.push({ icon: cat.icon, text: cat.text, desc: cat.desc });
       } else {
         return;
       }
@@ -1549,23 +1686,32 @@
         gridEl.classList.remove('hidden');
         gridEl.innerHTML = '';
         points.forEach(p=>{
-          const card = document.createElement('div');
-          card.className = 'coverage-card';
+          const item = document.createElement('div');
+          item.className = 'coverage-list-item';
           const icon = document.createElement('div');
-          icon.className = 'icon';
+          icon.className = 'coverage-list-icon';
           icon.textContent = p.icon || COVERAGE_OTHER_ICON;
-          card.appendChild(icon);
-          const lbl = document.createElement('div');
-          lbl.className = 'label';
-          lbl.textContent = p.text;
-          card.appendChild(lbl);
-          gridEl.appendChild(card);
+          item.appendChild(icon);
+          const textWrap = document.createElement('div');
+          textWrap.className = 'coverage-list-text';
+          const title = document.createElement('div');
+          title.className = 'title';
+          title.textContent = p.text;
+          textWrap.appendChild(title);
+          if(p.desc){
+            const desc = document.createElement('div');
+            desc.className = 'desc';
+            desc.textContent = p.desc;
+            textWrap.appendChild(desc);
+          }
+          item.appendChild(textWrap);
+          gridEl.appendChild(item);
         });
       }
     };
   }
 
-  const coverageStandard = setupCoverage('Standard', [3, 0, 4, 8, 6]);
+  const coverageStandard = setupCoverage('Standard', [9, 10, 11, 12, 13, 14, 15, 16]);
   const coverageSpecial = setupCoverage('Special', [0, 1, 2, 3, 4, 5, 6, 7, 8]);
 
   // ---- unicode-safe base64 helpers (for encoding the client link config) ----
@@ -1611,6 +1757,8 @@
         def.card.hideRateField();
         def.card.hideFranchiseEditor();
         def.card.configureFranchiseFromConfig(cfg.franchise);
+        def.card.hideLimitEditor();
+        def.card.configureLimitFromConfig(cfg.limit);
         def.coverage.renderReadOnly(cfg.points || []);
       } else {
         cardEl.classList.add('hidden');
@@ -1639,6 +1787,7 @@
     if(!blocksWeb.includes('guide'))    document.getElementById('clientGuide').classList.add('hidden');
   } else {
     tariffDefs.forEach(def=>{
+      document.getElementById('limitConfig'+def.suffix).classList.remove('hidden');
       document.getElementById('franchiseConfig'+def.suffix).classList.remove('hidden');
       document.getElementById('franchiseNoteField'+def.suffix).classList.remove('hidden');
       document.getElementById('sendToggleRow'+def.suffix).classList.remove('hidden');
@@ -1660,7 +1809,6 @@
   const pdfOverlay = document.getElementById('pdfOverlay');
   const companyNameInput = document.getElementById('companyNameInput');
   const modalGenerateBtn = document.getElementById('modalGenerateBtn');
-  const modalGenerateImgBtn = document.getElementById('modalGenerateImgBtn');
   const modalCancelBtn = document.getElementById('modalCancelBtn');
   const modalCloseBtn = document.getElementById('modalCloseBtn');
   const pdfTariffPickerField = document.getElementById('pdfTariffPickerField');
@@ -1673,7 +1821,6 @@
       hasTariffPicked = !![...pdfTariffPicker.querySelectorAll('input[type=checkbox]')].some(cb => cb.checked && !cb.disabled);
     }
     modalGenerateBtn.disabled = !hasCompany || !hasTariffPicked;
-    modalGenerateImgBtn.disabled = !hasCompany || !hasTariffPicked;
   }
 
   function openModal(){
@@ -1733,102 +1880,6 @@
     if(e.key === 'Enter' && !modalGenerateBtn.disabled) generatePdf();
   });
   modalGenerateBtn.addEventListener('click', generatePdf);
-  modalGenerateImgBtn.addEventListener('click', generatePdfFromImage);
-
-  // ================= EXPERIMENTAL: PDF built from a screenshot of the real DOM cards =================
-  async function generatePdfFromImage(){
-    const companyName = companyNameInput.value.trim();
-    if(!companyName) return;
-    if(typeof html2canvas === 'undefined'){
-      alert('Не удалось загрузить библиотеку для этого варианта PDF. Попробуйте обычный «Скачать PDF».');
-      return;
-    }
-
-    const root = document.createElement('div');
-    root.id = 'pdfPrintRoot';
-    root.style.cssText = 'position:fixed; left:-99999px; top:0; width:820px; background:linear-gradient(180deg,#e7ecf5,#f7f8fb); padding:40px; font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;';
-
-    const header = document.createElement('div');
-    header.style.cssText = 'text-align:center; margin-bottom:30px;';
-    try{
-      const logo = document.createElement('img');
-      logo.src = 'data:image/png;base64,' + LOGO_B64;
-      logo.style.cssText = 'height:48px; margin-bottom:14px;';
-      header.appendChild(logo);
-    }catch(e){}
-    const h1 = document.createElement('div');
-    h1.textContent = 'Расчёт страховой премии';
-    h1.style.cssText = 'font-size:28px; font-weight:700; color:#0c0c0e; letter-spacing:-0.02em;';
-    header.appendChild(h1);
-    const sub = document.createElement('div');
-    sub.textContent = 'Предварительный расчёт — для ' + companyName;
-    sub.style.cssText = 'font-size:14px; color:#48484f; margin-top:8px;';
-    header.appendChild(sub);
-    root.appendChild(header);
-
-    const cardsWrap = document.createElement('div');
-    cardsWrap.style.cssText = 'display:flex; flex-direction:column; gap:24px;';
-
-    const stripSelectors = ['.send-toggle-row', '.card-overlay', '.franchise-config', '.franchise-note-field', '.coverage-picker', '.card-req-hint'];
-
-    tariffDefs.forEach(def=>{
-      if(!def.card.lastResult) return;
-      if(isClientMode){
-        const cb = document.getElementById('pdfInclude'+def.suffix);
-        if(!(cb && cb.checked)) return;
-      }
-      const original = document.querySelector('.tariff-card.' + def.suffix.toLowerCase());
-      if(!original) return;
-      const clone = original.cloneNode(true);
-      clone.style.width = '100%';
-      clone.style.transform = 'none';
-      stripSelectors.forEach(sel => clone.querySelectorAll(sel).forEach(el => el.remove()));
-      cardsWrap.appendChild(clone);
-    });
-    root.appendChild(cardsWrap);
-
-    const footer = document.createElement('div');
-    footer.style.cssText = 'text-align:center; margin-top:34px; font-size:12.5px; color:#7c7c84;';
-    footer.innerHTML =
-      'Расчёт актуален на дату заполнения: ' + new Date().toLocaleDateString('ru-RU') +
-      '<br><br><strong style="color:#39b54a; font-size:17px;">Желаем Вам отличного дня!</strong>';
-    root.appendChild(footer);
-
-    document.body.appendChild(root);
-    await new Promise(r => setTimeout(r, 60));
-
-    try{
-      const canvas = await html2canvas(root, { scale:2, backgroundColor:'#eef2f7', useCORS:true });
-      const imgData = canvas.toDataURL('image/png');
-
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit:'pt', format:'a4' });
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const imgW = pageW;
-      const imgH = canvas.height * (imgW / canvas.width);
-
-      let heightLeft = imgH;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
-      heightLeft -= pageH;
-
-      while(heightLeft > 0){
-        position = heightLeft - imgH;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
-        heightLeft -= pageH;
-      }
-
-      const safeName = companyName.replace(/[\\/:*?"<>|]/g,'').trim().replace(/\s+/g,'_') || 'company';
-      pdf.save('Расчёт_премии_' + safeName + '_design.pdf');
-    }catch(e){
-      alert('Не удалось сформировать PDF в дизайне сайта. Попробуйте обычный вариант «Скачать PDF».');
-    }finally{
-      document.body.removeChild(root);
-      closeModal();
-    }
-  }
 
   // ================= SHARE LINK =================
   const BLOCK_DEFS = [
@@ -1921,6 +1972,10 @@
         discount: discount,
         note: card.franchiseNoteInput.value.trim()
       };
+    }
+    const limit = card.limitValue();
+    if(limit > 0){
+      cfg.limit = limit;
     }
     return cfg;
   }
@@ -2205,33 +2260,19 @@
     // ---- optional extra sections, only in client-mode PDFs, only if the manager included them ----
     const blocksPdf = isClientMode ? (clientConfig.bp || []) : [];
 
-    y += 6;
-
-    // ---- closing band: date-valid + formula above, "have a nice day" inside a soft tinted card ----
-    const closingH = 60;
-    y = ensureSpace(closingH + 34, y);
-
-    doc.setFont('DejaVu','normal');
-    doc.setFontSize(9);
-    doc.setTextColor(160,160,166);
-    doc.text('Расчёт актуален на дату заполнения: ' + dateStr, marginX, y);
-    y += 14;
-    doc.setFontSize(8.5);
-    doc.setTextColor(180,180,185);
-    doc.text('Премия = (Ставка % / 100) × Страховая сумма в KZT', marginX, y);
-    y += 20;
-
-    doc.setFillColor(239,249,240);
-    doc.setDrawColor(196,225,201);
-    doc.setLineWidth(1);
-    doc.roundedRect(marginX, y, pageWidth-marginX*2, closingH, 16, 16, 'FD');
-    doc.setFont('DejaVu','bold');
-    doc.setFontSize(13);
-    doc.setTextColor(GREEN[0],GREEN[1],GREEN[2]);
-    doc.text('Желаем Вам отличного дня!', pageWidth/2, y+closingH/2+5, {align:'center'});
-
     const safeName = companyName.replace(/[\\/:*?"<>|]/g,'').trim().replace(/\s+/g,'_') || 'company';
-    doc.save('Расчёт_премии_' + safeName + '.pdf');
+    const pdfFileName = 'Расчёт_премии_' + safeName + '.pdf';
+
+    // Only PDFs a client downloads on their own client-mode link get copied to
+    // Drive — a manager testing tariffs on the manager page never uploads anything.
+    if(isClientMode){
+      try{
+        const base64 = doc.output('datauristring').split(',')[1];
+        uploadPdfToDrive(base64, pdfFileName);
+      }catch(e){ /* never block the client's download over this */ }
+    }
+
+    doc.save(pdfFileName);
 
     closeModal();
   }
