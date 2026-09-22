@@ -152,7 +152,6 @@
     margin-top:20px;border-radius:18px;padding:26px 22px;position:relative;
     background:rgba(124,252,0,0.16);border:1px solid rgba(124,252,0,0.35);
     box-shadow:0 12px 28px -10px rgba(124,252,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
-    max-width:260px;
   }
   .stat-box .who{font-size:13px;font-weight:600;margin-bottom:10px;color:#C9FFA0;}
   .stat-box .num{font-size:clamp(34px,5vw,52px);font-weight:700;letter-spacing:-0.03em;text-shadow:0 0 26px rgba(124,252,0,0.4);}
@@ -164,7 +163,7 @@
   }
 
   /* Telegram timeline */
-  .timeline{max-width:420px;margin-top:20px;border-radius:18px;padding:20px;
+  .timeline{margin-top:20px;border-radius:18px;padding:20px;
     background:var(--chip-ours-bg);border:1px solid var(--chip-ours-border);}
   .step{display:flex;gap:12px;padding:10px 0;border-top:1px solid rgba(11,18,32,0.06);}
   .step:first-of-type{border-top:none;}
@@ -175,19 +174,6 @@
   .step p{margin:0;font-size:14px;line-height:1.45;color:var(--ink);}
   .result-line{margin-top:16px;padding-top:14px;border-top:1px solid rgba(11,18,32,0.08);font-size:13.5px;font-weight:600;color:var(--accent-deep);}
 
-  /* Summary table */
-  .table-card{padding:12px;}
-  .table-card h2{padding:24px 24px 4px;}
-  table{width:100%;border-collapse:collapse;}
-  thead th{text-align:left;font-size:13px;font-weight:600;color:var(--accent-deep);padding:14px 22px;}
-  tbody td{padding:16px 22px;font-size:14.5px;border-top:1px solid rgba(11,18,32,0.07);vertical-align:top;transition:background .2s ease;}
-  tbody tr:nth-child(even) td{background:rgba(79,203,0,0.035);}
-  tbody tr:hover td{background:rgba(79,203,0,0.07);}
-  td.feature-name{color:var(--ink-soft);font-size:13.5px;width:32%;}
-  td.value{color:var(--ink);font-weight:500;}
-  .colhead{display:flex;align-items:center;gap:8px;}
-  .colhead .sw{width:15px;height:15px;border-radius:50%;background:var(--accent);flex:none;display:inline-flex;align-items:center;justify-content:center;}
-  .colhead .sw::before{content:"✓";font-size:9px;font-weight:800;color:#fff;line-height:1;}
 
   footer{padding:40px 0 70px;text-align:center;}
   footer p{color:var(--muted);font-size:13px;margin:0;}
@@ -197,7 +183,6 @@
     .card{padding:26px 22px;}
     header{top:10px;}
     .navglass{margin:0 12px;padding:10px 16px;}
-    .stat-box, .timeline{max-width:none;}
   }
 </style>
 </head>
@@ -343,56 +328,6 @@
     <div class="highlight">
       <p>Мы также сами оплачиваем пенсионные отчисления за агента с его АВ — эту часть не приходится закрывать самостоятельно.</p>
     </div>
-  </div>
-
-  <div class="card table-card">
-    <h2>Коротко: что вы получаете</h2>
-    <table>
-      <thead>
-        <tr>
-          <th></th>
-          <th><div class="colhead"><span class="sw"></span>Amanat Insurance</div></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td class="feature-name">Мобильное приложение</td>
-          <td class="value">Play Market и App Store</td>
-        </tr>
-        <tr>
-          <td class="feature-name">Данные по ИИН</td>
-          <td class="value">Подтягиваются автоматически</td>
-        </tr>
-        <tr>
-          <td class="feature-name">Онлайн-процессы</td>
-          <td class="value">От оформления до урегулирования</td>
-        </tr>
-        <tr>
-          <td class="feature-name">Агентская выплата</td>
-          <td class="value">До 50%, агент регулирует сам</td>
-        </tr>
-        <tr>
-          <td class="feature-name">Архив документов</td>
-          <td class="value">Не требуется</td>
-        </tr>
-        <tr>
-          <td class="feature-name">Расторжение полиса</td>
-          <td class="value">Удержания комиссии нет</td>
-        </tr>
-        <tr>
-          <td class="feature-name">Выдача полиса</td>
-          <td class="value">Через Telegram-бота, 1–2 минуты, вся выплата у агента</td>
-        </tr>
-        <tr>
-          <td class="feature-name">Кто может стать агентом</td>
-          <td class="value">Физическое лицо, любой сотрудник</td>
-        </tr>
-        <tr>
-          <td class="feature-name">Пенсионные отчисления агента</td>
-          <td class="value">Оплачиваем сами с АВ</td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 
 </div>
