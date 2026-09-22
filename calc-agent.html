@@ -391,6 +391,38 @@
     position:relative;
   }
 
+  .result-hero .rval-gross{
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:rgba(255,255,255,0.82);
+    margin:0 0 22px 0;
+    position:relative;
+  }
+  .tax-breakdown{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    max-width:280px;
+    margin:0 auto 20px auto;
+    position:relative;
+  }
+  .tax-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:12.5px;
+    color:#9F9FA6;
+  }
+  .tax-row b{font-weight:600; color:#D8A0A0;}
+  .tax-divider{
+    height:1px;
+    background:rgba(255,255,255,0.14);
+    max-width:280px;
+    margin:4px auto 22px auto;
+    position:relative;
+  }
+
   footer.note{
     margin-top:44px;
     font-size:12.5px;
@@ -425,7 +457,7 @@
   <div id="panels"></div>
 
   <footer class="note">
-    Средний чек предзаполнен по сегменту и может быть скорректирован. АВ (агентское вознаграждение) — это и есть ваш заработок с проданных полисов; его размер можно регулировать ползунком от 1% до 50%.
+    Средний чек предзаполнен по сегменту и может быть скорректирован. АВ (агентское вознаграждение) — это и есть ваш заработок с проданных полисов; его размер можно регулировать ползунком от 1% до 50%. Итоговая сумма «На руки» показана за вычетом ИПН (10%), ОСМС (2%) и пенсионных взносов (10%) — это ориентировочный расчёт, точная сумма зависит от применяемого налогового режима.
   </footer>
 </div>
 
@@ -491,7 +523,7 @@
         <div class="field-row">
           <div>
             <label>Продано полисов</label>
-            <span class="field-hint">В месяц</span>
+            <span class="field-hint">За выбранный период</span>
           </div>
           <div class="num-input-wrap">
             <input type="number" id="policies-${s.id}" value="${s.policies}" min="0" step="1">
@@ -515,9 +547,19 @@
       </div>
 
       <div class="result-hero ${s.tier}">
-        <p class="rk">Ваш доход (АВ)</p>
+        <p class="rk">Начислено АВ</p>
+        <p class="rval-gross" id="gross-${s.id}">0 ₸</p>
+
+        <div class="tax-breakdown">
+          <div class="tax-row"><span>ИПН, 10%</span><b id="ipn-${s.id}">−0 ₸</b></div>
+          <div class="tax-row"><span>ОСМС, 2%</span><b id="osms-${s.id}">−0 ₸</b></div>
+          <div class="tax-row"><span>Пенсионные взносы, 10%</span><b id="pension-${s.id}">−0 ₸</b></div>
+        </div>
+        <div class="tax-divider"></div>
+
+        <p class="rk">На руки</p>
         <p class="rval" id="result-${s.id}">0<span class="cur"> ₸</span></p>
-        <p class="rnote">Премия × АВ — это и есть ваша комиссия с продаж</p>
+        <p class="rnote">Премия × АВ, за вычетом ИПН, ОСМС и пенсионных взносов</p>
       </div>
     `;
     panels.appendChild(panel);
@@ -527,6 +569,11 @@
     const policiesInput = panel.querySelector(`#policies-${s.id}`);
     const avInput = panel.querySelector(`#av-${s.id}`);
 
+    // Налоговые вычеты с дохода агента (фиксированные ставки).
+    const IPN_RATE = 0.10;
+    const OSMS_RATE = 0.02;
+    const PENSION_RATE = 0.10;
+
     function recalc(){
       const check = parseFloat(checkInput.value) || 0;
       const policies = parseFloat(policiesInput.value) || 0;
@@ -535,9 +582,18 @@
       const premium = check * policies;
       const avAmount = premium * (av/100);
 
+      const ipn = avAmount * IPN_RATE;
+      const osms = avAmount * OSMS_RATE;
+      const pension = avAmount * PENSION_RATE;
+      const netAmount = avAmount - ipn - osms - pension;
+
       panel.querySelector(`#premium-${s.id}`).textContent = fmt.format(premium) + ' ₸';
       panel.querySelector(`#av-pct-${s.id}`).textContent = av + '%';
-      panel.querySelector(`#result-${s.id}`).innerHTML = fmt.format(avAmount) + '<span class="cur"> ₸</span>';
+      panel.querySelector(`#gross-${s.id}`).textContent = fmt.format(avAmount) + ' ₸';
+      panel.querySelector(`#ipn-${s.id}`).textContent = '−' + fmt.format(ipn) + ' ₸';
+      panel.querySelector(`#osms-${s.id}`).textContent = '−' + fmt.format(osms) + ' ₸';
+      panel.querySelector(`#pension-${s.id}`).textContent = '−' + fmt.format(pension) + ' ₸';
+      panel.querySelector(`#result-${s.id}`).innerHTML = fmt.format(netAmount) + '<span class="cur"> ₸</span>';
     }
 
     checkInput.addEventListener('input', recalc);
