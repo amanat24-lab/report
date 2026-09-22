@@ -763,7 +763,7 @@
         </div>
       </div>
       <div class="franchise-note-field hidden" id="franchiseNoteFieldStandard">
-        <textarea id="franchiseNoteStandard" rows="2" placeholder="Например: франшиза 100 000 ₸ — при наступлении случая первые 100 000 ₸ ущерба клиент покрывает самостоятельно"></textarea>
+        <textarea id="franchiseNoteStandard" rows="2" placeholder="Комментарий менеджера"></textarea>
       </div>
 
       <div class="franchise-row hidden" id="franchiseRowStandard">
@@ -786,14 +786,8 @@
       </div>
 
       <div class="coverage-block">
-        <label class="mini-label" id="coverageMiniLabelStandard">Договор страхования покрывает:</label>
+        <label class="mini-label" id="coverageMiniLabelStandard">Основные покрытия</label>
         <div class="coverage-chips" id="coverageChipsStandard"></div>
-        <div class="coverage-picker" id="coveragePickerRowStandard">
-          <select id="coveragePickerStandard"></select>
-          <input type="text" id="coverageCustomStandard" class="hidden" placeholder="Свой текст">
-          <button type="button" class="add-point-btn" id="addPointStandard">+ Добавить</button>
-        </div>
-        <div class="coverage-list hidden" id="coverageGridStandard"></div>
         <div class="coverage-footer hidden" id="coverageFooterStandard"></div>
       </div>
 
@@ -907,7 +901,7 @@
         </div>
       </div>
       <div class="franchise-note-field hidden" id="franchiseNoteFieldSpecial">
-        <textarea id="franchiseNoteSpecial" rows="2" placeholder="Например: франшиза 150 000 ₸ — при наступлении случая первые 150 000 ₸ ущерба клиент покрывает самостоятельно"></textarea>
+        <textarea id="franchiseNoteSpecial" rows="2" placeholder="Комментарий менеджера"></textarea>
       </div>
 
       <div class="franchise-row hidden" id="franchiseRowSpecial">
@@ -930,14 +924,8 @@
       </div>
 
       <div class="coverage-block">
-        <label class="mini-label" id="coverageMiniLabelSpecial">Договор страхования покрывает:</label>
+        <label class="mini-label" id="coverageMiniLabelSpecial">Основные покрытия</label>
         <div class="coverage-chips" id="coverageChipsSpecial"></div>
-        <div class="coverage-picker" id="coveragePickerRowSpecial">
-          <select id="coveragePickerSpecial"></select>
-          <input type="text" id="coverageCustomSpecial" class="hidden" placeholder="Свой текст">
-          <button type="button" class="add-point-btn" id="addPointSpecial">+ Добавить</button>
-        </div>
-        <div class="coverage-list hidden" id="coverageGridSpecial"></div>
         <div class="coverage-footer hidden" id="coverageFooterSpecial"></div>
       </div>
 
@@ -1393,7 +1381,7 @@
       premiumEl.classList.remove('ready');
       valueBadgeEl.classList.add('hidden');
       valuePitchEl.textContent = '';
-      coverageMiniLabelEl.textContent = 'Договор страхования покрывает:';
+      coverageMiniLabelEl.textContent = 'Основные покрытия';
       coverageFooterEl.classList.add('hidden');
       coverageFooterEl.textContent = '';
       resetRing();
@@ -1514,11 +1502,10 @@
       const payout = Math.max(0, damageAmount - franchiseAmount);
 
       franchiseExampleEl.innerHTML =
-        '<span class="example-line">Если груз повредится на <strong>' + examplePctText + '%</strong> ' +
-          '(ущерб — <strong>' + formatCurrencyAmount(damageAmount) + '</strong>), страховая компания выплатит вам ' +
-          '<strong>' + formatCurrencyAmount(payout) + '</strong>. Разница, <strong>' + formatCurrencyAmount(franchiseAmount) + '</strong>, ' +
-          '— это франшиза, которую вы покрываете сами.' +
-        '</span>';
+        '<span class="example-line">При повреждении груза на <strong>' + examplePctText + '%</strong> ' +
+          '(ущерб в тенге — <strong>' + formatCurrencyAmount(damageAmount) + '</strong>) сумма выплаты составит ' +
+          '<strong>' + formatCurrencyAmount(payout) + '</strong>.</span>' +
+        '<span class="example-line">Сумма франшизы, которую вы покрываете сами, — <strong>' + formatCurrencyAmount(franchiseAmount) + '</strong>.</span>';
     }
 
     function calc(){
@@ -1536,7 +1523,6 @@
       premiumEl.classList.add('ready');
 
       const sumText = formatCurrencyAmount(sum);
-      const premiumText = formatCurrencyAmount(premium);
       const multiplier = premium > 0 ? sumKZT / premium : 0;
       const multiplierText = multiplier >= 10
         ? formatWithSpaces(String(Math.round(multiplier)))
@@ -1546,7 +1532,7 @@
       valuePitchEl.innerHTML =
         'Стоимость страхования вашего груза в <strong>' + multiplierText + ' раз</strong> дешевле, чем сам груз.';
 
-      coverageMiniLabelEl.textContent = 'За ' + premiumText + ' вы получаете защиту от следующих рисков:';
+      coverageMiniLabelEl.textContent = 'Основные покрытия';
       coverageFooterEl.textContent = 'Полная защита груза на ' + sumText;
       coverageFooterEl.classList.remove('hidden');
 
@@ -1714,6 +1700,8 @@
   refreshShareButton();
 
   // ================= COVERAGE (pick from a catalog, matching icons built in) =================
+  // Fixed catalog — this is now the only source of coverage items. The manager can no
+  // longer add/remove points; each tariff just shows its default set, read-only.
   const COVERAGE_CATALOG = [
     {icon:'🚧', text:'ДТП'},
     {icon:'🔓', text:'Кража'},
@@ -1721,134 +1709,43 @@
     {icon:'🔥', text:'Пожар'},
     {icon:'🌊', text:'Стихийные бедствия'},
     {icon:'💥', text:'Полная гибель груза'},
-    {icon:'📉', text:'Частичная порча груза'},
-    {icon:'🚚', text:'Утрата при перевозке'},
-    {icon:'💧', text:'Подмочка груза'},
-    {icon:'🔥', text:'Огонь и стихийные бедствия', desc:'Пожар, молния, буря, вихрь, другие стихийные бедствия'},
-    {icon:'🚛', text:'Транспортные происшествия', desc:'Крушение или столкновение транспортных средств между собой, удар о неподвижные/плавучие предметы, посадка судна на мель, провал мостов, повреждение судна льдом, подмочка груза забортной водой'},
-    {icon:'💥', text:'Взрыв', desc:'Убытки от взрыва на транспортном средстве'},
-    {icon:'🧯', text:'Меры по спасению и тушению пожара', desc:'Убытки от мер, принятых для спасания груза или тушения пожара'},
-    {icon:'🛟', text:'Пропажа транспортного средства без вести', desc:'Пропажа судна или самолёта без вести'},
-    {icon:'⚓', text:'Погрузка и выгрузка (только водный транспорт)', desc:'Повреждение/утрата при погрузке на судно, укладке, выгрузке с судна, приёме судном топлива'},
-    {icon:'⚖️', text:'Общая авария', desc:'Выбрасывание груза за борт для общего спасения, повреждение судна и груза при спасательных мерах, тушение пожара на судне, снятие с мели, вынужденный заход в порт'},
-    {icon:'🧾', text:'Расходы на предотвращение убытков', desc:'Необходимые и целесообразные расходы страхователя на предотвращение/уменьшение убытков (по указанию страховщика, в фактическом размере)'},
+    {icon:'➕', text:'И другое'},
   ];
   const COVERAGE_OTHER_ICON = '📄';
 
+  // Coverage points are now fixed — the manager can no longer add, remove, or pick
+  // items. Each tariff just always shows its default set from COVERAGE_CATALOG.
   function setupCoverage(suffix, defaultIndices){
     const chipsEl = document.getElementById('coverageChips'+suffix);
-    const gridEl = document.getElementById('coverageGrid'+suffix);
-    const pickerRow = document.getElementById('coveragePickerRow'+suffix);
-    const select = document.getElementById('coveragePicker'+suffix);
-    const customInput = document.getElementById('coverageCustom'+suffix);
-    const addBtn = document.getElementById('addPoint'+suffix);
+    const items = (defaultIndices || []).map(i => ({ icon: COVERAGE_CATALOG[i].icon, text: COVERAGE_CATALOG[i].text }));
 
-    let items = (defaultIndices || []).map(i => ({ icon: COVERAGE_CATALOG[i].icon, text: COVERAGE_CATALOG[i].text, desc: COVERAGE_CATALOG[i].desc }));
-    let readOnlyPoints = null;
-
-    const placeholderOpt = document.createElement('option');
-    placeholderOpt.value = '';
-    placeholderOpt.textContent = 'Выберите пункт…';
-    select.appendChild(placeholderOpt);
-
-    COVERAGE_CATALOG.forEach((c, idx)=>{
-      const opt = document.createElement('option');
-      opt.value = String(idx);
-      opt.textContent = c.icon + '  ' + c.text;
-      select.appendChild(opt);
-    });
-    const otherOpt = document.createElement('option');
-    otherOpt.value = 'other';
-    otherOpt.textContent = COVERAGE_OTHER_ICON + '  Другое (свой текст)';
-    select.appendChild(otherOpt);
-
-    select.addEventListener('change', ()=>{
-      customInput.classList.toggle('hidden', select.value !== 'other');
-      if(select.value === 'other') customInput.focus();
-    });
-
-    function renderChips(){
+    function renderChips(list){
       chipsEl.innerHTML = '';
-      items.forEach((item, idx)=>{
+      (list || items).forEach(item=>{
         const chip = document.createElement('span');
         chip.className = 'coverage-chip';
         const emoji = document.createElement('span');
         emoji.className = 'emoji';
-        emoji.textContent = item.icon;
+        emoji.textContent = item.icon || COVERAGE_OTHER_ICON;
         const label = document.createElement('span');
         label.textContent = item.text;
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'coverage-remove';
-        removeBtn.innerHTML = '&times;';
-        removeBtn.setAttribute('aria-label', 'Удалить пункт');
-        removeBtn.addEventListener('click', ()=>{
-          items.splice(idx, 1);
-          renderChips();
-        });
-        chip.append(emoji, label, removeBtn);
+        chip.append(emoji, label);
         chipsEl.appendChild(chip);
       });
     }
 
-    addBtn.addEventListener('click', ()=>{
-      if(select.value === 'other'){
-        const text = customInput.value.trim();
-        if(!text) return;
-        items.push({ icon: COVERAGE_OTHER_ICON, text: text });
-        customInput.value = '';
-      } else if(select.value !== ''){
-        const cat = COVERAGE_CATALOG[parseInt(select.value, 10)];
-        items.push({ icon: cat.icon, text: cat.text, desc: cat.desc });
-      } else {
-        return;
-      }
-      select.value = '';
-      customInput.classList.add('hidden');
-      renderChips();
-    });
-
     renderChips();
 
     return {
-      getPoints(){
-        if(readOnlyPoints !== null) return readOnlyPoints;
-        return items;
-      },
-      renderReadOnly(points){
-        readOnlyPoints = points;
-        chipsEl.classList.add('hidden');
-        pickerRow.classList.add('hidden');
-        gridEl.classList.remove('hidden');
-        gridEl.innerHTML = '';
-        points.forEach(p=>{
-          const item = document.createElement('div');
-          item.className = 'coverage-list-item';
-          const icon = document.createElement('div');
-          icon.className = 'coverage-list-icon';
-          icon.textContent = p.icon || COVERAGE_OTHER_ICON;
-          item.appendChild(icon);
-          const textWrap = document.createElement('div');
-          textWrap.className = 'coverage-list-text';
-          const title = document.createElement('div');
-          title.className = 'title';
-          title.textContent = p.text;
-          textWrap.appendChild(title);
-          if(p.desc){
-            const desc = document.createElement('div');
-            desc.className = 'desc';
-            desc.textContent = p.desc;
-            textWrap.appendChild(desc);
-          }
-          item.appendChild(textWrap);
-          gridEl.appendChild(item);
-        });
-      }
+      getPoints(){ return items; },
+      // Client mode passes the points transmitted in the share-link config —
+      // same fixed list, just re-rendered from what the manager's link carried.
+      renderReadOnly(points){ renderChips(points && points.length ? points : items); }
     };
   }
 
-  const coverageStandard = setupCoverage('Standard', [9, 10, 11, 12, 13, 14, 15, 16]);
-  const coverageSpecial = setupCoverage('Special', [0, 1, 2, 3, 4, 5, 6, 7, 8]);
+  const coverageStandard = setupCoverage('Standard', [0, 1, 2, 3, 4, 5, 6]);
+  const coverageSpecial = setupCoverage('Special', [0, 1, 2, 3, 4, 5, 6]);
 
   // ---- unicode-safe base64 helpers (for encoding the client link config) ----
   function b64EncodeUnicode(str){
