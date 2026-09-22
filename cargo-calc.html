@@ -1500,12 +1500,25 @@
       const franchiseAmount = sum * discount / 100;
       const damageAmount = sum * examplePct / 100;
       const payout = Math.max(0, damageAmount - franchiseAmount);
+      const premium = (!isNaN(rate) && rate >= 0) ? (rate/100) * sum : 0;
+
+      let multiplierLine = '';
+      if(premium > 0 && payout > 0){
+        const multiplier = payout / premium;
+        const multiplierText = multiplier >= 10
+          ? formatWithSpaces(String(Math.round(multiplier)))
+          : multiplier.toFixed(1).replace('.', ',');
+        multiplierLine =
+          '<span class="example-line">Выплата в <strong>' + multiplierText + ' раз</strong> больше чем стоимость страхования.</span>';
+      }
 
       franchiseExampleEl.innerHTML =
         '<span class="example-line">При повреждении груза на <strong>' + examplePctText + '%</strong> ' +
           '(ущерб — <strong>' + formatCurrencyAmount(damageAmount) + '</strong>) сумма выплаты составит ' +
           '<strong>' + formatCurrencyAmount(payout) + '</strong>.</span>' +
-        '<span class="example-line">Сумма франшизы - часть убытка при страховом случае, которая не компенсируются страховой компанией — <strong>' + formatCurrencyAmount(franchiseAmount) + '</strong>.</span>';
+        '<span class="example-line">Сумма франшизы — часть убытка при страховом случае, которая не компенсируется страховой компанией, — ' +
+          '<strong>' + formatCurrencyAmount(franchiseAmount) + '</strong>.</span>' +
+        multiplierLine;
     }
 
     function calc(){
