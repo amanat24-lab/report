@@ -783,7 +783,7 @@
       <div class="franchise-row hidden" id="franchiseRowStandard">
         <div class="franchise-row-top">
           <label class="switch">
-            <input type="checkbox" id="franchiseToggleStandard">
+            <input type="checkbox" id="franchiseToggleStandard" checked>
             <span class="track"></span>
             <span class="thumb"></span>
           </label>
@@ -935,7 +935,7 @@
       <div class="franchise-row hidden" id="franchiseRowSpecial">
         <div class="franchise-row-top">
           <label class="switch">
-            <input type="checkbox" id="franchiseToggleSpecial">
+            <input type="checkbox" id="franchiseToggleSpecial" checked>
             <span class="track"></span>
             <span class="thumb"></span>
           </label>
@@ -1154,7 +1154,7 @@
     <h3>Экспорт в PDF</h3>
     <p class="modal-desc" id="pdfModalDesc">Укажите компанию, для которой готовится расчёт.</p>
     <div class="field">
-      <label for="companyNameInput">Компания, для которой производится расчет</label>
+      <label for="companyNameInput">Компания-экспедитор (кому этот расчёт)</label>
       <div class="input-shell"><input type="text" id="companyNameInput" placeholder="ТОО «Компания»" autocomplete="off"></div>
     </div>
     <div class="field hidden" id="pdfTariffPickerField">
@@ -1529,8 +1529,8 @@
         return;
       }
 
-      // illustrative damage %, clearly above the franchise itself so the payout is non-zero
-      const examplePct = Math.min(discount + 10, 100);
+      // illustrative damage % — fixed, independent of the franchise size
+      const examplePct = 20;
       const examplePctText = String(examplePct).replace('.', ',');
 
       const franchiseAmount = sum * discount / 100;
