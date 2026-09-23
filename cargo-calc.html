@@ -712,6 +712,20 @@
           </div>
         </div>
       </div>
+      <div class="rate-sum-row" id="minPremiumRowStandard">
+        <div class="field">
+          <label for="minPremiumStandard">Минимальная премия
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Если рассчитанная премия окажется ниже этого значения, клиенту покажется именно оно. Видно только вам.</span>
+            </span>
+          </label>
+          <div class="input-shell">
+            <span class="prefix">₸</span>
+            <input type="text" id="minPremiumStandard" inputmode="decimal" placeholder="Не задано">
+          </div>
+        </div>
+      </div>
       <div class="card-req-hint" id="reqHintStandard"></div>
 
       <div class="franchise-config hidden" id="limitConfigStandard">
@@ -847,6 +861,20 @@
           <div class="input-shell">
             <input type="number" id="rateSpecial" inputmode="decimal" placeholder="0.00" min="0" step="0.01">
             <span class="suffix">%</span>
+          </div>
+        </div>
+      </div>
+      <div class="rate-sum-row" id="minPremiumRowSpecial">
+        <div class="field">
+          <label for="minPremiumSpecial">Минимальная премия
+            <span class="tooltip">
+              <button type="button" class="tooltip-btn">?</button>
+              <span class="tooltip-bubble">Если рассчитанная премия окажется ниже этого значения, клиенту покажется именно оно. Видно только вам.</span>
+            </span>
+          </label>
+          <div class="input-shell">
+            <span class="prefix">₸</span>
+            <input type="text" id="minPremiumSpecial" inputmode="decimal" placeholder="Не задано">
           </div>
         </div>
       </div>
@@ -1126,7 +1154,7 @@
     <h3>Экспорт в PDF</h3>
     <p class="modal-desc" id="pdfModalDesc">Укажите компанию, для которой готовится расчёт.</p>
     <div class="field">
-      <label for="companyNameInput">Компания-клиент</label>
+      <label for="companyNameInput">Компания, для которой производится расчет</label>
       <div class="input-shell"><input type="text" id="companyNameInput" placeholder="ТОО «Компания»" autocomplete="off"></div>
     </div>
     <div class="field hidden" id="pdfTariffPickerField">
@@ -1307,6 +1335,9 @@
     const limitConfig = document.getElementById('limitConfig'+suffix);
     const limitInput = document.getElementById('limit'+suffix);
 
+    const minPremiumRow = document.getElementById('minPremiumRow'+suffix);
+    const minPremiumInput = document.getElementById('minPremium'+suffix);
+
     const franchiseConfig = document.getElementById('franchiseConfig'+suffix);
     const franchiseNoteField = document.getElementById('franchiseNoteField'+suffix);
     const franchiseDiscountInput = document.getElementById('franchiseDiscount'+suffix);
@@ -1393,6 +1424,11 @@
 
     function limitValue(){
       const v = parseFormatted(limitInput.value);
+      return !isNaN(v) && v > 0 ? v : 0;
+    }
+
+    function minPremiumValue(){
+      const v = parseFormatted(minPremiumInput.value);
       return !isNaN(v) && v > 0 ? v : 0;
     }
 
@@ -1500,7 +1536,9 @@
       const franchiseAmount = sum * discount / 100;
       const damageAmount = sum * examplePct / 100;
       const payout = Math.max(0, damageAmount - franchiseAmount);
-      const premium = (!isNaN(rate) && rate >= 0) ? (rate/100) * sum : 0;
+      const rawPremium = (!isNaN(rate) && rate >= 0) ? (rate/100) * sum : 0;
+      const minPremium = minPremiumValue();
+      const premium = (minPremium > 0 && rawPremium < minPremium) ? minPremium : rawPremium;
 
       let multiplierLine = '';
       if(premium > 0 && payout > 0){
@@ -1516,7 +1554,7 @@
         '<span class="example-line">При повреждении груза на <strong>' + examplePctText + '%</strong> ' +
           '(ущерб — <strong>' + formatCurrencyAmount(damageAmount) + '</strong>) сумма выплаты составит ' +
           '<strong>' + formatCurrencyAmount(payout) + '</strong>.</span>' +
-        '<span class="example-line">Сумма франшизы — часть убытка при страховом случае, которая не компенсируется страховой компанией — ' +
+        '<span class="example-line">Сумма франшизы — часть убытка при страховом случае, которая не компенсируется страховой компанией, — ' +
           '<strong>' + formatCurrencyAmount(franchiseAmount) + '</strong>.</span>' +
         multiplierLine;
     }
@@ -1525,7 +1563,11 @@
       const sum = parseFormatted(sumInput.value);
       const sumKZT = sum;
       const rate = parseFloat(rateInput.value);
-      const premium = (rate/100) * sumKZT;
+      const rawPremium = (rate/100) * sumKZT;
+      const minPremium = minPremiumValue();
+      // Premium never shows below the manager's configured floor — the raw
+      // rate×sum result is only used when it's already above that floor.
+      const premium = (minPremium > 0 && rawPremium < minPremium) ? minPremium : rawPremium;
       const useFranchise = franchiseActive();
 
       updateFranchiseExample();
@@ -1627,6 +1669,7 @@
     rateInput.addEventListener('input', ()=>{ scheduleCalc(); refreshShareButton(); });
 
     attachSpacedInput(limitInput, ()=>{ scheduleCalc(); });
+    attachSpacedInput(minPremiumInput, ()=>{ scheduleCalc(); });
 
     franchiseDiscountInput.addEventListener('input', ()=>{
       updateFranchiseVisibility();
@@ -1694,13 +1737,28 @@
       limitConfig.classList.add('hidden');
     }
 
+    function applyMinPremiumFromConfig(minPremium){
+      // Purely internal to the floor logic in calc()/updateFranchiseExample() — the
+      // client never sees this value or knows a floor exists, they just see the
+      // final premium already respecting it.
+      if(minPremium > 0){
+        minPremiumInput.value = numberToInputString(minPremium);
+      }
+    }
+
+    function hideMinPremiumEditor(){
+      minPremiumRow.classList.add('hidden');
+    }
+
     const handle = {
       sumInput, rateInput, resetPremium, validate, recalc: scheduleCalc, scheduleCalc, applySharedKZT,
       hasValidRate, lockRate, hideRateField, configureFranchiseFromConfig, hideFranchiseEditor,
       configureLimitFromConfig, hideLimitEditor, limitValue,
+      applyMinPremiumFromConfig, hideMinPremiumEditor, minPremiumValue,
       get franchiseDiscountInput(){ return franchiseDiscountInput; },
       get franchiseNoteInput(){ return franchiseNoteInput; },
       get limitInput(){ return limitInput; },
+      get minPremiumInput(){ return minPremiumInput; },
       get lastResult(){ return lastResult; }
     };
     allCards.push(handle);
@@ -1805,6 +1863,8 @@
         def.card.configureFranchiseFromConfig(cfg.franchise);
         def.card.hideLimitEditor();
         def.card.configureLimitFromConfig(cfg.limit);
+        def.card.applyMinPremiumFromConfig(cfg.minPremium || 0);
+        def.card.hideMinPremiumEditor();
         def.coverage.renderReadOnly(cfg.points || []);
       } else {
         cardEl.classList.add('hidden');
@@ -1871,7 +1931,10 @@
 
   function openModal(){
     if(isClientMode){
-      companyNameInput.value = clientConfig.co || '';
+      // Not prefilled: this is the end customer (экспедитор) this specific calculation
+      // is for, which changes every time — the partner company itself (clientConfig.co)
+      // is shown separately and automatically as "ОТ" in the generated PDF.
+      companyNameInput.value = '';
 
       pdfTariffPickerField.classList.remove('hidden');
       pdfTariffPicker.innerHTML = '';
@@ -2023,6 +2086,10 @@
     if(limit > 0){
       cfg.limit = limit;
     }
+    const minPremium = card.minPremiumValue();
+    if(minPremium > 0){
+      cfg.minPremium = minPremium;
+    }
     return cfg;
   }
 
@@ -2127,15 +2194,44 @@
     doc.setFillColor(GREEN[0],GREEN[1],GREEN[2]);
     doc.roundedRect(marginX, y, 5, clientCardH, 2.5, 2.5, 'F');
 
-    doc.setFont('DejaVu','normal');
-    doc.setFontSize(9.5);
-    doc.setTextColor(150,150,158);
-    doc.text('РАСЧЁТ ДЛЯ', marginX+24, y+28);
+    // "ОТ" — the partner company that this calculator link was generated for
+    // (clientConfig.co, captured automatically once, at share-link creation).
+    // "РАСЧЁТ ДЛЯ" — the end customer (экспедитор) this specific calculation is
+    // for, typed by the partner in the export modal every time, since it changes
+    // per calculation. This is how we tell apart 100+ partners' PDFs at a glance.
+    const partnerName = (isClientMode && clientConfig.co) ? clientConfig.co.trim() : '';
 
-    doc.setFont('DejaVu','bold');
-    doc.setFontSize(19);
-    doc.setTextColor(29,29,31);
-    doc.text(companyName, marginX+24, y+52);
+    if(partnerName){
+      const halfW = (pageWidth - marginX*2) / 2;
+      const leftX = marginX + 24;
+      const rightX = marginX + halfW + 24;
+
+      doc.setFont('DejaVu','normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(150,150,158);
+      doc.text('ОТ', leftX, y+28);
+      doc.text('РАСЧЁТ ДЛЯ', rightX, y+28);
+
+      doc.setFont('DejaVu','bold');
+      doc.setFontSize(16);
+      doc.setTextColor(29,29,31);
+      doc.text(doc.splitTextToSize(partnerName, halfW-48)[0] || partnerName, leftX, y+52);
+      doc.text(doc.splitTextToSize(companyName, halfW-48)[0] || companyName, rightX, y+52);
+
+      doc.setDrawColor(230,230,234);
+      doc.setLineWidth(1);
+      doc.line(marginX+halfW, y+16, marginX+halfW, y+clientCardH-16);
+    } else {
+      doc.setFont('DejaVu','normal');
+      doc.setFontSize(9.5);
+      doc.setTextColor(150,150,158);
+      doc.text('РАСЧЁТ ДЛЯ', marginX+24, y+28);
+
+      doc.setFont('DejaVu','bold');
+      doc.setFontSize(19);
+      doc.setTextColor(29,29,31);
+      doc.text(companyName, marginX+24, y+52);
+    }
 
     y += clientCardH + 26;
 
@@ -2307,7 +2403,10 @@
     const blocksPdf = isClientMode ? (clientConfig.bp || []) : [];
 
     const safeName = companyName.replace(/[\\/:*?"<>|]/g,'').trim().replace(/\s+/g,'_') || 'company';
-    const pdfFileName = 'Расчёт_премии_' + safeName + '.pdf';
+    // Filename also carries the partner name (when known), so PDFs from 100+ partners
+    // are told apart at a glance in the Drive folder listing, without opening each one.
+    const safePartner = partnerName ? partnerName.replace(/[\\/:*?"<>|]/g,'').trim().replace(/\s+/g,'_') : '';
+    const pdfFileName = 'Расчёт_премии_' + (safePartner ? safePartner + '_' : '') + safeName + '.pdf';
 
     // Only PDFs a client downloads on their own client-mode link get copied to
     // Drive — a manager testing tariffs on the manager page never uploads anything.
