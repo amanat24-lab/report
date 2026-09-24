@@ -34,8 +34,6 @@
     position:relative;
     overflow-x:hidden;
   }
-.navglass{
-padding-top:30px}
   .grain{
     position:fixed;inset:0;z-index:-1;pointer-events:none;
     opacity:0.05;mix-blend-mode:overlay;
@@ -159,27 +157,25 @@ padding-top:30px}
   /* Payout stat card */
   .stat-card{
     position:relative;
-    background:
-      radial-gradient(500px 280px at 90% -10%, rgba(124,252,0,0.16), transparent 60%),
-      radial-gradient(400px 260px at -10% 110%, rgba(79,203,0,0.18), transparent 60%),
-      linear-gradient(155deg,#0B1F0C 0%,#1E4A24 100%);
-    color:#fff;border:1px solid rgba(255,255,255,0.14);
-    box-shadow:0 24px 60px -16px rgba(11,18,32,0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+    background:linear-gradient(155deg,#EAFBF2 0%,#CDF2E2 100%);
+    color:#12341C;border:1px solid rgba(255,255,255,0.6);
+    box-shadow:0 24px 60px -16px rgba(11,31,12,0.16), inset 0 1px 0 rgba(255,255,255,0.7);
   }
-  .stat-card h2{color:#fff;}
-  .stat-card > p.desc{color:rgba(255,255,255,0.6);}
+  .stat-card h2{color:#12341C;}
+  .stat-card > p.desc{color:rgba(18,52,28,0.65);}
   .stat-box{
     margin-top:20px;border-radius:18px;padding:26px 22px;position:relative;
-    background:rgba(124,252,0,0.16);border:1px solid rgba(124,252,0,0.35);
-    box-shadow:0 12px 28px -10px rgba(124,252,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08);
-    text-align:center;
+    background:rgba(255,255,255,0.55);
+    border:1px solid rgba(255,255,255,0.8);
+    box-shadow:0 12px 28px -10px rgba(11,31,12,0.14), inset 0 1px 0 rgba(255,255,255,0.8);
+    text-align:center;color:#12341C;
   }
-  .stat-box .who{font-size:13px;font-weight:600;margin-bottom:10px;color:#C9FFA0;}
-  .stat-box .num{font-size:clamp(34px,5vw,52px);font-weight:700;letter-spacing:-0.03em;text-shadow:0 0 26px rgba(124,252,0,0.4);}
-  .stat-box .num small{font-size:0.4em;font-weight:600;color:rgba(255,255,255,0.5);margin-left:4px;}
+  .stat-box .who{font-size:13px;font-weight:600;margin-bottom:10px;color:#2F7A45;}
+  .stat-box .num{font-size:clamp(34px,5vw,52px);font-weight:700;letter-spacing:-0.03em;color:#12341C;text-shadow:none;}
+  .stat-box .num small{font-size:0.4em;font-weight:600;color:rgba(18,52,28,0.5);margin-left:4px;}
   .stat-box .tag{
     display:inline-block;margin-top:12px;font-size:12px;font-weight:600;
-    color:#DFFFAE;background:rgba(124,252,0,0.14);border:1px solid rgba(124,252,0,0.3);
+    color:#1C5C34;background:rgba(255,255,255,0.55);border:1px solid rgba(46,125,71,0.28);
     padding:4px 10px;border-radius:100px;
   }
 
@@ -298,22 +294,24 @@ padding-top:30px}
   .calc-scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-top:4px;}
 
   .calc-result{
-    margin-top:18px;border-radius:18px;padding:26px 22px;text-align:center;color:#fff;
-    background:linear-gradient(155deg,#0B1F0C 0%,#1E4A24 100%);
+    margin-top:18px;border-radius:18px;padding:26px 22px;text-align:center;color:#12341C;
+    background:linear-gradient(155deg,#EAFBF2 0%,#CDF2E2 100%);
+    border:1px solid rgba(255,255,255,0.6);
+    box-shadow:0 12px 28px -10px rgba(11,31,12,0.18), inset 0 1px 0 rgba(255,255,255,0.7);
     position:relative;overflow:hidden;
   }
   .calc-result::before{
     content:"";position:absolute;width:220px;height:220px;
-    background:radial-gradient(circle, rgba(124,252,0,0.28) 0%, transparent 70%);
+    background:radial-gradient(circle, rgba(124,252,0,0.16) 0%, transparent 70%);
     top:-90px;right:-60px;pointer-events:none;
   }
-  .calc-rk{font-size:12px;font-weight:600;color:rgba(255,255,255,0.55);margin:0 0 8px;position:relative;}
+  .calc-rk{font-size:12px;font-weight:600;color:rgba(18,52,28,0.6);margin:0 0 8px;position:relative;}
   .calc-final-val{
     font-size:clamp(28px,5vw,40px);font-weight:700;letter-spacing:-0.02em;margin:0;position:relative;
-    text-shadow:0 0 24px rgba(124,252,0,0.4);
+    color:#12341C;text-shadow:none;
   }
-  .calc-final-val .calc-cur{font-size:0.42em;color:#C9FFA0;}
-  .calc-rnote{font-size:11.5px;color:rgba(255,255,255,0.5);margin:12px 0 0;position:relative;}
+  .calc-final-val .calc-cur{font-size:0.42em;color:#2F7A45;}
+  .calc-rnote{font-size:11.5px;color:rgba(18,52,28,0.55);margin:12px 0 0;position:relative;}
   .calc-footnote{margin-top:16px;font-size:12px;color:var(--muted);line-height:1.5;text-align:justify;text-align-last:center;}
 </style>
 </head>
@@ -349,9 +347,9 @@ padding-top:30px}
 
   <div class="card stat-card">
     <div class="card-head">
-      <div class="icon-wrap" style="background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.18);">
+      <div class="icon-wrap">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 20 L4 14 M10 20 L10 9 M16 20 L16 4" stroke="#9EFF6E" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M4 20 L4 14 M10 20 L10 9 M16 20 L16 4" stroke="#2F7A45" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
       </div>
       <h2>Выплата до 50% — и гибкая</h2>
