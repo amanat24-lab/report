@@ -313,6 +313,68 @@
   .calc-final-val .calc-cur{font-size:0.42em;color:#2F7A45;}
   .calc-rnote{font-size:11.5px;color:rgba(18,52,28,0.55);margin:12px 0 0;position:relative;}
   .calc-footnote{margin-top:16px;font-size:12px;color:var(--muted);line-height:1.5;text-align:justify;text-align-last:center;}
+
+  /* Admin settings access */
+  #admin-trigger{
+    position:fixed;bottom:16px;right:16px;z-index:80;
+    width:34px;height:34px;border-radius:50%;
+    background:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.7);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    color:var(--muted);display:flex;align-items:center;justify-content:center;
+    cursor:pointer;opacity:0.35;transition:opacity 0.2s, transform 0.2s;
+  }
+  #admin-trigger:hover{opacity:1;transform:scale(1.06);color:var(--accent-deep);}
+
+  .modal-overlay{
+    display:none;position:fixed;inset:0;z-index:200;
+    background:rgba(10,20,15,0.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-card{
+    position:relative;width:100%;max-width:380px;
+    background:rgba(255,255,255,0.92);border:1px solid rgba(255,255,255,0.8);
+    border-radius:22px;padding:30px 26px;
+    box-shadow:0 30px 70px -20px rgba(11,18,32,0.35);
+  }
+  .modal-card h3{margin:0 0 6px;font-size:19px;font-weight:700;letter-spacing:-0.01em;color:var(--ink);}
+  .modal-sub{margin:0 0 20px;font-size:13.5px;color:var(--ink-soft);line-height:1.5;}
+  .modal-close{
+    position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;
+    border:none;background:rgba(11,18,32,0.06);color:var(--ink-soft);font-size:16px;line-height:1;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .modal-close:hover{background:rgba(11,18,32,0.12);}
+  .modal-field{margin-bottom:14px;}
+  .modal-field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:6px;}
+  .modal-field input{
+    width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--line);
+    font-size:15px;font-family:inherit;color:var(--ink);background:#fff;
+  }
+  .modal-field input:focus{outline:none;border-color:var(--accent);}
+  .modal-error{display:none;color:#C0392B;font-size:12.5px;margin:-4px 0 12px;}
+  .modal-error.visible{display:block;}
+  .modal-btn{
+    width:100%;padding:12px 16px;border:none;border-radius:12px;
+    background:var(--accent-deep);color:#fff;font-size:14.5px;font-weight:600;
+    cursor:pointer;transition:background 0.2s;
+  }
+  .modal-btn:hover{background:#256E00;}
+  .modal-link-block{display:none;margin-top:18px;padding-top:18px;border-top:1px solid var(--line);}
+  .modal-link-block.visible{display:block;}
+  .modal-link-block label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-bottom:8px;}
+  .modal-link-row{display:flex;gap:8px;}
+  .modal-link-row input{
+    flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);
+    font-size:12.5px;color:var(--ink);background:#F5F7FA;
+  }
+  .modal-copy{
+    flex:none;padding:10px 14px;border:none;border-radius:10px;
+    background:rgba(79,203,0,0.14);color:var(--accent-deep);font-size:13px;font-weight:600;cursor:pointer;
+  }
+  .modal-copy:hover{background:rgba(79,203,0,0.22);}
+  .modal-copied{display:none;margin:10px 0 0;font-size:12.5px;color:var(--accent-deep);font-weight:600;}
+  .modal-copied.visible{display:block;}
 </style>
 </head>
 <body>
@@ -352,12 +414,12 @@
           <path d="M4 20 L4 14 M10 20 L10 9 M16 20 L16 4" stroke="#2F7A45" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
       </div>
-      <h2>Выплата до 50% — и гибкая</h2>
+      <h2>Выплата до <span id="hero-max-av">50</span>% — и гибкая</h2>
     </div>
-    <p class="desc">Агент сам регулирует размер своей агентской выплаты: может выставить максимум 50%, а может уменьшить её до любой суммы в этих рамках, чтобы сделать клиенту скидку на полис.</p>
+    <p class="desc">Агент сам регулирует размер своей агентской выплаты: может выставить максимум <span id="desc-max-av">50</span>%, а может уменьшить её до любой суммы в этих рамках, чтобы сделать клиенту скидку на полис.</p>
     <div class="stat-box">
       <div class="who">Amanat Insurance</div>
-      <div class="num">до 50<small>%</small></div>
+      <div class="num">до <span id="stat-num-av">50</span><small>%</small></div>
       <span class="tag">агент управляет размером сам</span>
     </div>
   </div>
@@ -375,7 +437,7 @@
 
     <div id="calc-panels"></div>
 
-    <p class="calc-footnote">Средний чек можно изменить под свой рынок. АВ регулируется ползунком от 1% до 50%.</p>
+    <p class="calc-footnote">Средний чек можно изменить под свой рынок. АВ регулируется ползунком от 1% до <span id="footnote-max-av">50</span>%.</p>
   </div>
 
   <div class="contact-card">
@@ -491,6 +553,166 @@
 </footer>
 </div>
 
+<button id="admin-trigger" type="button" aria-label="Настройки" title="Настройки">
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="16" height="16">
+    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" stroke="currentColor" stroke-width="1.6"/>
+    <path d="M19.4 13.5c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.02-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.6 7.6 0 0 0-1.73-1l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.63.24-1.21.58-1.73 1l-2.39-.96a.5.5 0 0 0-.6.22L2.66 9.28a.5.5 0 0 0 .12.64L4.8 11.5c-.04.33-.06.66-.06 1s.02.67.06 1l-2.02 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.4.3.6.22l2.39-.96c.52.42 1.1.76 1.73 1l.36 2.54c.05.25.26.42.5.42h3.84c.24 0 .45-.17.5-.42l.36-2.54c.63-.24 1.21-.58 1.73-1l2.39.96c.2.08.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64L19.4 13.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+  </svg>
+</button>
+
+<div class="modal-overlay" id="login-overlay">
+  <div class="modal-card">
+    <button class="modal-close" type="button" data-close>&times;</button>
+    <h3>Режим настройки КП</h3>
+    <p class="modal-sub">Доступно только сотрудникам. Введите логин и пароль.</p>
+    <div class="modal-field">
+      <label for="login-user">Логин</label>
+      <input type="text" id="login-user" autocomplete="off">
+    </div>
+    <div class="modal-field">
+      <label for="login-pass">Пароль</label>
+      <input type="password" id="login-pass" autocomplete="off">
+    </div>
+    <p class="modal-error" id="login-error">Неверный логин или пароль</p>
+    <button class="modal-btn" id="login-submit" type="button">Войти</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settings-overlay">
+  <div class="modal-card">
+    <button class="modal-close" type="button" data-close>&times;</button>
+    <h3>Настройка КП</h3>
+    <p class="modal-sub">Укажите, какую максимальную АВ показывать в этом КП, и получите персональную ссылку для клиента.</p>
+    <div class="modal-field">
+      <label for="settings-av">Максимальная АВ, %</label>
+      <input type="number" id="settings-av" min="1" max="95" step="1" value="50">
+    </div>
+    <button class="modal-btn" id="settings-save" type="button">Сохранить и получить ссылку</button>
+    <div class="modal-link-block" id="settings-link-block">
+      <label for="settings-link">Персональная ссылка для клиента</label>
+      <div class="modal-link-row">
+        <input type="text" id="settings-link" readonly>
+        <button class="modal-copy" id="settings-copy" type="button">Копировать</button>
+      </div>
+      <p class="modal-copied" id="settings-copied">Скопировано ✓</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const params = new URLSearchParams(location.search);
+  let av = parseInt(params.get('av'), 10);
+  if (!av || av < 1) av = 50;
+  if (av > 95) av = 95;
+  window.AMANAT_MAX_AV = av;
+
+  ['hero-max-av','desc-max-av','stat-num-av','footnote-max-av'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = av;
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const AUTH_KEY = 'amanat_admin_auth';
+  const LOGIN = 'amanat26';
+  const PASS = 'amanat565';
+
+  const trigger = document.getElementById('admin-trigger');
+  const loginOverlay = document.getElementById('login-overlay');
+  const settingsOverlay = document.getElementById('settings-overlay');
+  const loginUser = document.getElementById('login-user');
+  const loginPass = document.getElementById('login-pass');
+  const loginError = document.getElementById('login-error');
+  const loginSubmit = document.getElementById('login-submit');
+  const settingsAv = document.getElementById('settings-av');
+  const settingsSave = document.getElementById('settings-save');
+  const settingsLinkBlock = document.getElementById('settings-link-block');
+  const settingsLink = document.getElementById('settings-link');
+  const settingsCopy = document.getElementById('settings-copy');
+  const settingsCopied = document.getElementById('settings-copied');
+
+  function closeAll(){
+    loginOverlay.classList.remove('open');
+    settingsOverlay.classList.remove('open');
+  }
+
+  function openSettings(){
+    settingsAv.value = window.AMANAT_MAX_AV || 50;
+    settingsLinkBlock.classList.remove('visible');
+    settingsCopied.classList.remove('visible');
+    settingsOverlay.classList.add('open');
+  }
+
+  trigger.addEventListener('click', () => {
+    if (sessionStorage.getItem(AUTH_KEY) === '1') {
+      openSettings();
+    } else {
+      loginUser.value = '';
+      loginPass.value = '';
+      loginError.classList.remove('visible');
+      loginOverlay.classList.add('open');
+      loginUser.focus();
+    }
+  });
+
+  loginSubmit.addEventListener('click', () => {
+    if (loginUser.value === LOGIN && loginPass.value === PASS) {
+      sessionStorage.setItem(AUTH_KEY, '1');
+      loginOverlay.classList.remove('open');
+      openSettings();
+    } else {
+      loginError.classList.add('visible');
+    }
+  });
+
+  [loginUser, loginPass].forEach(el => el.addEventListener('keydown', e => {
+    if (e.key === 'Enter') loginSubmit.click();
+  }));
+
+  settingsSave.addEventListener('click', () => {
+    let val = parseInt(settingsAv.value, 10);
+    if (!val || val < 1) val = 1;
+    if (val > 95) val = 95;
+    settingsAv.value = val;
+
+    const url = new URL(location.href);
+    url.search = '';
+    url.searchParams.set('av', val);
+    settingsLink.value = url.toString();
+    settingsLinkBlock.classList.add('visible');
+    settingsCopied.classList.remove('visible');
+  });
+
+  settingsCopy.addEventListener('click', () => {
+    settingsLink.select();
+    settingsLink.setSelectionRange(0, 999);
+    const done = () => settingsCopied.classList.add('visible');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(settingsLink.value).then(done).catch(() => {
+        document.execCommand('copy');
+        done();
+      });
+    } else {
+      document.execCommand('copy');
+      done();
+    }
+  });
+
+  document.querySelectorAll('[data-close]').forEach(btn => {
+    btn.addEventListener('click', closeAll);
+  });
+  [loginOverlay, settingsOverlay].forEach(ov => {
+    ov.addEventListener('click', (e) => { if (e.target === ov) closeAll(); });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
+  });
+})();
+</script>
+
 <script>
   const items = document.querySelectorAll('.card');
   const io = new IntersectionObserver((entries) => {
@@ -511,15 +733,16 @@
   const panels = document.getElementById('calc-panels');
   if (!panels) return;
 
+  const maxAv = window.AMANAT_MAX_AV || 50;
   const defaultCheck = 20000;
   const defaultPolicies = 10;
-  const defaultAv = 30;
+  const defaultAv = maxAv;
 
   panels.innerHTML = `
     <div class="calc-pcard">
       <div class="calc-field-row">
         <div>
-          <label>Средний чек продажи страхового полиса</label>
+          <label>Средний чек от продажи страхового полиса</label>
           <span class="calc-hint">Можно изменить под свой рынок</span>
         </div>
         <div class="calc-input-wrap">
@@ -549,8 +772,8 @@
           <label>АВ (агентское вознаграждение)</label>
           <span class="calc-av-pct" id="calc-av-pct">${defaultAv}%</span>
         </div>
-        <input type="range" id="calc-av" min="1" max="50" step="1" value="${defaultAv}">
-        <div class="calc-scale"><span>1%</span><span>50%</span></div>
+        <input type="range" id="calc-av" min="1" max="${maxAv}" step="1" value="${defaultAv}">
+        <div class="calc-scale"><span>1%</span><span>${maxAv}%</span></div>
       </div>
     </div>
 
