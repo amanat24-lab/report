@@ -1782,7 +1782,8 @@
     {icon:'🔥', text:'Пожар, взрыв, удар молнии'},
     {icon:'🚨', text:'Пропажа транспортного средства без вести'},
     {icon:'🌊', text:'Повреждения в результате природных явлений (стихийные бедствия, чрезмерное выпадение осадков)'},
-    {icon:'⚠️', text:'Противоправные действия третьих лиц, недостача при срыве/повреждении и/или фальсификации пломбы'},
+    {icon:'🔓', text:'Противоправные действия третьих лиц (кража)'},
+    {icon:'⚠️', text:'Недостача при срыве/повреждении и/или фальсификации пломбы'},
   ];
   const COVERAGE_OTHER_ICON = '📄';
   const COVERAGE_CUSTOM_VALUE = '__custom__';
@@ -1894,8 +1895,8 @@
     };
   }
 
-  const coverageStandard = setupCoverage('Standard', [0, 1, 2, 3, 4, 5]);
-  const coverageSpecial = setupCoverage('Special', [0, 1, 2, 3, 4, 5]);
+  const coverageStandard = setupCoverage('Standard', [0, 1, 2, 3, 4, 5, 6]);
+  const coverageSpecial = setupCoverage('Special', [0, 1, 2, 3, 4, 5, 6]);
 
   // ---- unicode-safe base64 helpers (for encoding the client link config) ----
   function b64EncodeUnicode(str){
