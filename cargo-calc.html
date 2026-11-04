@@ -1161,6 +1161,14 @@
       <label>Какой тариф включить в PDF?</label>
       <div class="pdf-tariff-picker" id="pdfTariffPicker"></div>
     </div>
+    <div class="field hidden" id="pdfManagerField">
+      <div class="pdf-tariff-picker">
+        <label class="pdf-tariff-row">
+          <input type="checkbox" id="pdfIncludeManager" checked>
+          <span class="name">Указать в PDF имя и контакты менеджера<br><span class="hint" id="pdfManagerHint"></span></span>
+        </label>
+      </div>
+    </div>
     <div class="modal-actions">
       <button class="btn-secondary" id="modalCancelBtn" type="button">Отмена</button>
       <button class="btn-primary" id="modalGenerateBtn" type="button" disabled>Скачать PDF</button>
@@ -2016,6 +2024,11 @@
       // is shown separately and automatically as "ОТ" in the generated PDF.
       companyNameInput.value = '';
 
+      const mgrLabel = [clientConfig.m, clientConfig.p].filter(Boolean).join(' · ');
+      document.getElementById('pdfManagerField').classList.toggle('hidden', !mgrLabel);
+      document.getElementById('pdfManagerHint').textContent = mgrLabel;
+      document.getElementById('pdfIncludeManager').checked = true;
+
       pdfTariffPickerField.classList.remove('hidden');
       pdfTariffPicker.innerHTML = '';
       tariffDefs.forEach(def=>{
@@ -2050,6 +2063,7 @@
     } else {
       companyNameInput.value = '';
       pdfTariffPickerField.classList.add('hidden');
+      document.getElementById('pdfManagerField').classList.add('hidden');
     }
     updateModalGenerateState();
     pdfOverlay.classList.add('open');
@@ -2417,7 +2431,13 @@
       coverageLines.forEach(lines => coverageLineCount += lines.length);
 
       let franchiseLines = [];
-      if(result.franchiseUsed && result.franchiseNote){
+      if(result.franchiseUsed && result.franchiseDiscount > 0){
+        const frAmount = result.sum * result.franchiseDiscount / 100;
+        franchiseLines.push('Франшиза: ' + String(result.franchiseDiscount).replace('.', ',') + ' % страховой суммы (' + formatMoney(frAmount) + ' ₸)');
+        if(result.franchiseNote){
+          franchiseLines = franchiseLines.concat(doc.splitTextToSize(result.franchiseNote, innerW - 20));
+        }
+      } else if(result.franchiseUsed && result.franchiseNote){
         franchiseLines = doc.splitTextToSize(result.franchiseNote, innerW - 20);
       }
 
@@ -2557,6 +2577,29 @@
 
     if(tariffIncluded('Standard')) block(cardStandard.lastResult, coverageStandard.getPoints(), [57,181,74], '01', [238,249,239], [196,225,201]);
     if(tariffIncluded('Special'))  block(cardSpecial.lastResult,  coverageSpecial.getPoints(),  [57,181,74], '02', [238,249,239], [196,225,201]);
+
+    // ---- manager contacts, only if the client opted in via the export modal ----
+    const mgrCb = document.getElementById('pdfIncludeManager');
+    if(isClientMode && mgrCb && mgrCb.checked && (clientConfig.m || clientConfig.p)){
+      const mgrH = 62;
+      y = ensureSpace(mgrH, y);
+      doc.setFillColor(250,250,251);
+      doc.setDrawColor(230,230,234);
+      doc.setLineWidth(1);
+      doc.roundedRect(marginX, y, pageWidth-marginX*2, mgrH, 14, 14, 'FD');
+      doc.setFillColor(GREEN[0],GREEN[1],GREEN[2]);
+      doc.roundedRect(marginX, y, 5, mgrH, 2.5, 2.5, 'F');
+      doc.setFont('DejaVu','normal');
+      doc.setFontSize(9);
+      doc.setTextColor(150,150,158);
+      doc.text('МЕНЕДЖЕР', marginX+24, y+24);
+      doc.setFont('DejaVu','bold');
+      doc.setFontSize(12.5);
+      doc.setTextColor(29,29,31);
+      const mgrText = [clientConfig.m, clientConfig.p].filter(Boolean).join('   ·   ');
+      doc.text(doc.splitTextToSize(mgrText, pageWidth-marginX*2-48)[0] || mgrText, marginX+24, y+44);
+      y += mgrH + 20;
+    }
 
     // ---- optional extra sections, only in client-mode PDFs, only if the manager included them ----
     const blocksPdf = isClientMode ? (clientConfig.bp || []) : [];
